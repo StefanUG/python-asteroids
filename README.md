@@ -1,39 +1,76 @@
-# Asteroid spil forløb
+# Asteroids med Python – kursusforløb
 
+Kursusside for Coding Pirates: børn (10–14 år), der har gået på intro-holdet, bygger et Asteroids-spil i Python med turtle over 7 gange.
 
-| Uge | 1. time                                                      | 2. time                                                                              |
-|:---:|--------------------------------------------------------------|--------------------------------------------------------------------------------------|
-|  1  | Workshop præsentation                                        | Install PyCharm, start på projekt, create screen and a player (1), simple events (2) |
-|  2  | Intro til Game Loop, move better (3)                         | Wrap player (4), function with parameters                                            |
-|  3  | Intro til classes, create a bullet, make spaceship shoot (5) | Wrap the bullet (6), add more bullets (7)                                            |
-|  4  | Refactor to Player class and shoot less rapidly (8)          | Add asteroids (9) and shoot them (10) but not the invisible ones (11)                |
-|  5  | Game over when hitting asteroid (12) and keep a score (13)   | Make the asteroids move (14) and respawn (15)                                        |
-|  -  | Let's have more than one life (16)                           | Let's add a grace period (17), Flash when hit (18)                                   |
-|  6  | Move with thrust like in space (19)                          | Thrust animation (20)                                                                |
-|  7  | Make it yours                                                | Demo to the others                                                                   |
+Siden: https://stefanug.github.io/python-asteroids/
 
-# Step by step
+## Struktur
 
-- 1 Create Screen and Player
-- 2 Make the spaceship move  with events
-- 3 Make it move better with keypress and keyrelease
-- 4 Make the spaceship shoot with one bullet
-- 5 Prevent player from exiting the screen (or appearing in the other side)
-- 6 Add a lifetime to the bullets, and make them move across screens too
-- 7 Add more bullets, but oops, they are too rapidly firing
-- 8 Let's add a Player class and a cooldown/reload time
-- 9 Add asteroids
-- 10 shoot the asteroids
-- 11 why are the bullets not passing on?
-- 12 game over if hitting the asteroids
-- 13 add score and display it
-- 14 Make the asteroids move
-- 15 Respawn asteroids
-- 16 add health and a grace period after being hit
-- 17 add a grace period after being hit
-- 18 flash during grace period
-- 19 move like in space
-- 20 add thrust animation
+| Sti | Indhold |
+|---|---|
+| `python/NN_*.py` | Færdig kode efter hvert niveau (1–19). `MIY_*.py` er "gør det til dit eget"-eksempler til lektion 7. |
+| `src/content/docs/` | Lektionssider (MDX, Starlight). Én mappe per lektion. |
+| `src/pages/slides/` | Én reveal.js-præsentation per lektion (`lektion-N.astro`) og `pitch.astro` (salgspitch fra forsiden). |
+| `src/layouts/SlideDeck.astro`, `src/styles/slides.css`, `src/components/slides/` | Rum-tema til præsentationerne. |
+| `src/components/` | `PythonRun` (Skulpt-kodeboks), `Solution`, `CatchUp` ("Jeg var her ikke sidst"), `Footer` (klikbare tjekbokse). |
+| `src/data/catchup.ts` | Kodeord og startfil per lektion. |
+| `public/images/` | Billeder til sider og slides. |
+
+## Kom i gang (udvikling)
+
+```sh
+npm install
+npm run dev      # udviklingsserver
+npm run build    # bygger til dist/
+npm run preview  # vis det byggede site lokalt
+```
+
+Siden bliver udgivet til GitHub Pages ved push til `main` (`.github/workflows/deploy.yml`). Under *Settings → Pages* skal kilden være **GitHub Actions**.
+
+## Lektioner og niveauer
+
+| Lektion | Længde | Niveauer | Startfil ("Jeg var her ikke sidst") |
+|:---:|---|---|---|
+| 1 – Rumskibet | 45 min | Installation, 1 skærm og rumskib, 2 styr rumskibet (events + game loop) | – |
+| 2 – Skyd! | 30 + pause + 45 | 3 ud over kanten, 4 skyd én kugle, 5 kuglen flyver rundt, 6 flere kugler | `02_move_better.py` |
+| 3 – Asteroider | 30 + pause + 45 | 7 genladetid, 8 asteroider, 9 skyd asteroiderne, 10 ikke de usynlige | `06_more_bullets.py` |
+| 4 – Game over og point | 30 + pause + 45 | 11 game over, 12 point, 13 asteroiderne flytter sig, 14 nye asteroider | `10_not_invisible_ones.py` |
+| 5 – Liv og skjold | 30 + pause + 45 | 15 flere liv, 16 skjold efter et hit, 17 blink | `14_respawn_asteroids.py` |
+| 6 – Rumfysik | 30 + pause + 45 | 18 flyv som i rummet, 19 raketflamme | `17_flash_upon_hit.py` |
+| 7 – Gør det til dit eget | 45 min | Farver, skrifttype, taster, former, del asteroiderne, bonus-spil, demo | `19_thrust_animation.py` |
+
+Det gamle niveau 2 (`onkey`) er droppet; dets indhold er flettet ind i niveau 2.
+
+## Til underviseren
+
+### Kodeord til "Jeg var her ikke sidst"
+
+På hver lektions oversigt kan elever, der var væk, låse et link til startfilen op med et kodeord. Kodeordene står med vilje i klartekst i [`src/data/catchup.ts`](src/data/catchup.ts), så andre undervisere kan finde dem. Finder en elev dem selv, har de fortjent det. Store og små bogstaver og mellemrum omkring kodeordet er ligegyldige.
+
+| Lektion | Kodeord |
+|:---:|---|
+| 2 | `raket` |
+| 3 | `komet` |
+| 4 | `meteor` |
+| 5 | `galakse` |
+| 6 | `nebula` |
+| 7 | `supernova` |
+
+Kodeordet står også i speaker notes på lektionens første slide. Ret tabellen her, hvis du ændrer et kodeord.
+
+### Præsentationer
+
+Åbn fra knappen på lektionens oversigt (eller `/python-asteroids/slides/lektion-N/`). Piletaster bladrer, `F` giver fuld skærm, `S` åbner speaker view med noter, `Esc` giver overblik.
+
+### Løsninger
+
+Løsningsbokse på siderne er skjulte. Skriv `iddqd` et sted på siden for at vise/skjule dem.
+
+### Demo-video
+
+Læg videoen i `public/videos/asteroids-demo.mp4` og sæt `hasVideo = true` i [`src/pages/slides/pitch.astro`](src/pages/slides/pitch.astro).
+
+# Idéer
 
 More advanced
 
@@ -56,13 +93,8 @@ Make it yours!
 
 ## Noter om materialet
 
-Følg-selv med materialet for lesson 2 var lidt for svært. Bør rettes til, så det bliver lidt lettere.
-
-Skip move player og gå direkte til move better for at få mere tid til mere spændende ting.
-
-
-"indsæt efter en funktion" instruktionerne sætter børnene bare ind efter et kald til en funktion. Ikke efter definitionen på den. 
-Gennemgå på et passende tidspunkt hvad der menes med sådan en sætning.
+- Følg-selv-materialet til den gamle lektion 2 var for svært. "Move player" er droppet, og niveau 2 går direkte til "move better" i mindre trin.
+- Børnene satte kode ind efter et *kald* til en funktion i stedet for efter *definitionen*. Det gennemgås nu på siden "Sådan er koden bygget op" i lektion 1.
 
 
 ## Acceleration

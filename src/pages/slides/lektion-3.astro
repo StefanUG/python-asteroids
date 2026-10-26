@@ -1,0 +1,778 @@
+---
+import SlideDeck from '../../layouts/SlideDeck.astro'
+import Code from '../../components/slides/Code.astro'
+import Ship from '../../components/slides/Ship.astro'
+import Asteroid from '../../components/slides/Asteroid.astro'
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+---
+<SlideDeck title="Lektion 3 – Asteroider" lesson={3}>
+
+  <!-- 1. Title -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #4a1260, #05041a 70%)">
+    <div style="position: relative; height: 150px;">
+      <div class="fly-across" style="top: 30px;"><Ship size={70} flame /></div>
+    </div>
+    <span class="kicker">Lektion 3</span>
+    <h1 class="neon">ASTEROIDER</h1>
+    <h3>Nu er der noget at skyde på!</h3>
+    <div style="margin-top: 0.5em;">
+      <Asteroid size={60} spin={8} />
+      <Asteroid size={95} spin={14} color="#ff9d3c" />
+      <Asteroid size={50} spin={6} color="#3ef3ff" />
+      <Asteroid size={75} spin={11} color="#ff4fd8" />
+    </div>
+    <aside class="notes">
+      Velkommen tilbage. Husk catch-up: dagens kodeord er <strong>komet</strong>. Børn, der ikke var her sidst (eller hvis kode ikke virker),
+      åbner lektionens oversigtsside og bruger boksen "Jeg var her ikke sidst" med kodeordet. Så får de koden efter niveau 6.
+      Sig kodeordet højt eller skriv det på tavlen, når de andre er gået i gang.
+    </aside>
+  </section>
+
+  <!-- 2. Agenda -->
+  <section>
+    <span class="kicker">I dag</span>
+    <h2>Dagens mission</h2>
+    <ol class="agenda">
+      <li class="fragment fade-up">🚀 Rumskibet får sin egen klasse – og genladetid</li>
+      <li class="fragment fade-up">🪨 Asteroider på tilfældige steder</li>
+      <li class="fragment fade-up">💥 Skyd dem!</li>
+      <li class="fragment fade-up">👻 Mysteriet om de usynlige asteroider</li>
+    </ol>
+    <p class="fragment muted small" style="margin-top: 0.8em;">ca. 30 min · pause · ca. 45 min</p>
+    <aside class="notes">
+      Plan: først gennemgang af niveau 7 og 8 (ca. 10 min), så bygger de. Efter pausen viser vi kollision og mysteriet (niveau 9 og 10).
+    </aside>
+  </section>
+
+  <!-- 3. Preview -->
+  <section>
+    <span class="kicker">Det bygger vi</span>
+    <h2>Efter i dag kan dit spil...</h2>
+    <div class="grid-3" style="margin-top: 0.8em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">⏱️</span><h3>Lade op</h3><p class="small">Kanonen skal køle af mellem skud</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">🎲</span><h3>10 asteroider</h3><p class="small">Nye tilfældige steder hver gang</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">🎯</span><h3>Ramt!</h3><p class="small">Asteroiden forsvinder, når du rammer</p></div>
+    </div>
+  </section>
+
+  <!-- 4. Recap -->
+  <section>
+    <span class="kicker">Sidst</span>
+    <h2>Mange kugler i en liste</h2>
+    <Code code={`bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())`} lines="1|2-3" />
+    <p class="fragment">Hvad sker der, når I holder <code>mellemrum</code> nede?</p>
+    <p class="fragment zoom-in big pink">En lang pølse af kugler! 🌭</p>
+    <p class="fragment">Den skyder lidt for hurtigt – lad os give rumskibet <span class="yellow">genladetid</span> ⏱️</p>
+    <aside class="notes">
+      Spørg klassen: Hvad gjorde vi sidst? Kuglerne ligger i en liste, og vi genbruger dem, der ikke er aktive.
+      Lad dem svare på spørgsmålet, før du viser svaret. Det skyder alt for hurtigt – det fikser vi nu.
+    </aside>
+  </section>
+
+  <!-- 5. State -->
+  <section>
+    <span class="kicker">Niveau 7</span>
+    <h2>Hvornår skød vi sidst?</h2>
+    <ul class="clean">
+      <li class="fragment">🤔 Hvordan kan vi holde styr på det?</li>
+      <li class="fragment">🔢 Med en <span class="yellow">tæller</span>!</li>
+      <li class="fragment">🏠 Hvor skal tælleren bo?</li>
+      <li class="fragment">🚀 På rumskibet: <code>self.fire_cooldown</code></li>
+    </ul>
+    <p class="fragment muted">Men så skal rumskibet have sin egen klasse...</p>
+    <aside class="notes">
+      Lad børnene foreslå. Pointen: tælleren hører til rumskibet, ligesom ttl hører til kuglen. Så skal rumskibet være en klasse ligesom Bullet.
+    </aside>
+  </section>
+
+  <!-- Player = Turtle? -->
+  <section>
+    <span class="kicker">Niveau 7</span>
+    <h2>Skal <code>Player</code> også være en <code>Turtle</code>?</h2>
+    <p class="fragment zoom-in big green">JA DA!</p>
+    <div class="fragment"><Code code={`class Player(turtle.Turtle):`} lines="" /></div>
+    <p class="fragment">Og så skal den kunne:</p>
+    <ul class="clean small">
+      <li class="fragment">🐣 Lave en ny af sig selv: <code>__init__(self)</code></li>
+      <li class="fragment">💥 Skyde en kugle: <code>shoot(self, inactive_bullet)</code></li>
+      <li class="fragment">❄️ Køle ned, efter den har skudt: <code>cooldown(self)</code></li>
+    </ul>
+    <aside class="notes">Spørg: Skal Player også være en Turtle? Svar: JA DA! Den skal jo kunne vises og flyve – ligesom Bullet.</aside>
+  </section>
+
+  <!-- Trin 1: remove from GAME SETUP -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 7 · trin 1</span>
+    <h2>En ny af sig selv: før</h2>
+    <div class="grid-2" style="grid-template-columns: 1.5fr 1fr; align-items: center;">
+      <Code id="player" small code={`# GAME SETUP
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+screen.bgcolor(BG_COLOR)
+screen.tracer(0)
+
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.shapesize(stretch_wid=0.75, stretch_len=1.5)
+player.penup()`} lines="7-11|2-5" />
+      <ul class="clean small">
+        <li>Rumskibet laves med løse linjer i <code># GAME SETUP</code></li>
+        <li class="fragment pink">✂️ Fjern linjerne med <code>player</code></li>
+        <li class="fragment green">✋ <strong>Ikke</strong> dem med <code>screen</code>!</li>
+      </ul>
+    </div>
+    <aside class="notes">Fra GAME SETUP til CLASSES. Refaktorere = samme opførsel, bedre orden. Pas på, at de ikke sletter screen-linjerne.</aside>
+  </section>
+
+  <!-- Trin 2: Player class -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 7 · trin 2</span>
+    <h2>En ny af sig selv: efter</h2>
+    <div class="grid-2" style="grid-template-columns: 1.5fr 1fr; align-items: center;">
+      <Code id="player" small code={`# CLASSES
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)
+        self.penup()
+
+
+class Bullet(turtle.Turtle):
+    ...
+
+# GAME SETUP
+screen = turtle.Screen()
+...
+
+player = Player()`} lines="2-9|5|6-9|12-13|19" />
+      <ul class="clean small">
+        <li>Ny klasse i <code># CLASSES</code> – fx før <code>Bullet</code></li>
+        <li><code>super().__init__()</code>: start som en almindelig Turtle</li>
+        <li><code>player.</code> bliver til <code>self.</code> – "mig selv"</li>
+        <li><code>Bullet</code> er uændret</li>
+        <li class="cyan">I <code># GAME SETUP</code>: kun <code>player = Player()</code> – hvor de gamle linjer var</li>
+      </ul>
+    </div>
+    <aside class="notes">Bladr linje for linje. I GAME SETUP er der nu kun én linje tilbage for rumskibet.</aside>
+  </section>
+
+  <!-- Trin 3: fire_cooldown -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 7 · trin 3</span>
+    <h2>Hver ny spiller</h2>
+    <div class="grid-2" style="grid-template-columns: 1.5fr 1fr; align-items: center;">
+      <Code id="player" small code={`class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)
+        self.penup()
+
+        self.fire_cooldown = 0`} lines="10" />
+      <ul class="clean small">
+        <li>Foruden det skal vi sætte cooldown til 0</li>
+        <li class="fragment">0 = klar til at skyde 🟢</li>
+        <li class="fragment cyan">→ sidste linje i <code>Player.__init__</code></li>
+      </ul>
+    </div>
+    <aside class="notes">Nu kan rumskibet få sin egen variabel fire_cooldown – ligesom kuglen har ttl.</aside>
+  </section>
+
+  <!-- Trin 4: shoot -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 7 · trin 4</span>
+    <h2>Når spilleren skyder</h2>
+    <div class="grid-2" style="grid-template-columns: 1.5fr 1fr; align-items: center;">
+      <Code id="player" small code={`class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)
+        self.penup()
+
+        self.fire_cooldown = 0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME`} lines="12-15|12|13|14|15" />
+      <ul class="clean small">
+        <li>Vi har allerede fundet en inaktiv kugle: <code>inactive_bullet</code></li>
+        <li>Er vi klar? (cooldown er 0)</li>
+        <li>Skyd kuglen – fra mig selv (<code>self</code>)</li>
+        <li>Sæt cooldown til <code>RELOAD_TIME</code></li>
+        <li class="fragment cyan">→ i <code>Player</code>, efter <code>__init__</code></li>
+      </ul>
+    </div>
+    <aside class="notes">fire(self): kuglen starter der, hvor rumskibet er, og peger samme vej. RELOAD_TIME findes ikke endnu – det kommer om lidt.</aside>
+  </section>
+
+  <!-- Trin 5: cooldown -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 7 · trin 5</span>
+    <h2>Cooldown...</h2>
+    <div class="grid-2" style="grid-template-columns: 1.5fr 1fr; align-items: center;">
+      <Code id="player" small code={`class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)
+        self.penup()
+
+        self.fire_cooldown = 0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1`} lines="17-19|18|19" />
+      <ul class="clean small">
+        <li>I hvert game loop skal spilleren "køle ned"</li>
+        <li>Men kun hvis cooldown ikke allerede er 0</li>
+        <li>Træk en fra</li>
+        <li class="fragment">🤔 Hvorfor tjekker vi <code>&gt; 0</code>?</li>
+        <li class="fragment cyan">→ i <code>Player</code>, efter <code>shoot</code></li>
+      </ul>
+    </div>
+    <aside class="notes">
+      Svar: ellers bliver tælleren negativ (-1, -2, ...) og rammer aldrig 0 igen – så kan man aldrig skyde mere.
+      Nu er hele Player-klassen færdig.
+    </aside>
+  </section>
+
+  <!-- 9. Cooldown counter -->
+  <section>
+    <span class="kicker">Genladetid</span>
+    <h2>En tæller der tæller ned</h2>
+    <div style="display: flex; gap: 0.4em; justify-content: center; margin-top: 0.8em;">
+      <div class="card center"><span class="big pink">💥</span><p class="small">tick 0</p></div>
+      <div class="card center fragment"><span class="big">4</span><p class="small">tick 1</p></div>
+      <div class="card center fragment"><span class="big">3</span><p class="small">tick 2</p></div>
+      <div class="card center fragment"><span class="big">2</span><p class="small">tick 3</p></div>
+      <div class="card center fragment"><span class="big">1</span><p class="small">tick 4</p></div>
+      <div class="card center fragment zoom-in"><span class="big pink">💥</span><p class="small">tick 5</p></div>
+    </div>
+    <p class="fragment" style="margin-top: 0.8em;">Skyd → tæller = 5 · hvert tick: −1 · kun skyd når tæller = 0</p>
+    <aside class="notes">
+      Metafor: som en vandpistol, der skal pumpes op igen, eller en mikroovn-timer. Spørg: Hvad sker der, hvis RELOAD_TIME er 1? 50?
+    </aside>
+  </section>
+
+  <!-- Trin 6: RELOAD_TIME -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 7 · trin 6</span>
+    <h2>Lagde I mærke til <code>RELOAD_TIME</code>?</h2>
+    <Code id="consts" code={`# CONSTANTS
+...
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 20
+RELOAD_TIME = 5  # ticks between reload`} lines="6" />
+    <ul class="clean">
+      <li class="fragment">Den skal defineres. Hvor skal den være?</li>
+      <li class="fragment cyan">→ I <code># CONSTANTS</code>-sektionen!</li>
+    </ul>
+    <aside class="notes">Lad dem svare, før du viser svaret. 5 ticks mellem hvert skud.</aside>
+  </section>
+
+  <!-- Trin 7: MAX_BULLETS -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 7 · trin 7</span>
+    <h2>Færre kugler</h2>
+    <Code id="consts" code={`# CONSTANTS
+...
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload`} lines="5" />
+    <p>Lad os gøre spillet lidt sværere 😈</p>
+    <p class="fragment cyan">Ændr <code>MAX_BULLETS</code> fra <span class="pink">20</span> til <span class="green">10</span></p>
+  </section>
+
+  <!-- Trin 8: move_bullets before -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 7 · trin 8</span>
+    <h2>Ret game loop til</h2>
+    <div class="grid-2" style="grid-template-columns: 1.4fr 1fr; align-items: center;">
+      <Code id="movebullets" small code={`def move_bullets():
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        inactive_bullet.fire(player)`} lines="10" />
+      <ul class="clean small">
+        <li>I <code>move_bullets</code> skyder kuglen selv...</li>
+        <li class="fragment pink">...uden at spørge rumskibet, om det er klar!</li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 7 · trin 8</span>
+    <h2>Ret game loop til</h2>
+    <div class="grid-2" style="grid-template-columns: 1.4fr 1fr; align-items: center;">
+      <Code id="movebullets" small code={`def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)`} lines="2|11" />
+      <ul class="clean small">
+        <li>❄️ Køl spilleren ned: <code>player.cooldown()</code> – første linje i <code>move_bullets</code></li>
+        <li>💥 Spilleren skyder: <code>player.shoot(inactive_bullet)</code></li>
+        <li class="muted">i stedet for <s><code>inactive_bullet.fire(player)</code></s></li>
+      </ul>
+    </div>
+    <aside class="notes">Nu spørger vi rumskibet, og rumskibet bestemmer selv, om det er klar.</aside>
+  </section>
+
+  <!-- Try level 7 -->
+  <section>
+    <span class="kicker">Kør spillet ▶</span>
+    <h2>Prøv niveau 7</h2>
+    <p>Hold <kbd>mellemrum</kbd> nede – hvad sker der nu?</p>
+    <p class="fragment zoom-in big green">Pæne huller mellem kuglerne ✨</p>
+    <p class="fragment small muted">Prøv at ændre <code>RELOAD_TIME</code> til 1 eller 50</p>
+  </section>
+
+  <!-- Level 8 intro -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #3a2a10, #05041a 70%)">
+    <span class="kicker">Niveau 8</span>
+    <h2 class="neon">Nu med asteroider!</h2>
+    <div>
+      <Asteroid size={70} spin={9} />
+      <Asteroid size={50} spin={6} color="#ff9d3c" />
+      <Asteroid size={85} spin={12} />
+    </div>
+    <p>Nu er det på tide at få nogle asteroider</p>
+  </section>
+
+  <!-- Level 8 trin 1: MAX_ASTEROIDS -->
+  <section>
+    <span class="kicker">Niveau 8 · trin 1</span>
+    <h2>Lad os starte med 10 asteroider</h2>
+    <Code id="consts" code={`# CONSTANTS
+...
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+MAX_ASTEROIDS = 10`} lines="6" />
+    <p>Hvor mange kan vi max have?</p>
+    <p class="fragment cyan">→ i <code># CONSTANTS</code>-sektionen</p>
+  </section>
+
+  <!-- Level 8 trin 2: Asteroid class -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 8 · trin 2</span>
+    <h2>En klasse til asteroiden</h2>
+    <div class="grid-2" style="align-items: center;">
+      <ul class="clean small">
+        <li>🤔 Hvad skal det være for en slags?</li>
+        <li class="fragment green">En <code>Turtle</code> – selvfølgelig!</li>
+        <li class="fragment">🤔 Hvad skal den kunne?</li>
+        <li class="fragment green">Lige nu: ikke andet</li>
+        <li class="fragment cyan">→ i <code># CLASSES</code>, fx efter <code>Player</code></li>
+      </ul>
+      <Code id="ast" code={`class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()`} lines="1|3-4" />
+    </div>
+    <aside class="notes">Lad dem svare på spørgsmålene. Turtle kan allerede vises og flyttes – mere skal en asteroide ikke kunne endnu.</aside>
+  </section>
+
+  <!-- Level 8 trin 3: import random -->
+  <section>
+    <span class="kicker">Niveau 8 · trin 3</span>
+    <h2>🎲 Tilfældighed</h2>
+    <ul class="clean">
+      <li>Asteroiderne skal være tilfældige steder på skærmen...</li>
+      <li class="fragment">...uden at vi selv skal bestemme det</li>
+      <li class="fragment">Så lad os hente <code>random</code>, så vi kan bruge den senere</li>
+    </ul>
+    <div class="fragment"><Code code={`import turtle
+import random`} lines="2" /></div>
+    <p class="fragment cyan">→ øverst i filen, efter <code>import turtle</code></p>
+  </section>
+
+  <!-- Level 8 trin 4: __init__ -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 8 · trin 4</span>
+    <h2>Hver ny asteroide</h2>
+    <div class="grid-2" style="align-items: center;">
+      <Code id="ast" code={`class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()`} lines="5|6|7|8" />
+      <ul class="clean small">
+        <li>Sæt formen: en cirkel</li>
+        <li>Sæt størrelsen</li>
+        <li>Sæt farven</li>
+        <li>Løft pennen</li>
+        <li class="muted">Udregn en tilfældig x og y (kommer om lidt)</li>
+        <li class="muted">Flyt den derhen: <code>self.goto(x, y)</code></li>
+        <li class="fragment cyan">→ i <code>Asteroid.__init__</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 10. Random -->
+  <section>
+    <span class="kicker">Niveau 8</span>
+    <h2>🎲 Et tilfældigt tal</h2>
+    <p class="small"><code>random.randint(a, b)</code> giver et tilfældigt tal mellem <code>a</code> og <code>b</code></p>
+    <Code code={`import random
+
+random.randint(0, 3)`} lines="1|3" />
+    <p class="fragment">Hvis a = 0 og b = 3 – hvad kan den så give?</p>
+    <p class="fragment zoom-in big yellow">0 · 1 · 2 · 3</p>
+    <p class="fragment small muted">Begge ender er med!</p>
+    <aside class="notes">Lad dem gætte. Mange tror 0-2 eller 1-3. randint tager begge ender med.</aside>
+  </section>
+
+  <!-- 11. Random position -->
+  <section>
+    <span class="kicker">Niveau 8</span>
+    <h2>Hvad er vores a og b?</h2>
+    <div class="grid-2">
+      <img class="framed" src={`${base}images/coordinate-system.svg`} alt="Koordinatsystem med (0, 0) i midten" />
+      <div>
+        <Code code={`x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+self.goto(x, y)`} lines="1|2|3" />
+        <p class="fragment small">x: −600 til 600 · y: −400 til 400</p>
+      </div>
+    </div>
+    <aside class="notes">Spørg: Hvor går skærmen fra og til? Midten er (0, 0). HALF_WIDTH = 600, HALF_HEIGHT = 400.</aside>
+  </section>
+
+  <!-- Level 8 trin 5: random position -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 8 · trin 5</span>
+    <h2>En tilfældig position</h2>
+    <div class="grid-2" style="grid-template-columns: 1.5fr 1fr; align-items: center;">
+      <Code id="ast" small code={`class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)`} lines="9|10|11" />
+      <ul class="clean small">
+        <li>Find en tilfældig x</li>
+        <li>Find en tilfældig y</li>
+        <li>Flyt asteroiden derhen</li>
+        <li class="fragment cyan">→ også i <code>Asteroid.__init__</code>, efter <code>penup</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Level 8 trin 6: create asteroids -->
+  <section>
+    <span class="kicker">Niveau 8 · trin 6</span>
+    <h2>Når spillet starter: lav asteroiderne</h2>
+    <div class="grid-2" style="align-items: center;">
+      <Code code={`# GAME SETUP
+...
+player = Player()
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+# Create asteroids
+asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroids.append(Asteroid())`} lines="10-13|11|12-13" />
+      <ul class="clean small">
+        <li>En liste til at have dem i</li>
+        <li>Lav så mange asteroider, som vi har defineret i <code>MAX_ASTEROIDS</code></li>
+        <li class="fragment yellow">Præcis ligesom kugle-listen!</li>
+        <li class="fragment cyan">→ i <code># GAME SETUP</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Try level 8 -->
+  <section>
+    <span class="kicker">Kør spillet ▶</span>
+    <h2>Prøv niveau 8</h2>
+    <p>Kommer der asteroider frem?</p>
+    <p class="fragment">Luk spillet og start igen – hvor er de nu?</p>
+    <p class="fragment zoom-in big yellow">Nye tilfældige steder hver gang 🎲</p>
+  </section>
+
+  <!-- 13. Build + pause -->
+  <section data-background-gradient="radial-gradient(circle at 50% 50%, #0f3a5e, #05041a 70%)">
+    <span class="kicker">Jeres tur</span>
+    <h2 class="neon">Byg niveau 7 og 8</h2>
+    <p>Åbn lektionen på hjemmesiden og følg trinene</p>
+    <p class="fragment zoom-in big yellow">☕ Så holder vi pause</p>
+    <aside class="notes">Lad dem bygge til pausen. Efter pausen: fortsæt med næste slide (kollision).</aside>
+  </section>
+
+  <!-- Level 9 intro -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #5e0f2a, #05041a 70%)">
+    <span class="kicker">Niveau 9</span>
+    <h2 class="neon">Skyd asteroiderne! 💥</h2>
+    <Asteroid size={90} spin={10} color="#ff4fd8" />
+    <p>Asteroiderne skal da kunne skydes</p>
+  </section>
+
+  <!-- 14. Collision -->
+  <section>
+    <span class="kicker">Niveau 9</span>
+    <h2>Har kuglen ramt?</h2>
+    <div class="grid-2">
+      <ul class="clean">
+        <li>🤔 Har de noget til fælles?</li>
+        <li class="fragment">🐢 Begge er en <code>Turtle</code></li>
+        <li class="fragment">📍 Begge har en position</li>
+        <li class="fragment">📏 Så kan vi måle afstanden</li>
+        <li class="fragment green">afstand &lt; radius → RAMT!</li>
+        <li class="fragment pink">afstand &gt; radius → forbi</li>
+      </ul>
+      <svg viewBox="0 0 400 300" width="460" aria-label="En asteroide-cirkel med radius, en kugle inde i cirklen og en kugle udenfor">
+        <circle cx="170" cy="150" r="100" fill="rgba(5,4,26,0.6)" stroke="#f1f0ff" stroke-width="4" />
+        <circle cx="170" cy="150" r="5" fill="#f1f0ff" />
+        <g class="fragment">
+          <line x1="170" y1="150" x2="270" y2="150" stroke="#ffe14f" stroke-width="3" stroke-dasharray="8 6" />
+          <text x="200" y="140" fill="#ffe14f" font-size="22">radius</text>
+        </g>
+        <g class="fragment">
+          <line x1="170" y1="150" x2="215" y2="85" stroke="#7dff8a" stroke-width="3" />
+          <rect x="209" y="79" width="12" height="12" fill="#7dff8a" />
+          <text x="225" y="80" fill="#7dff8a" font-size="22">RAMT</text>
+        </g>
+        <g class="fragment">
+          <line x1="170" y1="150" x2="330" y2="250" stroke="#ff4fd8" stroke-width="3" />
+          <rect x="324" y="244" width="12" height="12" fill="#ff4fd8" />
+          <text x="290" y="285" fill="#ff4fd8" font-size="22">forbi</text>
+        </g>
+      </svg>
+    </div>
+    <aside class="notes">
+      Spørg først: Hvordan kan computeren vide, at kuglen har ramt? Tegn gerne selv på tavlen: en cirkel, midten, radius.
+      Kuglen inde i cirklen = tættere på midten end radius.
+    </aside>
+  </section>
+
+  <!-- 15. distance -->
+  <section>
+    <span class="kicker">Niveau 9</span>
+    <h2>Turtle måler for os</h2>
+    <p>Man kan spørge én <code>Turtle</code>, hvor langt der er til en anden <code>Turtle</code></p>
+    <Code code={`asteroid.distance(bullet)`} lines="" />
+    <p class="fragment small muted">Den bruger Pythagoras: afstand = √(dx² + dy²)</p>
+    <p class="fragment">Det bruger vi i en ny funktion: <code class="yellow">check_collision</code></p>
+    <aside class="notes">Pythagoras er bonus – de behøver ikke kunne det. På niveausiden er der en kørbar demo, hvor de selv kan prøve.</aside>
+  </section>
+
+  <!-- Level 9 trin 1: radius -->
+  <section>
+    <span class="kicker">Niveau 9 · trin 1</span>
+    <h2>Asteroidens radius</h2>
+    <div class="grid-2" style="grid-template-columns: 1.5fr 1fr; align-items: center;">
+      <Code id="ast" small code={`class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+        self.radius = 30`} lines="12" />
+      <ul class="clean small">
+        <li>Asteroiden skal huske, hvor stor den er</li>
+        <li class="fragment">🤔 Hvor skal vi sætte det?</li>
+        <li class="fragment cyan">→ i <code>Asteroid.__init__</code> – et godt sted!</li>
+        <li class="fragment muted">Cirklen er 20 px bred · <code>shapesize(3, 3)</code> → 60 px · radius = 30</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Level 9 trin 2: check_collision -->
+  <section>
+    <span class="kicker">Niveau 9 · trin 2</span>
+    <h2>check_collision</h2>
+    <Code code={`def check_collision(with_turtle):
+    # Check for collisions between a turtle and the asteroids
+    for asteroid in asteroids:
+        if abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None`} lines="1|3|4|5|6" />
+    <ul class="clean small">
+      <li class="fragment"><code>with_turtle</code> = det, vi vil se, om har ramt en asteroide (fx en kugle)</li>
+      <li class="fragment">Løb listen af asteroider igennem</li>
+      <li class="fragment">Er afstanden mindre end radius? → returnér asteroiden</li>
+      <li class="fragment">Ellers til sidst: <code>None</code> = ingenting</li>
+      <li class="fragment cyan">→ i <code># BEHAVIOURS</code>, fx efter <code>move_if_out_of_bounds</code></li>
+    </ul>
+    <aside class="notes">
+      Bemærk: return None står efter løkken – ikke inde i den. abs gør et tal positivt.
+    </aside>
+  </section>
+
+  <!-- Level 9 trin 3: move_bullets -->
+  <section>
+    <span class="kicker">Niveau 9 · trin 3</span>
+    <h2>Når vi flytter en kugle</h2>
+    <div class="grid-2" style="grid-template-columns: 1.4fr 1fr; align-items: center;">
+      <Code id="movebullets" small code={`def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hideturtle()
+                bullet.hideturtle()
+                bullet.active = False
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)`} lines="7-11|7|8|9|10|11" />
+      <ul class="clean small">
+        <li class="cyan">→ lige efter <code>bullet.move()</code></li>
+        <li>Er en asteroide ramt?</li>
+        <li>Hvis vi ramte en:</li>
+        <li>👻 skjul asteroiden</li>
+        <li>👻 skjul kuglen</li>
+        <li>💤 gør kuglen inaktiv</li>
+      </ul>
+    </div>
+    <aside class="notes">
+      if hit_asteroid er sandt, hvis vi fik en asteroide, og falsk, hvis vi fik None.
+      Sådan skal hele move_bullets se ud nu – pas på indrykningen.
+    </aside>
+  </section>
+
+  <!-- Try level 9 -->
+  <section>
+    <span class="kicker">Kør spillet ▶</span>
+    <h2>Prøv niveau 9</h2>
+    <p>Kan du skyde nogle asteroider?</p>
+    <p class="fragment zoom-in big pink">💥 BOOM!</p>
+  </section>
+
+  <!-- 17. Puzzle -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #3a0f3e, #05041a 70%)">
+    <span class="kicker">Niveau 10 · Mysterie</span>
+    <h2>👻 Hvorfor stopper kuglerne?</h2>
+    <svg viewBox="0 0 600 200" width="700" aria-label="En kugle flyver mod det sted, hvor en asteroide var, og stopper">
+      <polygon points="40,90 40,110 70,100" fill="none" stroke="#f1f0ff" stroke-width="3" />
+      <line x1="80" y1="100" x2="380" y2="100" stroke="#a9a8d6" stroke-width="2" stroke-dasharray="4 10" />
+      <rect x="374" y="94" width="12" height="12" fill="#ff4fd8" />
+      <circle class="fragment" cx="450" cy="100" r="70" fill="none" stroke="#a9a8d6" stroke-width="3" stroke-dasharray="10 8" opacity="0.7" />
+    </svg>
+    <p class="fragment">Kan I se kuglen forsvinde, når vi skyder der, hvor vi allerede har skudt en asteroide?</p>
+    <p class="fragment">Dem, vi har skudt, skal da ikke rammes igen?!</p>
+    <p class="fragment yellow"><code>hideturtle()</code> gør den usynlig – men den er <strong>stadig i listen</strong>!</p>
+    <aside class="notes">
+      Lad dem først prøve i deres eget spil: skyd en asteroide, skyd så samme sted igen. Spørg: Hvorfor forsvinder kuglen?
+      Lad flere gætte, før du viser svaret. check_collision går hele listen igennem – også de usynlige.
+    </aside>
+  </section>
+
+  <!-- Level 10 trin 1: before -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 10</span>
+    <h2>Hvordan kan vi undgå det?</h2>
+    <Code id="cc" code={`def check_collision(with_turtle):
+    # Check for collisions between a turtle and the asteroids
+    for asteroid in asteroids:
+        if abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None`} lines="3|4" />
+    <ul class="clean small">
+      <li class="fragment">I <code>check_collision</code> løber vi <strong>hele</strong> listen igennem</li>
+      <li class="fragment">– uanset om asteroiderne er synlige eller ej</li>
+      <li class="fragment yellow">Så vi skal tjekke, om den er synlig, før vi tjekker afstanden: <code>asteroid.isvisible()</code></li>
+    </ul>
+  </section>
+
+  <!-- Level 10 trin 1: after -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 10 · trin 1</span>
+    <h2>Sammensat i samme <code>if</code></h2>
+    <Code id="cc" code={`def check_collision(with_turtle):
+    # Check for collisions between the player and asteroids
+    for asteroid in asteroids:
+        if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None`} lines="4" />
+    <p class="fragment cyan small">→ Find <code>if</code>-sætningen i <code>check_collision</code> og sæt <code>asteroid.isvisible() and</code> ind forrest</p>
+  </section>
+
+  <!-- 18. Conditions -->
+  <section>
+    <span class="kicker">Niveau 10</span>
+    <h2>To betingelser med <code>and</code></h2>
+    <Code code={`if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+    return asteroid`} lines="1" />
+    <div class="grid-3" style="margin-top: 0.6em;">
+      <div class="card center fragment"><p>👀 synlig?</p><p class="big green">ja</p></div>
+      <div class="card center fragment"><p>📏 tæt nok på?</p><p class="big green">ja</p></div>
+      <div class="card center fragment zoom-in"><p>💥 ramt?</p><p class="big green">JA</p></div>
+    </div>
+    <p class="fragment small">Er bare én af dem <span class="pink">nej</span>, er det hele <span class="pink">nej</span>.</p>
+    <aside class="notes">Spørg: Hvis asteroiden er usynlig, men kuglen er tæt på – er den så ramt? (Nej.) Det er hele fixet: én betingelse ekstra.</aside>
+  </section>
+
+  <!-- Try level 10 -->
+  <section>
+    <span class="kicker">Kør spillet ▶</span>
+    <h2>Prøv niveau 10</h2>
+    <p>Skyd en asteroide – og skyd så samme sted igen</p>
+    <p class="fragment zoom-in big green">Kuglen flyver lige igennem 👻➡️</p>
+  </section>
+
+  <!-- 19. Build -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #3a0f6e, #05041a 70%)">
+    <Ship size={90} flame class="float" />
+    <h2 class="neon">Nu skal I bygge!</h2>
+    <p class="cyan">/python-asteroids/lektion-3-asteroider/0-oversigt/</p>
+    <p class="small muted">Var du her ikke sidst? Brug boksen "Jeg var her ikke sidst" på oversigtssiden.</p>
+    <p class="fragment small">Færdig før tid? Prøv ekstra-opgaverne: farvede asteroider og turbo-kanon 🔥</p>
+    <aside class="notes">Kodeordet til catch-up er komet. Gå rundt og hjælp – typiske fejl er indrykning og stavefejl i navne.</aside>
+  </section>
+
+</SlideDeck>

@@ -1,0 +1,651 @@
+---
+import SlideDeck from '../../layouts/SlideDeck.astro'
+import Code from '../../components/slides/Code.astro'
+import Ship from '../../components/slides/Ship.astro'
+import Asteroid from '../../components/slides/Asteroid.astro'
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+---
+<SlideDeck title="Lektion 5 – Liv og skjold" lesson={5}>
+
+  <!-- 1. Title -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #5a0f3e, #05041a 70%)">
+    <div style="position: relative; height: 150px;">
+      <div class="fly-across" style="top: 20px;"><Ship size={70} flame /></div>
+    </div>
+    <span class="kicker">Lektion 5 · Niveau 15–17</span>
+    <h1 class="neon">LIV OG SKJOLD</h1>
+    <p class="big"><span class="pink pulse" style="display: inline-block;">♥ ♥ ♥</span></p>
+    <div>
+      <Asteroid size={60} spin={9} />
+      <Ship size={60} class="blink" />
+      <Asteroid size={80} spin={13} color="#ff4fd8" />
+    </div>
+    <aside class="notes">
+      Velkommen tilbage. Catch-up: kodeordet til lektion 5 er "galakse" (giver koden efter niveau 14, 14_respawn_asteroids.py).
+      Del det kun med dem, der ikke var her sidst eller hvis kode er gået i stykker. Ca. 30 min præsentation + niveau 15 før pausen.
+    </aside>
+  </section>
+
+  <!-- 2. Agenda -->
+  <section>
+    <span class="kicker">I dag</span>
+    <h2>Plan</h2>
+    <ol class="agenda">
+      <li class="fragment">Flere liv ♥</li>
+      <li class="fragment">Tid i Python ⏱️</li>
+      <li class="fragment">Skjold efter et hit 🛡️</li>
+      <li class="fragment">Blink! ✨</li>
+    </ol>
+    <aside class="notes">Kort overblik. Niveau 15 før pausen, 16 og 17 efter. Ekstra-opgaver til de hurtige.</aside>
+  </section>
+
+  <!-- 3. Preview -->
+  <section>
+    <span class="kicker">Det bygger vi</span>
+    <h2>Efter i dag kan spillet ...</h2>
+    <div class="grid-3" style="margin-top: 0.8em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">❤️</span><h3>3 liv</h3><p class="small">Ét hit er ikke længere game over</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">🛡️</span><h3>Skjold</h3><p class="small">3 sekunder hvor du ikke kan blive ramt</p></div>
+      <div class="card center fragment fade-up"><Ship size={60} class="blink" /><h3>Blink</h3><p class="small">Så du kan se, at du er beskyttet</p></div>
+    </div>
+  </section>
+
+  <!-- 4. Recap -->
+  <section>
+    <span class="kicker">Sidst</span>
+    <h2>Hvor kom vi til?</h2>
+    <ul class="clean">
+      <li class="fragment">🏆 Score, der tæller op</li>
+      <li class="fragment">🪨 Asteroider, der flyver rundt</li>
+      <li class="fragment">♻️ ... og kommer igen efter et stykke tid</li>
+    </ul>
+    <p class="fragment big yellow" style="margin-top: 0.8em;">Hvad sker der, når en asteroide rører dig?</p>
+    <p class="fragment big pink">GAME OVER. Med det samme. 😱</p>
+    <aside class="notes">Spørg klassen før du viser svaret. Er det fair? Hvad gør andre spil?</aside>
+  </section>
+
+  <!-- 5. Lives in games -->
+  <section>
+    <span class="kicker">Liv i spil</span>
+    <h2>Hvor har I set liv før?</h2>
+    <div class="grid-3" style="margin-top: 0.6em;">
+      <div class="card center fragment zoom-in"><span class="emoji-big">🍄</span><p>Mario</p></div>
+      <div class="card center fragment zoom-in"><span class="emoji-big">❤️</span><p>Minecraft-hjerter</p></div>
+      <div class="card center fragment zoom-in"><span class="emoji-big">👻</span><p>Pac-Man</p></div>
+    </div>
+    <p class="fragment" style="margin-top: 0.8em;">Liv er bare et <span class="cyan">tal</span>, der tæller <span class="pink">ned</span>.</p>
+    <p class="fragment muted small">Ligesom scoren – bare omvendt.</p>
+    <aside class="notes">Lad børnene komme med eksempler. Pointen: liv = en variabel, ligesom score. Ved 0 er det game over.</aside>
+  </section>
+
+  <!-- Niveau 15 intro -->
+  <section>
+    <span class="kicker">Niveau 15</span>
+    <h2>Skal vi ikke have mere end ét liv?</h2>
+    <p class="fragment">Kun én chance, før det er game over? 😢</p>
+    <p class="fragment big">Vi skal da have flere liv: <span class="pink">Player Health</span> ♥</p>
+  </section>
+
+  <!-- 15.1 HEALTH text -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 15 · trin 1</span>
+    <h2>Mere tekst, der <em>ikke</em> ændrer sig</h2>
+    <div class="grid-2">
+      <Code id="pen15" small code={`# GAME SETUP
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 60)
+pen.write("HEALTH: ", font=SCORE_FONT)`} lines="2-6|7|8" />
+      <ul class="clean">
+        <li>Vi har stadig vores <code>pen</code> til at skrive på skærmen</li>
+        <li class="fragment">Flyt den ned under "SCORE"</li>
+        <li class="fragment">... og skriv "HEALTH: "</li>
+        <li class="fragment cyan">→ GAME SETUP, lige efter vi har skrevet "SCORE"</li>
+      </ul>
+    </div>
+    <aside class="notes">Spørg: hvorfor -60 og ikke -30? (30 pixels længere nede, så teksten ikke står oven i SCORE).</aside>
+  </section>
+
+  <!-- 15.2 health_pen -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 15 · trin 2</span>
+    <h2>En <code>health_pen</code></h2>
+    <div class="grid-2">
+      <Code id="pen15" small code={`# GAME SETUP
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 60)
+pen.write("HEALTH: ", font=SCORE_FONT)
+
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+
+health_pen = turtle.Turtle(visible=False)
+health_pen.color("white")
+health_pen.penup()
+health_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 60)`} lines="15|16|17|18" />
+      <ul class="clean small">
+        <li>En ny, usynlig pen til antal liv</li>
+        <li class="fragment">Skriver med hvid farve</li>
+        <li class="fragment">Løfter pennen – ingen streger</li>
+        <li class="fragment">Flytter den hen efter "HEALTH: "</li>
+        <li class="fragment cyan">→ GAME SETUP, efter <code>score_pen</code></li>
+      </ul>
+    </div>
+    <aside class="notes">Præcis som score_pen – bare 30 pixels længere nede. Hvorfor en egen pen? Så vi kan rydde tallet uden at slette "HEALTH: ".</aside>
+  </section>
+
+  <!-- 15.3 constant -->
+  <section>
+    <span class="kicker">Niveau 15 · trin 3</span>
+    <h2>Hvor mange liv skal vi have?</h2>
+    <div class="grid-2">
+      <Code small code={`# CONSTANTS
+# ...
+PLAYER_SPEED = 10  # Pixels to move player each tick
+PLAYER_START_HEALTH = 3
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed`} lines="4" />
+      <ul class="clean">
+        <li>Lad os lave en konstant</li>
+        <li class="fragment">... med måske <span class="pink">3</span> liv? ♥ ♥ ♥</li>
+        <li class="fragment cyan">→ CONSTANTS</li>
+      </ul>
+    </div>
+    <aside class="notes">Spørg: hvor mange liv synes I? De må gerne ændre tallet i deres eget spil.</aside>
+  </section>
+
+  <!-- 15.4 Player.health -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 15 · trin 4</span>
+    <h2><code>Player.health</code></h2>
+    <div class="grid-2">
+      <Code id="player15" small code={`class Player(turtle.Turtle):
+
+    def __init__(self):
+        # ...
+        self.fire_cooldown = 0
+        self.alive = True
+        self.score = 0
+        self.health = PLAYER_START_HEALTH`} lines="8" />
+      <ul class="clean">
+        <li>Spilleren skal have liv, vi kan tælle ned</li>
+        <li class="fragment">En variabel på <code>Player</code>-klassen: <code>health</code></li>
+        <li class="fragment">Starter med <code>PLAYER_START_HEALTH</code></li>
+        <li class="fragment cyan">→ <code>Player.__init__</code>, efter <code>self.score = 0</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 15.5 draw_health -->
+  <section>
+    <span class="kicker">Niveau 15 · trin 5</span>
+    <h2>Skriv antal liv</h2>
+    <div class="grid-2">
+      <Code small code={`# BEHAVIOURS
+def draw_score():
+    score_pen.clear()
+    score_pen.write(player.score, font=SCORE_FONT)
+
+
+def draw_health():
+    health_pen.clear()
+    health_pen.write(player.health, font=SCORE_FONT)`} lines="7-9|8|9" />
+      <ul class="clean">
+        <li>Liv skal skrives, hver gang de ændrer sig</li>
+        <li class="fragment">Ny funktion: <code>draw_health</code></li>
+        <li class="fragment">Ryd det gamle tal ...</li>
+        <li class="fragment">... skriv det nye</li>
+        <li class="fragment cyan">→ BEHAVIOURS, efter <code>draw_score</code></li>
+      </ul>
+    </div>
+    <aside class="notes">Spørg: hvad ligner den? (draw_score). Hvad sker der, hvis vi glemmer clear()? (tallene skrives oven i hinanden).</aside>
+  </section>
+
+  <!-- Question: hit -->
+  <section>
+    <span class="kicker">Spørgsmål</span>
+    <h2>Hvad skal der ske, når rumskibet bliver ramt?</h2>
+    <ul class="clean">
+      <li class="fragment">💥 En ny opførsel på <code>Player</code>: <code>hit</code></li>
+      <li class="fragment">➖ Træk 1 fra <code>health</code></li>
+      <li class="fragment">🖊️ Skriv det nye antal liv på skærmen</li>
+      <li class="fragment">💀 0 liv tilbage? Så sæt <code>alive</code> til <code>False</code></li>
+    </ul>
+    <aside class="notes">Lad klassen svare først, vis så punkterne et ad gangen.</aside>
+  </section>
+
+  <!-- 15.6 hit -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 15 · trin 6</span>
+    <h2>Ny <code>hit</code>-funktion</h2>
+    <div class="grid-2">
+      <Code id="player15" small code={`class Player(turtle.Turtle):
+
+    def __init__(self):
+        # ...
+        self.score = 0
+        self.health = PLAYER_START_HEALTH
+
+    # ...
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+    def hit(self):
+        self.health -= 1
+        draw_health()
+
+        if self.health == 0:
+            self.alive = False`} lines="13-18|14|15|17-18" />
+      <ul class="clean">
+        <li>Træk et liv fra</li>
+        <li class="fragment">Skriv det nye antal</li>
+        <li class="fragment">Ingen liv tilbage → game over</li>
+        <li class="fragment cyan">→ <code>Player</code>-klassen, efter <code>cooldown</code></li>
+      </ul>
+    </div>
+    <aside class="notes">Husk indrykning: hit hører til klassen, så den skal have 4 mellemrum foran def.</aside>
+  </section>
+
+  <!-- Question: where hit -->
+  <section>
+    <span class="kicker">Spørgsmål</span>
+    <h2>Hvor i koden bliver man ramt?</h2>
+    <div class="grid-2" style="margin-top: 0.6em;">
+      <div class="card center fragment fade-up"><Asteroid size={60} spin={9} /><h3><code>move_asteroids</code></h3><p class="small">En asteroide flyver ind i dig</p></div>
+      <div class="card center fragment fade-up"><Ship size={60} /><h3><code>move_spaceship</code></h3><p class="small">Du flyver ind i en asteroide</p></div>
+    </div>
+    <p class="fragment" style="margin-top: 0.6em;">Begge steder står der: <code>player.alive = False</code></p>
+  </section>
+
+  <!-- 15.7 move_asteroids -->
+  <section>
+    <span class="kicker">Niveau 15 · trin 7</span>
+    <h2>I <code>move_asteroids</code></h2>
+    <div class="grid-2">
+      <div>
+        <p class="pink">Før</p>
+        <Code small code={`def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid)
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.alive = False`} lines="7" />
+      </div>
+      <div class="fragment fade-up">
+        <p class="green">Efter</p>
+        <Code small code={`def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid)
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.hit()`} lines="7" />
+      </div>
+    </div>
+    <p class="fragment cyan">Find <code>player.alive = False</code> og erstat med <code>player.hit()</code></p>
+  </section>
+
+  <!-- 15.8 move_spaceship -->
+  <section>
+    <span class="kicker">Niveau 15 · trin 8</span>
+    <h2>Også i <code>move_spaceship</code></h2>
+    <div class="grid-2">
+      <div>
+        <p class="pink">Før</p>
+        <Code small code={`    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.alive = False`} lines="5" />
+      </div>
+      <div class="fragment fade-up">
+        <p class="green">Efter</p>
+        <Code small code={`    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.hit()`} lines="5" />
+      </div>
+    </div>
+    <p class="fragment cyan">Samme ændring: <code>player.alive = False</code> → <code>player.hit()</code></p>
+  </section>
+
+  <!-- 15.9 start -->
+  <section>
+    <span class="kicker">Niveau 15 · trin 9</span>
+    <h2>Skriv liv, når spillet starter</h2>
+    <div class="grid-2">
+      <Code small code={`# START THE GAME
+draw_score()
+draw_health()
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window`} lines="3" />
+      <ul class="clean">
+        <li>Nu mangler kun én ting ...</li>
+        <li class="fragment">Skriv antal liv på skærmen, når spillet starter</li>
+        <li class="fragment cyan">→ START THE GAME, efter <code>draw_score()</code></li>
+        <li class="fragment green">✅ Prøv spillet: tæller dine liv ned?</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 8. Problem -->
+  <section>
+    <span class="kicker">Men ...</span>
+    <h2>Hvor hurtigt forsvinder 3 liv?</h2>
+    <p class="fragment">Spillet tjekker for sammenstød hvert game tick</p>
+    <p class="fragment big cyan">1 tick = 20 millisekunder</p>
+    <p class="fragment big pink">3 liv væk på 0,06 sekunder!</p>
+    <p class="fragment emoji-big">💥💥💥</p>
+    <p class="fragment">Løsning: en lille <span class="cyan">henstandstid</span> – en <span class="yellow">"Grace Period"</span> 🛡️</p>
+    <aside class="notes">Lad dem gætte først. 3 ticks à 20 ms = 60 ms – hurtigere end man kan blinke. Det er derfor vi skal have et skjold. Byg niveau 15 nu, og oplev det selv. PAUSE efter niveau 15.</aside>
+  </section>
+
+  <!-- 16.1 grace constant -->
+  <section>
+    <span class="kicker">Niveau 16 · trin 1</span>
+    <h2>Hvor mange sekunder før vi kan rammes igen?</h2>
+    <div class="grid-2">
+      <Code small code={`# CONSTANTS
+# ...
+PLAYER_START_HEALTH = 3
+PLAYER_GRACE_PERIOD = 3 # seconds`} lines="4" />
+      <ul class="clean">
+        <li>Lad os sige <span class="yellow">3 sekunder</span></li>
+        <li class="fragment">Burde være tid nok til at komme væk fra asteroiden</li>
+        <li class="fragment cyan">→ CONSTANTS</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 16.2 import time -->
+  <section>
+    <span class="kicker">Niveau 16 · trin 2</span>
+    <h2>Et nyt bibliotek: <code>time</code></h2>
+    <div class="grid-2">
+      <Code small code={`import turtle
+import random
+import time`} lines="3" />
+      <ul class="clean">
+        <li>Nu skal vi holde styr på tiden og tælle sekunder</li>
+        <li class="fragment cyan">→ øverst i filen, lige efter <code>import random</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 9. time.time() -->
+  <section data-background-gradient="radial-gradient(circle at 50% 50%, #0f3a6e, #05041a 70%)">
+    <span class="kicker">Niveau 16</span>
+    <h2>Tid i Python ⏱️</h2>
+    <Code lines="" code={`import time
+
+print(time.time())`} />
+    <p class="fragment big yellow">1717964314.8923671</p>
+    <p class="fragment">Sekunder siden "tiden startede": <span class="cyan">torsdag 1. januar 1970 kl. 00:00:00</span></p>
+    <p class="fragment">Det kaldes <span class="yellow">epoch</span></p>
+    <p class="fragment muted">Et kæmpe stopur, som aldrig er blevet stoppet</p>
+    <aside class="notes">Hvorfor 1970? Det er bare en aftale mellem computere ("epoch"). Det vigtige er: vi kan trække to tider fra hinanden og få sekunder imellem.</aside>
+  </section>
+
+  <!-- 16.3 last_hit -->
+  <section>
+    <span class="kicker">Niveau 16 · trin 3</span>
+    <h2>Hvornår blev spilleren sidst ramt?</h2>
+    <div class="grid-2">
+      <Code small code={`class Player(turtle.Turtle):
+
+    def __init__(self):
+        # ...
+        self.score = 0
+        self.health = PLAYER_START_HEALTH
+        self.last_hit = 0.0`} lines="7" />
+      <ul class="clean">
+        <li>En ny variabel: <code>last_hit</code></li>
+        <li class="fragment cyan">→ <code>Player.__init__</code>, efter <code>self.health</code></li>
+        <li class="fragment">Hver gang spilleren rammes, sætter vi den til tiden lige nu:</li>
+        <li class="fragment"><code class="green">self.last_hit = time.time()</code></li>
+        <li class="fragment muted small">Det bruger vi senere – gør ikke noget endnu ...</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Question: invincible math -->
+  <section>
+    <span class="kicker">Udødelig!</span>
+    <h2>Hvordan siger vi det i matematik?</h2>
+    <p class="fragment">Udødelig, hvis vi blev ramt for <span class="yellow">mindre end 3 sekunder</span> siden</p>
+    <p class="fragment">Vi har:</p>
+    <div class="grid-3 fragment">
+      <div class="card center"><code>last_hit</code></div>
+      <div class="card center"><code>3</code></div>
+      <div class="card center"><code>time.time()</code></div>
+    </div>
+    <p class="fragment muted">Alle sammen i sekunder</p>
+    <aside class="notes">Lad dem gætte på en formel, før I går videre til tidslinjen.</aside>
+  </section>
+
+  <!-- 10. Timeline -->
+  <section>
+    <span class="kicker">Skjold i 3 sekunder</span>
+    <h2>En tidslinje</h2>
+    <div style="position: relative; height: 140px; margin: 1em auto; width: 90%;">
+      <div style="position: absolute; top: 60px; left: 0; right: 0; height: 6px; background: #556;"></div>
+      <div class="fragment" data-fragment-index="1" style="position: absolute; top: 48px; left: 30%; width: 36%; height: 30px; background: rgba(62, 243, 255, 0.35); border: 2px solid #3ef3ff; border-radius: 8px;"></div>
+      <div style="position: absolute; top: 95px; left: 30%; transform: translateX(-50%);" class="pink">20<br /><span class="small">💥 ramt</span></div>
+      <div class="fragment" data-fragment-index="1" style="position: absolute; top: 95px; left: 66%; transform: translateX(-50%);"><span class="cyan">23</span><br /><span class="small">skjold slukker</span></div>
+      <div class="fragment" data-fragment-index="2" style="position: absolute; top: 0; left: 54%; transform: translateX(-50%);"><span class="yellow">22?</span></div>
+      <div class="fragment" data-fragment-index="3" style="position: absolute; top: 0; left: 78%; transform: translateX(-50%);"><span class="yellow">24?</span></div>
+    </div>
+    <p class="fragment" data-fragment-index="4"><code>last_hit</code> = 20 · <code>PLAYER_GRACE_PERIOD</code> = 3</p>
+    <p class="fragment big" data-fragment-index="5">Udødelig, hvis <code class="green">20 + 3 &gt; nu</code></p>
+    <p class="fragment small" data-fragment-index="6"><code>last_hit + PLAYER_GRACE_PERIOD &gt; time.time()</code></p>
+    <p class="fragment small muted" data-fragment-index="7">Lad os lade som om epoch var, da spillet startede</p>
+    <aside class="notes">Tegn evt. også på tavlen. Spørg: bliver jeg ramt ved sekund 22? (nej, 23 &gt; 22). Ved 24? (ja, 23 er ikke større end 24). Lad dem selv finde reglen før den vises.</aside>
+  </section>
+
+  <!-- 11. Return values -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 16 · trin 4</span>
+    <h2>Ja eller nej? <code>is_invincible</code></h2>
+    <p class="small">Meget at skrive hver gang – og ikke særlig beskrivende. Så: en funktion med et godt navn!</p>
+    <Code id="inv" lines="1|2" code={`    def is_invincible(self):
+        return self.last_hit + PLAYER_GRACE_PERIOD > time.time()`} />
+    <div class="grid-2 fragment" style="margin-top: 0.6em;">
+      <div class="card center"><span class="big green">True</span><p class="small">Skjold tændt</p></div>
+      <div class="card center"><span class="big pink">False</span><p class="small">Pas på!</p></div>
+    </div>
+    <p class="fragment">Hvad gør <code>return</code>?</p>
+    <p class="fragment cyan small">→ <code>Player</code>-klassen, før <code>hit</code></p>
+    <aside class="notes">return sender svaret tilbage til den, der kaldte funktionen. Navnet is_invincible gør koden let at læse – det er et spørgsmål. Husk return fra intro-holdet (f.eks. random_color).</aside>
+  </section>
+
+  <!-- 12. Using the answer -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 16 · trin 5</span>
+    <h2>Opdateret <code>hit</code></h2>
+    <div class="grid-2">
+      <Code id="inv" small lines="2|3|4|5|7-8" code={`    def hit(self):
+        if not self.is_invincible():
+            self.health -= 1
+            self.last_hit = time.time()
+            draw_health()
+
+        if self.health == 0:
+            self.alive = False`} />
+      <ul class="clean small">
+        <li>Hvis spilleren <span class="pink">ikke</span> er udødelig lige nu:</li>
+        <li class="fragment">· træk et liv fra</li>
+        <li class="fragment">· sæt <code>last_hit</code> til tiden lige nu</li>
+        <li class="fragment">· skriv det nye antal liv</li>
+        <li class="fragment">Til sidst: 0 liv → <code>alive = False</code></li>
+        <li class="fragment cyan">→ Erstat den gamle <code>hit</code> i <code>Player</code></li>
+      </ul>
+    </div>
+    <p class="fragment small"><code>not</code> vender svaret om: kun når du <span class="pink">ikke</span> har skjold</p>
+  </section>
+
+  <!-- 13. Visual feedback -->
+  <section>
+    <span class="kicker">Feedback</span>
+    <h2>Hvordan ved spilleren, at de har skjold?</h2>
+    <div class="grid-2" style="margin-top: 0.6em;">
+      <div class="card center fragment fade-up"><Ship size={70} color="#ff4f4f" /><h3>Niveau 16</h3><p class="small">Rød, så længe skjoldet er tændt</p></div>
+      <div class="card center fragment fade-up"><Ship size={70} class="blink" /><h3>Niveau 17</h3><p class="small">Blink – som det rigtige Asteroids fra 1979</p></div>
+    </div>
+    <p class="fragment muted small" style="margin-top: 0.6em;">Det rigtige spil havde en sort-hvid skærm – ingen rød farve!</p>
+    <aside class="notes">Visuel feedback: spilleren skal kunne SE, hvad der sker. Spørg om andre spil, hvor man blinker efter et hit.</aside>
+  </section>
+
+  <!-- 16.6 animate red -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 16 · trin 6</span>
+    <h2>Rød, når du er udødelig</h2>
+    <div class="grid-2">
+      <Code id="blink" small code={`def animate_spaceship():
+    if player.is_invincible():
+        player.color("red", BG_COLOR)
+    else:
+        player.color("light grey", BG_COLOR)`} lines="2-3|4-5" />
+      <ul class="clean">
+        <li>Ny funktion, der kan kaldes i hvert game tick</li>
+        <li class="fragment">Udødelig → <span class="pink">rød</span></li>
+        <li class="fragment">Ellers → lysegrå igen</li>
+        <li class="fragment cyan">→ BEHAVIOURS, før <code>move_spaceship</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 16.7 call in update -->
+  <section>
+    <span class="kicker">Niveau 16 · trin 7</span>
+    <h2>Kald den fra game loop</h2>
+    <div class="grid-2">
+      <Code small code={`# GAME LOOP
+def update():
+    move_spaceship()
+    animate_spaceship()
+    move_bullets()
+    move_asteroids()`} lines="4" />
+      <ul class="clean">
+        <li>Ellers sker der ingenting!</li>
+        <li class="fragment cyan">→ <code>update</code> i GAME LOOP, lige efter <code>move_spaceship()</code></li>
+        <li class="fragment green">✅ Prøv: bliver rumskibet rødt, når det bliver ramt?</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 17 intro -->
+  <section>
+    <span class="kicker">Niveau 17</span>
+    <h2>Blink, når du er udødelig</h2>
+    <p class="fragment yellow">⚠️ Avanceret niveau – det er okay, hvis det er svært!</p>
+    <p class="fragment">Det rigtige Asteroids var lavet til en <span class="muted">sort-hvid</span> skærm – ingen rød</p>
+    <p class="fragment">Så rumskibet skal skiftevis være <span class="cyan">synligt</span> og <span class="pink">usynligt</span></p>
+    <p class="fragment">... f.eks. hver <span class="yellow">tiendedel</span> sekund</p>
+    <div class="fragment"><Ship size={60} class="blink" /></div>
+  </section>
+
+  <!-- 14. Modulus -->
+  <section>
+    <span class="kicker">Niveau 17</span>
+    <h2>Rest ved division: <code>%</code></h2>
+    <p class="small muted">Modulus giver det, der er tilovers efter en division</p>
+    <p class="fragment">7 mønter i bunker med 3 ...</p>
+    <p class="fragment big">🪙🪙🪙 &nbsp; 🪙🪙🪙 &nbsp; <span class="yellow">🪙</span></p>
+    <p class="fragment"><code>7 % 3</code> = <span class="yellow big">1</span></p>
+    <p class="fragment">Hvad er <code>10 % 2</code>? <span class="fragment green big">0</span></p>
+    <p class="fragment">Og <code>11 % 2</code>? <span class="fragment pink big">1</span></p>
+    <aside class="notes">Modulus er det svære i dag. Brug mønter. Pointen: % 2 giver altid 0 eller 1 – lige/ulige.</aside>
+  </section>
+
+  <!-- 15. Every other -->
+  <section>
+    <span class="kicker">Tæl hver anden</span>
+    <h2>Tiendedele sekunder</h2>
+    <ul class="clean">
+      <li class="fragment"><code>time.time()</code> → <span class="cyan">1717964314.89</span></li>
+      <li class="fragment"><code>* 10</code> → <span class="cyan">17179643148.9</span> <span class="small muted">(kommaet flytter til højre: tiendedel-sekunder siden 1970)</span></li>
+      <li class="fragment"><code>int(...)</code> → <span class="cyan">17179643148</span> <span class="small muted">(uden decimaler)</span></li>
+      <li class="fragment"><code>17179643148 % 2</code> giver hvad? <span class="fragment yellow big">0</span></li>
+      <li class="fragment"><code>% 2</code> → <span class="yellow">0</span> · <span class="pink">1</span> · <span class="yellow">0</span> · <span class="pink">1</span> ...</li>
+    </ul>
+    <aside class="notes">Tallet bliver 1 større hver tiendedel sekund. % 2 skifter derfor mellem 0 og 1 ti gange i sekundet. Med % 2 kan vi tælle hver anden.</aside>
+  </section>
+
+  <!-- 17.1 scaled / is_invisible -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 17 · trin 1</span>
+    <h2>Brudt ned i bidder</h2>
+    <div class="grid-2">
+      <Code id="blink" small code={`        scaled = int(time.time() * 10)
+        is_invisible = scaled % 2`} lines="1|2" />
+      <ul class="clean small">
+        <li>Tiendedel-sekunder i en variabel: <code>scaled</code></li>
+        <li>... lavet om til et heltal med <code>int()</code></li>
+        <li class="fragment">Resultatet af <code>% 2</code> i en anden variabel: <code>is_invisible</code></li>
+        <li class="fragment"><code>is_invisible</code> er <strong>altid</strong> enten 0 eller 1</li>
+        <li class="fragment yellow">Python-hack: 0 = <code>False</code> · 1 = <code>True</code></li>
+      </ul>
+    </div>
+    <aside class="notes">I Python tæller 0 som False og 1 som True, så vi kan bruge is_invisible direkte i en if.</aside>
+  </section>
+
+  <!-- 17.2 if/else -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 17 · trin 2</span>
+    <h2>Hvis vi skal være usynlige ...</h2>
+    <div class="grid-2">
+      <Code id="blink" small code={`        scaled = int(time.time() * 10)
+        is_invisible = scaled % 2
+        if is_invisible:
+            player.hideturtle()
+        else:
+            player.showturtle()`} lines="3-6|3-4|5-6" />
+      <ul class="clean">
+        <li>En <code>if/else</code>:</li>
+        <li class="fragment">Usynlig → skjul <code>player</code></li>
+        <li class="fragment">Ellers → vis den</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 16. animate_spaceship -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 17 · trin 3</span>
+    <h2>Blink! Opdatér <code>animate_spaceship</code></h2>
+    <p class="small">Saml det hele – i stedet for at skifte farve. <span class="cyan">→ Erstat den gamle <code>animate_spaceship</code></span></p>
+    <Code id="blink" lines="2|3-4|5-8|9-10" code={`def animate_spaceship():
+    if player.is_invincible():
+        scaled = int(time.time() * 10)
+        is_invisible = scaled % 2
+        if is_invisible:
+            player.hideturtle()
+        else:
+            player.showturtle()
+    else:
+        player.showturtle()`} />
+    <p class="fragment green small">✅ Prøv: blinker rumskibet, når det bliver ramt?</p>
+    <aside class="notes">Spørg: hvad sker der, hvis vi glemmer det sidste else? (skibet kan blive usynligt for evigt). Hvad hvis vi ganger med 5 i stedet for 10?</aside>
+  </section>
+
+  <!-- 17. Build -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #3a0f6e, #05041a 70%)">
+    <h2 class="neon">Nu skal I bygge!</h2>
+    <div><Ship size={70} flame class="float" /></div>
+    <p class="big cyan">/python-asteroids/lektion-5-liv-og-skjold/0-oversigt/</p>
+    <p class="small muted">Var du her ikke sidst? Brug catch-up-boksen øverst på siden.</p>
+    <p class="fragment small">Færdig? Prøv ekstra-opgaverne: <span class="pink">♥ hjerter</span> · <span class="cyan">🛡️ skjold</span> · <span class="yellow">🌈 regnbue</span></p>
+    <aside class="notes">Før pausen: niveau 15. Efter pausen: 16 og 17. Gå rundt og hjælp – typiske fejl: indrykning i klassen, glemt import time, glemt at kalde animate_spaceship() i update.</aside>
+  </section>
+
+</SlideDeck>

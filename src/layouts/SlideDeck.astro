@@ -1,0 +1,125 @@
+---
+import 'reveal.js/reset.css'
+import 'reveal.js/reveal.css'
+import 'reveal.js/theme/black.css'
+import 'reveal.js/plugin/highlight/monokai.css'
+import '../styles/slides.css'
+
+interface Props {
+  title: string
+  /** Lesson number, used for the "back to lesson" link. Omit for decks not tied to a lesson. */
+  lesson?: number
+  /** Where the corner link goes; defaults to the lesson overview or the home page. */
+  backHref?: string
+  backLabel?: string
+}
+
+const lessonDirs: Record<number, string> = {
+  1: 'lektion-1-rumskibet',
+  2: 'lektion-2-skyd',
+  3: 'lektion-3-asteroider',
+  4: 'lektion-4-game-over-og-point',
+  5: 'lektion-5-liv-og-skjold',
+  6: 'lektion-6-rumfysik',
+  7: 'lektion-7-goer-det-til-dit-eget',
+}
+
+const { title, lesson } = Astro.props
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+const backHref = Astro.props.backHref ?? (lesson ? `${base}${lessonDirs[lesson]}/0-oversigt/` : base)
+const backLabel = Astro.props.backLabel ?? (lesson ? `Lektion ${lesson}` : 'Forsiden')
+---
+
+<!doctype html>
+<html lang="da">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <canvas class="starfield" aria-hidden="true"></canvas>
+    <div class="reveal">
+      <div class="slides">
+        <slot />
+      </div>
+    </div>
+    <a class="deck-back" href={backHref}>← {backLabel}</a>
+
+    <script>
+      import Reveal from 'reveal.js'
+      import Highlight from 'reveal.js/plugin/highlight'
+      import Notes from 'reveal.js/plugin/notes'
+
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+      const deck = new Reveal({
+        hash: true,
+        width: 1280,
+        height: 720,
+        margin: 0.06,
+        slideNumber: 'c/t',
+        transition: reducedMotion ? 'none' : 'convex',
+        backgroundTransition: 'fade',
+        autoAnimateDuration: 0.9,
+        plugins: [Highlight, Notes],
+      })
+      deck.initialize()
+
+      // Starfield: stars rush towards the viewer; every slide change gives a short "warp" boost.
+      const canvas = document.querySelector<HTMLCanvasElement>('.starfield')!
+      const ctx = canvas.getContext('2d')!
+      const STAR_COUNT = 260
+      let w = 0, h = 0
+      let warp = 0
+      const stars = Array.from({ length: STAR_COUNT }, () => newStar(true))
+
+      function newStar(randomDepth: boolean) {
+        return {
+          x: (Math.random() - 0.5) * 2,
+          y: (Math.random() - 0.5) * 2,
+          z: randomDepth ? Math.random() : 1,
+          hue: Math.random() < 0.15 ? 190 + Math.random() * 140 : 0,
+        }
+      }
+
+      function resize() {
+        w = canvas.width = window.innerWidth * devicePixelRatio
+        h = canvas.height = window.innerHeight * devicePixelRatio
+      }
+
+      function draw() {
+        ctx.fillStyle = 'rgba(5, 4, 20, 0.35)'
+        ctx.fillRect(0, 0, w, h)
+        const speed = 0.0025 + warp * 0.03
+        for (const s of stars) {
+          const pz = s.z
+          s.z -= reducedMotion ? 0 : speed
+          if (s.z <= 0.02) Object.assign(s, newStar(false))
+          const scale = Math.min(w, h) * 0.6
+          const x = w / 2 + (s.x / s.z) * scale
+          const y = h / 2 + (s.y / s.z) * scale
+          const px = w / 2 + (s.x / pz) * scale
+          const py = h / 2 + (s.y / pz) * scale
+          const size = (1 - s.z) * 2.6 * devicePixelRatio
+          ctx.strokeStyle = s.hue ? `hsla(${s.hue}, 100%, 75%, ${1 - s.z})` : `rgba(255, 255, 255, ${1 - s.z})`
+          ctx.lineWidth = size
+          ctx.beginPath()
+          ctx.moveTo(px, py)
+          ctx.lineTo(x + 0.1, y + 0.1)
+          ctx.stroke()
+        }
+        warp *= 0.92
+        if (!reducedMotion) requestAnimationFrame(draw)
+      }
+
+      resize()
+      window.addEventListener('resize', () => { resize(); if (reducedMotion) draw() })
+      deck.on('slidechanged', () => { warp = 1 })
+      draw()
+    </script>
+  </body>
+</html>

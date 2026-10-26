@@ -1,0 +1,23 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro'
+---
+
+<Default><slot /></Default>
+
+<script>
+  // Markdown task lists render as disabled checkboxes; make them clickable and remember them per page.
+  const key = `tasks:${location.pathname}`
+  const boxes = Array.from(document.querySelectorAll<HTMLInputElement>('.sl-markdown-content li > input[type="checkbox"]'))
+  let saved: number[] = []
+  try { saved = JSON.parse(localStorage.getItem(key) ?? '[]') } catch {}
+
+  boxes.forEach((box, i) => {
+    box.disabled = false
+    box.checked = saved.includes(i)
+    box.closest('li')?.classList.add('task-item')
+    box.addEventListener('change', () => {
+      const checked = boxes.flatMap((b, j) => (b.checked ? [j] : []))
+      try { localStorage.setItem(key, JSON.stringify(checked)) } catch {}
+    })
+  })
+</script>

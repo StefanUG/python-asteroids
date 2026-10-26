@@ -1,0 +1,15 @@
+---
+// Code block for reveal.js slides. Use `lines="1|3-4"` to step through highlights,
+// and the same `id` on consecutive data-auto-animate slides to morph code between them.
+interface Props {
+  code: string
+  lines?: string
+  id?: string
+  lang?: string
+  /** Smaller font, for code that grows over several auto-animate slides. */
+  small?: boolean
+}
+const { code, lines, id, lang = 'python', small = false } = Astro.props
+---
+
+<pre data-id={id} class:list={[{ 'code-sm': small }]}><code class={`language-${lang}`} data-trim data-line-numbers={lines} set:text={code} /></pre>

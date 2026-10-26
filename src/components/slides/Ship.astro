@@ -1,0 +1,15 @@
+---
+// The game's spaceship as SVG: same triangle as SPACESHIP_SHAPE, optional animated thrust flame.
+interface Props {
+  size?: number
+  flame?: boolean
+  color?: string
+  class?: string
+}
+const { size = 120, flame = false, color = '#e8e8f0', class: className } = Astro.props
+---
+
+<svg class:list={['ship', className]} width={size} height={size * 1.4} viewBox="-12 -8 24 34" aria-hidden="true">
+  {flame && <polygon class="ship-flame" points="-6,18 0,30 6,18" />}
+  <polygon points="-7,20 0,-5 7,20" fill="#05041a" stroke={color} stroke-width="1.6" stroke-linejoin="round" />
+</svg>

@@ -1,0 +1,385 @@
+/* Space theme for the reveal.js lesson decks. Loaded after reveal's black theme. */
+
+:root {
+  --space-bg: #05041a;
+  --neon-cyan: #3ef3ff;
+  --neon-pink: #ff4fd8;
+  --neon-yellow: #ffe14f;
+  --neon-green: #7dff8a;
+  --neon-orange: #ff9d3c;
+  --text: #f1f0ff;
+  --muted: #a9a8d6;
+  --glass: rgba(20, 18, 60, 0.55);
+  --glass-border: rgba(62, 243, 255, 0.35);
+
+  --r-background-color: transparent;
+  --r-main-font: 'Nunito', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --r-main-font-size: 34px;
+  --r-main-color: var(--text);
+  --r-heading-font: 'Orbitron', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --r-heading-color: var(--text);
+  --r-heading-text-transform: none;
+  --r-heading-letter-spacing: 0.02em;
+  --r-heading-font-weight: 800;
+  --r-heading1-size: 2.4em;
+  --r-heading2-size: 1.5em;
+  --r-heading3-size: 1.1em;
+  --r-link-color: var(--neon-cyan);
+  --r-link-color-hover: var(--neon-yellow);
+  --r-selection-background-color: var(--neon-pink);
+  --r-code-font: 'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, monospace;
+}
+
+html,
+body {
+  background: radial-gradient(ellipse at 50% 120%, #2a0b4d 0%, var(--space-bg) 60%) fixed;
+  background-color: var(--space-bg);
+}
+
+.starfield {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+}
+
+.reveal {
+  z-index: 1;
+}
+
+.reveal-viewport {
+  background: transparent;
+}
+
+/* ── Typography ─────────────────────────────────────────── */
+
+.reveal h1,
+.reveal h2 {
+  text-shadow: 0 0 18px rgba(62, 243, 255, 0.55), 0 0 42px rgba(255, 79, 216, 0.35);
+}
+
+.reveal .neon {
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink) 55%, var(--neon-yellow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 14px rgba(255, 79, 216, 0.55));
+}
+
+.reveal .kicker {
+  display: inline-block;
+  font-family: var(--r-heading-font);
+  font-size: 0.55em;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--neon-yellow);
+  margin-bottom: 0.4em;
+}
+
+.reveal .muted {
+  color: var(--muted);
+}
+
+.reveal .cyan { color: var(--neon-cyan); }
+.reveal .pink { color: var(--neon-pink); }
+.reveal .yellow { color: var(--neon-yellow); }
+.reveal .green { color: var(--neon-green); }
+.reveal .orange { color: var(--neon-orange); }
+
+.reveal .small {
+  font-size: 0.7em;
+}
+
+.reveal .big {
+  font-size: 1.6em;
+  font-weight: 900;
+}
+
+.reveal .emoji-big {
+  font-size: 3.2em;
+  line-height: 1.1;
+  display: inline-block;
+  filter: drop-shadow(0 0 20px rgba(255, 225, 79, 0.45));
+}
+
+.reveal .pill {
+  display: inline-block;
+  padding: 0.1em 0.7em;
+  border-radius: 999px;
+  border: 2px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  font-weight: 700;
+  font-size: 0.75em;
+  margin: 0.15em;
+  box-shadow: 0 0 12px rgba(62, 243, 255, 0.4);
+}
+
+.reveal .pill.pink { border-color: var(--neon-pink); color: var(--neon-pink); box-shadow: 0 0 12px rgba(255, 79, 216, 0.4); }
+.reveal .pill.yellow { border-color: var(--neon-yellow); color: var(--neon-yellow); box-shadow: 0 0 12px rgba(255, 225, 79, 0.4); }
+.reveal .pill.green { border-color: var(--neon-green); color: var(--neon-green); box-shadow: 0 0 12px rgba(125, 255, 138, 0.4); }
+
+.reveal code {
+  color: var(--neon-yellow);
+  font-size: 0.9em;
+}
+
+/* ── Layout helpers ─────────────────────────────────────── */
+
+.reveal .grid-2,
+.reveal .grid-3 {
+  display: grid;
+  gap: 1em;
+  align-items: center;
+  text-align: left;
+}
+
+.reveal .grid-2 { grid-template-columns: 1fr 1fr; }
+.reveal .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.reveal .card {
+  background: var(--glass);
+  border: 2px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 0.7em 0.9em;
+  box-shadow: 0 0 24px rgba(62, 243, 255, 0.18), inset 0 0 30px rgba(255, 79, 216, 0.08);
+  backdrop-filter: blur(4px);
+  text-align: left;
+}
+
+.reveal .card h3 {
+  margin-top: 0;
+}
+
+.reveal .card.center {
+  text-align: center;
+}
+
+.reveal ul.clean {
+  list-style: none;
+  margin-left: 0;
+}
+
+.reveal ul.clean li {
+  margin: 0.35em 0;
+}
+
+.reveal .agenda {
+  counter-reset: agenda;
+  list-style: none;
+  margin: 0 auto;
+  text-align: left;
+  display: inline-block;
+}
+
+.reveal .agenda li {
+  counter-increment: agenda;
+  margin: 0.4em 0;
+}
+
+.reveal .agenda li::before {
+  content: counter(agenda);
+  display: inline-grid;
+  place-items: center;
+  width: 1.6em;
+  height: 1.6em;
+  margin-right: 0.6em;
+  border-radius: 50%;
+  font-family: var(--r-heading-font);
+  font-size: 0.75em;
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+  color: var(--space-bg);
+}
+
+.reveal img.framed {
+  border-radius: 14px;
+  border: 2px solid var(--glass-border);
+  box-shadow: 0 0 28px rgba(62, 243, 255, 0.3);
+  background: #fff;
+  max-height: 520px;
+}
+
+/* ── Code ───────────────────────────────────────────────── */
+
+.reveal pre {
+  width: 100%;
+  font-size: 0.6em;
+  border-radius: 14px;
+  border: 2px solid var(--glass-border);
+  box-shadow: 0 0 30px rgba(62, 243, 255, 0.25);
+  overflow: hidden;
+}
+
+.reveal pre code {
+  max-height: 520px;
+  padding: 0.8em 1em;
+  background: rgba(10, 8, 34, 0.92);
+  color: var(--text);
+}
+
+.reveal pre.code-sm {
+  font-size: 0.48em;
+}
+
+.reveal pre.code-sm code {
+  max-height: 600px;
+}
+
+.reveal table.keys {
+  font-size: 0.7em;
+  margin: 0.4em auto;
+}
+
+.reveal table.keys th {
+  color: var(--neon-yellow);
+}
+
+.reveal kbd {
+  display: inline-block;
+  padding: 0.05em 0.45em;
+  border-radius: 6px;
+  border: 2px solid var(--neon-cyan);
+  border-bottom-width: 4px;
+  font-family: var(--r-code-font);
+  font-size: 0.85em;
+  color: var(--neon-cyan);
+}
+
+.reveal .hljs-ln-numbers {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+/* ── Animated actors ────────────────────────────────────── */
+
+.reveal svg.ship,
+.reveal svg.asteroid {
+  display: inline-block;
+  overflow: visible;
+  filter: drop-shadow(0 0 10px rgba(62, 243, 255, 0.7));
+}
+
+.ship-flame {
+  fill: var(--neon-orange);
+  transform-origin: 0 18px;
+  animation: flame 0.12s infinite alternate;
+}
+
+.asteroid {
+  animation: spin var(--spin, 12s) linear infinite;
+}
+
+.reveal .float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.reveal .fly-across {
+  position: absolute;
+  animation: fly-across 9s linear infinite;
+}
+
+.reveal .pulse {
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.reveal .blink {
+  animation: blink 0.5s steps(2, start) infinite;
+}
+
+@keyframes flame {
+  from { transform: scaleY(0.6); fill: var(--neon-yellow); }
+  to { transform: scaleY(1.25); fill: var(--neon-orange); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-18px) rotate(3deg); }
+}
+
+@keyframes fly-across {
+  from { left: -15%; transform: rotate(90deg); }
+  to { left: 115%; transform: rotate(90deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px var(--neon-pink)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 22px var(--neon-pink)); }
+}
+
+@keyframes blink {
+  to { visibility: hidden; }
+}
+
+/* ── Chrome ─────────────────────────────────────────────── */
+
+.deck-back {
+  position: fixed;
+  top: 14px;
+  left: 18px;
+  z-index: 30;
+  font-family: var(--r-main-font);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(169, 168, 214, 0.35);
+  background: rgba(5, 4, 26, 0.6);
+}
+
+.deck-back:hover {
+  color: var(--neon-cyan);
+  border-color: var(--neon-cyan);
+}
+
+.reveal .slide-number {
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--r-heading-font);
+}
+
+.reveal .controls {
+  color: var(--neon-cyan);
+}
+
+.reveal .progress {
+  color: var(--neon-pink);
+  height: 4px;
+}
+
+.reveal .video-placeholder {
+  display: grid;
+  place-items: center;
+  width: 900px;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  border-radius: 18px;
+  border: 3px dashed var(--neon-pink);
+  background: var(--glass);
+  color: var(--muted);
+}
+
+.reveal video {
+  max-width: 100%;
+  max-height: 560px;
+  border-radius: 18px;
+  box-shadow: 0 0 40px rgba(255, 79, 216, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ship-flame,
+  .asteroid,
+  .reveal .float,
+  .reveal .fly-across,
+  .reveal .pulse,
+  .reveal .blink {
+    animation: none;
+  }
+}

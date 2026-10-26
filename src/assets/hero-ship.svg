@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 120 120" width="320" height="320">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.2" result="b" />
+      <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#glow)" fill="none" stroke-linejoin="round">
+    <polygon points="-38,-50 -22,-56 -12,-46 -14,-32 -28,-26 -42,-34" stroke="#ff4fd8" stroke-width="2" />
+    <polygon points="30,24 44,18 54,28 52,42 38,48 26,38" stroke="#ff4fd8" stroke-width="2" />
+    <polygon points="-50,30 -42,26 -36,32 -40,40 -48,40" stroke="#ff4fd8" stroke-width="1.6" />
+    <g transform="rotate(35)">
+      <polygon points="-9,26 0,40 9,26" fill="#ff9d3c" stroke="#ffe14f" stroke-width="1.5" />
+      <polygon points="-12,26 0,-24 12,26" fill="#05041a" stroke="#3ef3ff" stroke-width="3" />
+      <rect x="-1.5" y="-46" width="3" height="8" fill="#ffe14f" />
+      <rect x="-1.5" y="-60" width="3" height="8" fill="#ffe14f" />
+    </g>
+  </g>
+</svg>

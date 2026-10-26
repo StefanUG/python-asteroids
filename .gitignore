@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# Astro generated types
+.astro/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+.venv/
+
+# Old docs
+docs/

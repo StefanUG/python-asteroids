@@ -1,0 +1,22 @@
+---
+// Spinning, lumpy asteroid as SVG.
+interface Props {
+  size?: number
+  color?: string
+  spin?: number
+  class?: string
+}
+const { size = 100, color = '#cfd2ff', spin = 12, class: className } = Astro.props
+---
+
+<svg class:list={['asteroid', className]} width={size} height={size} viewBox="-50 -50 100 100" style={`--spin: ${spin}s`} aria-hidden="true">
+  <polygon
+    points="-20,-45 18,-42 44,-15 40,22 15,45 -22,40 -45,15 -38,-22"
+    fill="rgba(5,4,26,0.6)"
+    stroke={color}
+    stroke-width="3"
+    stroke-linejoin="round"
+  />
+  <circle cx="-10" cy="-12" r="7" fill="none" stroke={color} stroke-width="2" opacity="0.6" />
+  <circle cx="16" cy="14" r="5" fill="none" stroke={color} stroke-width="2" opacity="0.6" />
+</svg>

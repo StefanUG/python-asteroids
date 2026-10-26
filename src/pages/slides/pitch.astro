@@ -1,0 +1,86 @@
+---
+import SlideDeck from '../../layouts/SlideDeck.astro'
+import Ship from '../../components/slides/Ship.astro'
+import Asteroid from '../../components/slides/Asteroid.astro'
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+// Put the demo video in public/videos/asteroids-demo.mp4 and set this to true.
+const hasVideo = false
+---
+
+<SlideDeck title="Byg dit eget Asteroids-spil">
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #3a0f6e, #05041a 70%)">
+    <div style="position: relative; height: 160px;">
+      <div class="fly-across" style="top: 20px;"><Ship size={70} flame /></div>
+    </div>
+    <span class="kicker">Coding Pirates · Python</span>
+    <h1 class="neon">ASTEROIDS</h1>
+    <h3>Byg dit helt eget rumspil – fra bunden</h3>
+    <div style="margin-top: 0.6em;">
+      <Asteroid size={70} spin={9} />
+      <Asteroid size={50} spin={6} color="#ff4fd8" />
+      <Asteroid size={90} spin={14} color="#3ef3ff" />
+    </div>
+    <aside class="notes">Kort pitch: 7 gange, I bygger et rigtigt spil i rigtig Python, og til sidst viser I det frem.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Trin for trin</span>
+    <h2>Fra sort skærm til rumkamp</h2>
+    <div class="grid-3" style="margin-top: 0.8em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">🚀</span><h3>Rumskib</h3><p class="small">Styr det med tasterne og flyv ud over kanten</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">💥</span><h3>Skyd!</h3><p class="small">Skud, genladetid og asteroider der går i stykker</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">❤️</span><h3>Point og liv</h3><p class="small">Score, game over, skjold og blinkende rumskib</p></div>
+    </div>
+    <p class="fragment zoom-in big yellow" style="margin-top: 0.8em;">19 niveauer · 7 gange · 1 spil, der er dit</p>
+  </section>
+
+  <section>
+    <span class="kicker">Det lærer du</span>
+    <h2>Rigtig Python – som rigtige spiludviklere</h2>
+    <div style="margin-top: 0.6em; line-height: 2.2;">
+      <span class="pill fragment">🎮 Events og taster</span>
+      <span class="pill pink fragment">🔁 Game loop</span>
+      <span class="pill yellow fragment">📦 Klasser og objekter</span>
+      <span class="pill green fragment">📋 Lister</span>
+      <span class="pill fragment">🎲 Tilfældighed</span>
+      <span class="pill pink fragment">💥 Kollisioner</span>
+      <span class="pill yellow fragment">⏱️ Tid</span>
+      <span class="pill green fragment">🪐 Rumfysik</span>
+    </div>
+    <p class="fragment muted" style="margin-top: 1em;">Du bruger det, du lærte på intro-holdet: Turtle, løkker, variabler, <code>if</code> og funktioner.</p>
+  </section>
+
+  <section>
+    <span class="kicker">Sidste gang</span>
+    <h2 class="neon">Gør det til dit eget</h2>
+    <div class="grid-2" style="margin-top: 0.6em;">
+      <ul class="clean">
+        <li class="fragment">🎨 Dine egne farver og former</li>
+        <li class="fragment">🪨 Asteroider der splitter i mindre stykker</li>
+        <li class="fragment">⌨️ Dine egne taster</li>
+        <li class="fragment">✨ Dine egne skøre idéer</li>
+      </ul>
+      <div class="card center fragment zoom-in">
+        <span class="emoji-big pulse">🏆</span>
+        <h3>Demo!</h3>
+        <p class="small">Vis dit spil frem for de andre</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">Se det i aktion</span>
+    <h2>Sådan ser det ud</h2>
+    {hasVideo ? (
+      <video src={`${base}videos/asteroids-demo.mp4`} controls muted loop playsinline data-autoplay></video>
+    ) : (
+      <div class="video-placeholder">
+        <div>
+          <Ship size={80} flame class="float" />
+          <p>🎬 Video kommer snart</p>
+        </div>
+      </div>
+    )}
+  </section>
+</SlideDeck>

@@ -1,0 +1,1058 @@
+---
+import SlideDeck from '../../layouts/SlideDeck.astro'
+import Code from '../../components/slides/Code.astro'
+import Ship from '../../components/slides/Ship.astro'
+import Asteroid from '../../components/slides/Asteroid.astro'
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+---
+<SlideDeck title="Lektion 2 – Skyd!" lesson={2}>
+
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #3a0f6e, #05041a 70%)">
+    <div style="position: relative; height: 150px;">
+      <div class="fly-across" style="top: 20px;"><Ship size={70} flame /></div>
+    </div>
+    <span class="kicker">Asteroids · Lektion 2</span>
+    <h1 class="neon">SKYD!</h1>
+    <h3>Ud over kanten, klasser og en byge af kugler</h3>
+    <div style="margin-top: 0.5em;">
+      <Asteroid size={60} spin={9} />
+      <Asteroid size={90} spin={14} color="#ff4fd8" />
+      <Asteroid size={50} spin={6} color="#3ef3ff" />
+    </div>
+    <aside class="notes">
+      Velkommen tilbage. Kodeord til "Jeg var her ikke sidst"-boksen i dag: raket (giver koden efter niveau 2, 02_move_better.py). Skriv det på tavlen, så dem der var væk eller har en kode, der ikke virker, kan komme i gang.
+      Plan: ca. 30 min præsentation og niveau 3, pause, ca. 45 min niveau 4-6.
+    </aside>
+  </section>
+
+  <section>
+    <span class="kicker">I dag</span>
+    <h2>Det skal vi</h2>
+    <ol class="agenda">
+      <li class="fragment">Ud over kanten – og ind på den anden side</li>
+      <li class="fragment">Funktioner med parametre</li>
+      <li class="fragment">Klasser: en kugle er en turtle</li>
+      <li class="fragment">Kuglens liv: skyd, flyv, forsvind</li>
+      <li class="fragment">Lister: mange kugler på én gang</li>
+    </ol>
+    <aside class="notes">Niveau 3 før pausen, niveau 4, 5 og 6 efter pausen. Ekstraopgaver til dem der bliver hurtigt færdige.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Det bygger vi</span>
+    <h2>Efter i dag kan dit spil</h2>
+    <div class="grid-3" style="margin-top: 0.6em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">🔄</span><h3>Wrap</h3><p class="small">Flyv ud til højre – kom ind til venstre</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">💥</span><h3>Skyd</h3><p class="small">Tryk space, og en kugle flyver ud</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">🌧️</span><h3>Kuglebyge</h3><p class="small">Op til 20 kugler, der flyver rundt og forsvinder igen</p></div>
+    </div>
+    <div class="fragment" style="position: relative; height: 120px; margin-top: 0.4em;">
+      <div class="fly-across" style="top: 20px;"><Ship size={60} flame /></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">Sidste gang</span>
+    <h2>Kan I huske?</h2>
+    <Code code={`keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+def update():
+    move_spaceship()
+
+    screen.update()
+    screen.ontimer(update, GAME_TICK)`} lines="1-6|8|9|12" />
+    <p class="fragment small muted">Hvad gemmer <code>keys_pressed</code>? Hvor tit bliver <code>update</code> kaldt?</p>
+    <aside class="notes">
+      Spørg: Hvad gemmer keys_pressed? (Om hver tast er trykket ned lige nu.) Hvad er game loopet? (update kalder sig selv igen hvert 20. millisekund via ontimer.) Læg mærke til at "space" allerede er med – det skal vi bruge i dag!
+    </aside>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 3</span>
+    <h2>Har I prøvet at flyve lidt?</h2>
+    <p class="fragment big">Er der noget galt? 🤔</p>
+    <p class="fragment pink">Rumskibet flyver ud af skærmen – og er væk!</p>
+    <p class="fragment">Kan I huske <span class="cyan">koordinatsystemet</span>?</p>
+    <div class="fragment" style="margin-top: 0.4em;">
+      <img class="framed" style="max-height: 340px;" src={`${base}images/coordinate-system.svg`} alt="Koordinatsystemet med (0, 0) i midten" />
+    </div>
+    <aside class="notes">Lad dem svare. Vis koordinatsystemet: midten er (0, 0), x vokser mod højre, y vokser opad. Spørg: hvor er højre kant, hvis skærmen er 1200 bred?</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Hvor er kanten?</span>
+    <h2>Kan I huske skærmens størrelse?</h2>
+    <Code code={`SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800`} lines="" />
+    <p class="fragment big yellow">Hvordan finder vi halvdelen? 🤔</p>
+    <p class="fragment">Python er rigtig god til matematik:
+      <span class="pill">+ plus</span> <span class="pill">- minus</span> <span class="pill">* gange</span> <span class="pill">/ divider</span></p>
+    <div class="fragment"><Code code={`SCREEN_WIDTH / ???`} lines="" /></div>
+    <p class="fragment green"><code>SCREEN_WIDTH / 2</code> → 600</p>
+    <aside class="notes">Lad dem gætte, hvad ??? skal være, før svaret vises. Halvdelen af bredden er afstanden fra midten (0, 0) ud til kanten.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 3 · trin 1</span>
+    <h2>Gem det i en konstant</h2>
+    <div class="grid-2">
+      <Code id="lvl3" small code={`#  CONSTANTS
+...
+PLAYER_SPEED = 10  # Pixels to move player each tick
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = ???
+
+#  GAME SETUP
+...`} lines="5|6" />
+      <ul class="clean">
+        <li><code>int</code> laver decimaltallet <span class="yellow">600.0</span> om til heltallet <span class="green">600</span></li>
+        <li class="fragment small muted">Det er desværre nødvendigt for at bruge det i turtle senere</li>
+        <li class="fragment cyan">→ i <b>CONSTANTS</b>-sektionen</li>
+        <li class="fragment yellow">Din tur: gør <code>HALF_HEIGHT</code> færdig – halvdelen af højden</li>
+      </ul>
+    </div>
+    <aside class="notes">Efter de andre konstanter. HALF_HEIGHT er deres opgave (int(SCREEN_HEIGHT / 2)).</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Funktioner</span>
+    <h2>Lad os lave en funktion til at flytte en turtle</h2>
+    <ul class="clean">
+      <li class="fragment">Vi skal ikke kun flytte rumskibet …</li>
+      <li class="fragment">… vi skal også flytte asteroider 🪨</li>
+      <li class="fragment cyan">Funktioner gør, at vi kan <b>genbruge</b> algoritmen</li>
+    </ul>
+    <h3 class="fragment" style="margin-top: 0.6em;">Kan I huske funktioner? Det er lidt ligesom …</h3>
+    <div class="grid-2">
+      <div class="card center fragment fade-up"><span class="emoji-big">🎵</span><p>Omkvædet i en sang</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">🍳</span><p>En opskrift til madlavning</p></div>
+    </div>
+    <p class="fragment yellow">Men vidste I, at en funktion kan tage <b>parametre</b>?</p>
+  </section>
+
+  <section>
+    <span class="kicker">Funktioner</span>
+    <h2>Funktioner kan tage parametre</h2>
+    <div class="grid-2">
+      <div>
+        <p class="small muted">Det har I allerede brugt:</p>
+        <Code code={`player.shape("triangle")
+turtle.forward(100)
+turtle.right(90)`} lines="" />
+        <p class="fragment small yellow">Hvordan laver vi <b>selv</b> sådan en funktion?</p>
+      </div>
+      <div class="fragment">
+        <p class="small muted">Sådan laver man selv én:</p>
+        <Code code={`# En funktion uden parametre
+def chorus():
+    print("doo doo, doo doo doo doo")
+
+# En funktion med en parameter
+def verse(person):
+    for i in range(4):
+        print(person + " Shark")
+        chorus()
+
+for p in ("Baby", "Mommy"):
+    verse(p)  # For hver person-type, skriv et vers`} lines="1-3|5-6|8|11-12" />
+      </div>
+    </div>
+    <aside class="notes">En funktion er som omkvædet i en sang eller en opskrift. En parameter er det, man giver med. Spørg: hvad bliver printet, når vi kalder verse("Baby")? Syng gerne med ...</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 3 · trin 2</span>
+    <h2>En ny funktion</h2>
+    <div class="grid-2">
+      <Code id="lvl3" small code={`#  EVENTS
+...
+
+#  BEHAVIOURS
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    x = t.xcor()
+    y = t.ycor()
+
+def move_spaceship():
+    ...`} lines="6|7-8|10" />
+      <ul class="clean small">
+        <li><code>t</code> er navnet på en variabel – parameteren</li>
+        <li class="fragment"><code>turtle.Turtle</code> efter <code>:</code> er et <span class="yellow">type-hint</span>: det fortæller editoren, hvad vi kan forvente – så kan den hjælpe med forslag</li>
+        <li class="fragment">Gem <code>x</code> og <code>y</code> fra turtlen, så vi kan se, om den er udenfor</li>
+        <li class="fragment cyan">→ i <b>BEHAVIOURS</b>, <b>før</b> <code>move_spaceship</code></li>
+        <li class="fragment pink">Man kan ikke bruge en funktion, før den er lavet!</li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 3 · trin 3</span>
+    <h2>Er turtlen ude af syne?</h2>
+    <div class="grid-2">
+      <Code id="lvl3" small code={`#  EVENTS
+...
+
+#  BEHAVIOURS
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    x = t.xcor()
+    y = t.ycor()
+    if x is too far right:
+        t should goto left side of screen
+    elif x is too far left:
+        t should goto right side of screen
+
+def move_spaceship():
+    ...`} lines="9-10|11-12" />
+      <ul class="clean small">
+        <li>Det her er <span class="yellow">pseudokode</span> – idéen skrevet med almindelige ord</li>
+        <li class="fragment">Og det samme med op og ned ⬆️⬇️</li>
+      </ul>
+    </div>
+    <aside class="notes">Pseudokode kan ikke køre – det er en plan. Næste slide: hvordan skriver vi "too far right" i Python?</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Spørgsmål</span>
+    <h2>Hvordan ved vi, om x er for langt til højre eller venstre?</h2>
+    <ul class="clean">
+      <li class="fragment">Vi har <code>x</code> og vi har <code>HALF_WIDTH</code></li>
+      <li class="fragment yellow">Hvordan sammenligner vi dem?</li>
+      <li class="fragment">For langt til højre: <code>x</code> er <span class="green">større end</span> <code>HALF_WIDTH</code></li>
+      <li class="fragment">For langt til venstre: <code>x</code> er <span class="pink">mindre end</span> <code>-HALF_WIDTH</code></li>
+    </ul>
+    <p class="fragment">Python er også god til logik: <span class="pill">&gt; større end</span> <span class="pill pink">&lt; mindre end</span></p>
+    <aside class="notes">Lad dem svare på hvert punkt, før det vises. Peg på koordinatsystemet: venstre kant er -600.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 3 · trin 4</span>
+    <h2>Fra pseudokode til Python</h2>
+    <div class="grid-2">
+      <Code id="lvl3" small code={`#  EVENTS
+...
+
+#  BEHAVIOURS
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    x = t.xcor()
+    y = t.ycor()
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    # din tur: det samme med y (op og ned)
+
+def move_spaceship():
+    ...`} lines="9-10|11-12|13" />
+      <ul class="clean small">
+        <li>For langt til højre → hop til venstre kant</li>
+        <li class="fragment">For langt til venstre → hop til højre kant</li>
+        <li class="fragment yellow">Din tur: lav op og ned med <code>y</code> og <code>HALF_HEIGHT</code></li>
+        <li class="fragment cyan">Du skal bruge <b>to</b> <code>if</code> og <b>to</b> <code>elif</code> i alt</li>
+      </ul>
+    </div>
+    <aside class="notes">y-delen: if y > HALF_HEIGHT: t.goto(x, -HALF_HEIGHT) / elif y &lt; -HALF_HEIGHT: t.goto(x, HALF_HEIGHT). Lad dem selv finde den.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 3 · trin 5</span>
+    <h2>Kald funktionen</h2>
+    <div class="grid-2">
+      <Code id="lvl3" small code={`#  BEHAVIOURS
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    x = t.xcor()
+    y = t.ycor()
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    # din tur: det samme med y (op og ned)
+
+def move_spaceship():
+    ...
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)`} lines="16" />
+      <ul class="clean small">
+        <li>Lige efter vi har flyttet spilleren – sidst i <code>move_spaceship</code></li>
+        <li class="fragment">Vi sender <code>player</code> med som parameter – den vil vi flytte, hvis den er ude af syne</li>
+        <li class="fragment"><code>player</code> udenfor bliver til <code>t</code> indeni</li>
+        <li class="fragment yellow">Hvad kunne vi ellers sende med? 🪨 💥</li>
+        <li class="fragment green">▶ Prøv: flyv ud over kanten!</li>
+      </ul>
+    </div>
+    <aside class="notes">Svar: asteroider og kugler! Derfor laver vi funktionen generel med en parameter, i stedet for at skrive player inde i den. Nu: lav niveau 3, og så er det pause.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 4</span>
+    <h2>Skyd en kugle 💥</h2>
+    <p class="big">Nu skal vi lære om <span class="cyan">klasser</span> (classes)</p>
+    <p class="fragment">… og få rumskibet til at skyde!</p>
+    <div class="fragment" style="position: relative; height: 120px;">
+      <div class="fly-across" style="top: 20px;"><Ship size={60} flame /></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 4</span>
+    <h2>Kender I klasser i programmering?</h2>
+    <ul class="clean">
+      <li class="fragment yellow">Hvad tænker I, når I hører det?</li>
+      <li class="fragment yellow">Har I hørt om klassificeringer? F.eks. i dyreriget?</li>
+      <li class="fragment">🦴 <b>Hvirveldyr</b> er en klassificering af dyr med rygrad</li>
+      <li class="fragment">🔥 <b>Varmblodede dyr</b> er en klassificering af dyr med rygrad</li>
+      <li class="fragment">🐒 <b>Pattedyr</b> er en klassificering af varmblodede dyr</li>
+    </ul>
+    <aside class="notes">Lad dem svare på de to første spørgsmål. Kender I klassificeringer fra biologi?</aside>
+  </section>
+
+  <section>
+    <img class="framed" style="max-height: 560px;" src={`${base}images/classification-of-animals.jpg`} alt="Klassificering af dyr" />
+    <p class="small muted">Billede: Freepik</p>
+    <aside class="notes">Gennemgå billedet: hvirveldyr → varmblodede → fugle og pattedyr. En fugl ER et dyr – den kan alt det, et dyr kan, og lidt mere.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Klasser i Python</span>
+    <h2>Klasser i programmering er lidt det samme</h2>
+    <ul class="clean small">
+      <li class="fragment">En klasse beskriver en slags ting, der deler nogle egenskaber</li>
+      <li class="fragment">F.eks. om den har en rygrad – eller om den er varmblodet</li>
+    </ul>
+    <div class="grid-2">
+      <Code code={`class Animal:
+
+    def eat(self):
+        print("Animal is eating")
+
+ant = Animal()
+ant.eat()`} lines="1|3-4|6-7" />
+      <div class="fragment">
+        <Code code={`class Bird(Animal):
+
+    def fly(self):
+        print("Bird is flying")
+
+hawk = Bird()
+hawk.eat()
+hawk.fly()`} lines="1|7|8" />
+      </div>
+    </div>
+    <p class="fragment small">En klasse er en <span class="yellow">opskrift</span> · <code>Animal()</code> laver en ny ting ud fra opskriften</p>
+    <aside class="notes">Spørg: kan høgen spise? Ja – fordi Bird bygger videre på Animal. Funktioner inde i en klasse kaldes metoder.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">En kugle er en turtle!?</span>
+    <h2>En <span class="cyan">Bullet</span> er en <span class="pink">Turtle</span>, der kan mere</h2>
+    <p>En turtle i Python kan flytte sig …</p>
+    <p class="fragment">Men vores kugle skal kunne flere ting:</p>
+    <ul class="clean">
+      <li class="fragment">🔫 affyres …</li>
+      <li class="fragment">🚀 … fra det sted, rumskibet er</li>
+      <li class="fragment">🪨 ramme asteroider (senere)</li>
+    </ul>
+    <p class="fragment cyan">Så vores <code>Bullet</code> skal være en <code>turtle.Turtle</code> – der kan flere ting</p>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 4</span>
+    <h2>Kuglens liv</h2>
+    <div class="grid-3" style="margin-top: 0.4em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">🔫</span><h3>fire</h3><p class="small">Aktiv · flyt til rumskibet · samme retning · vis den</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">➡️</span><h3>move</h3><p class="small">Flyt den lidt fremad i hvert game loop</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big blink">💨</span><h3>væk</h3><p class="small">Ude over kanten? Skjul den · ikke aktiv mere</p></div>
+    </div>
+    <p class="fragment big yellow" style="margin-top: 0.4em;">Hvor langt? Hurtigere eller langsommere end rumskibet?</p>
+    <p class="fragment">Lad os sige dobbelt så hurtigt: <code>BULLET_SPEED = PLAYER_SPEED * 2</code></p>
+    <aside class="notes">Lad dem svare på hastigheden, før svaret vises. På niveau 4 forsvinder kuglen ved kanten – vi gør det smartere senere (niveau 5).</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 4 · trin 1</span>
+    <h2>Kuglens hastighed</h2>
+    <div class="grid-2">
+      <Code id="lvl4" small code={`#  CONSTANTS
+...
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#  GAME SETUP
+...`} lines="4" />
+      <ul class="clean">
+        <li>Dobbelt så hurtig som spilleren</li>
+        <li class="fragment">Gemt som en konstant</li>
+        <li class="fragment cyan">→ i <b>CONSTANTS</b>-sektionen, efter <code>PLAYER_SPEED</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 4 · trin 2</span>
+    <h2>En ny sektion: Classes</h2>
+    <div class="grid-2">
+      <Code id="lvl4" small code={`#  CONSTANTS
+...
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+#  GAME SETUP
+...`} lines="9-11" />
+      <ul class="clean">
+        <li>En ny kommentar-overskrift</li>
+        <li class="fragment cyan">→ <b>efter</b> konstanterne og <b>før</b> GAME SETUP</li>
+        <li class="fragment small muted">Her skal alle vores klasser bo</li>
+      </ul>
+    </div>
+    <aside class="notes">Klassen skal kende konstanterne, og GAME SETUP skal bruge klassen – derfor ligger den imellem.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 4 · trin 3</span>
+    <h2>Klassen Bullet</h2>
+    <div class="grid-2">
+      <Code id="bullet" small code={`class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.active = False
+
+    def fire(self, start):
+        self.active = True
+
+    def move(self):
+        self.forward(BULLET_SPEED)`} lines="1|3-5|4|5|7-8|10-11" />
+      <ul class="clean small">
+        <li><code>Bullet(turtle.Turtle)</code>: en Bullet <b>er</b> en Turtle</li>
+        <li class="fragment"><code>__init__</code> køres, hver gang vi laver en ny <code>Bullet</code></li>
+        <li class="fragment"><code>super().__init__()</code> gør den klar som en almindelig turtle</li>
+        <li class="fragment"><code>active</code> husker, om kuglen flyver</li>
+        <li class="fragment"><code>fire</code> og <code>move</code> fylder vi ud om lidt</li>
+        <li class="fragment cyan">→ i den nye <b>Classes</b>-sektion</li>
+      </ul>
+    </div>
+    <aside class="notes">Start simpelt med strukturen. Spørg ved fire: hvad tror I parameteren start er? (Gem svaret til lidt senere.)</aside>
+  </section>
+
+  <section>
+    <span class="kicker">En lille note til</span>
+    <h2 class="neon">self</h2>
+    <p class="small">En funktion inde i en klasse skal altid have <code>self</code> som første parameter</p>
+    <div class="grid-2">
+      <div>
+        <h3 class="cyan">Inde i klassen</h3>
+        <Code code={`class Bullet(turtle.Turtle):
+
+    def move(self):
+        self.forward(BULLET_SPEED)`} lines="3-4" />
+      </div>
+      <div class="fragment">
+        <h3 class="pink">Uden for klassen</h3>
+        <Code code={`bullet = Bullet()
+bullet.forward(BULLET_SPEED)
+# eller blot
+bullet.move()`} lines="2|4" />
+      </div>
+    </div>
+    <p class="fragment">Inde i klassen ved vi ikke, hvad kuglen hedder udenfor – så den hedder <code>self</code> 🙋</p>
+    <aside class="notes">self = "mig selv". Alle metoder i en klasse skal have self som første parameter.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 4 · trin 4</span>
+    <h2>Hver ny kugle <code>__init__</code></h2>
+    <div class="grid-2">
+      <Code id="bullet" small code={`class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+
+    def fire(self, start):
+        self.active = True
+
+    def move(self):
+        self.forward(BULLET_SPEED)`} lines="5|6|7|8|9|10" />
+      <ol class="small">
+        <li>Formen: en firkant</li>
+        <li>Farven</li>
+        <li>Størrelsen – lille bitte</li>
+        <li>Løft pennen</li>
+        <li>Skjul den, indtil den bliver affyret</li>
+        <li class="muted">Holde styr på om den er aktiv – <i>allerede gjort</i></li>
+      </ol>
+    </div>
+    <aside class="notes">Alle linjerne ind i __init__, efter super().__init__().</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 4 · trin 5</span>
+    <h2>Når kuglen affyres <code>fire</code></h2>
+    <div class="grid-2">
+      <Code id="bullet" small code={`class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+
+    def fire(self, start):
+        self.active = True
+        self.setposition(start.xcor(), start.ycor())
+        self.setheading(start.heading())
+        self.showturtle()
+
+    def move(self):
+        self.forward(BULLET_SPEED)`} lines="12|13|14|15|16" />
+      <ul class="clean small">
+        <li class="yellow">Læg mærke til <code>start</code>. Hvad tror I, det er?</li>
+        <li class="fragment green">→ spilleren! Der hvor kuglen skal skydes fra</li>
+        <li class="fragment muted">Sæt den til aktiv – <i>allerede gjort</i></li>
+        <li class="fragment">Flyt den til start: x og y fra <code>start</code></li>
+        <li class="fragment">Samme retning (<code>heading</code>) som <code>start</code></li>
+        <li class="fragment">Vis den</li>
+      </ul>
+    </div>
+    <aside class="notes">Lad dem gætte, hvad start er, før svaret vises. Alle linjerne ind i fire.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 4 · trin 6</span>
+    <h2>Når kuglen flytter sig <code>move</code></h2>
+    <div class="grid-2">
+      <Code id="bullet" small code={`class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+
+    def fire(self, start):
+        self.active = True
+        self.setposition(start.xcor(), start.ycor())
+        self.setheading(start.heading())
+        self.showturtle()
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        if abs(self.xcor()) > HALF_WIDTH or abs(self.ycor()) > HALF_HEIGHT:
+            self.hideturtle()
+            self.active = False`} lines="19|20|21-22" />
+      <ul class="clean small">
+        <li class="muted">Flyt den lidt – <i>allerede gjort</i></li>
+        <li class="fragment">Er den kommet ud over kanten?</li>
+        <li class="fragment"><code>abs</code> laver et tal positivt: <code>abs(-700)</code> → 700</li>
+        <li class="fragment">Så: skjul den og sæt den til inaktiv</li>
+        <li class="fragment cyan">Vi gør det lidt smartere senere 😉</li>
+      </ul>
+    </div>
+    <aside class="notes">Med abs kan vi tjekke både højre og venstre kant på én gang. or betyder "eller".</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 4</span>
+    <h2>Klar til at bruge vores <code>Bullet</code></h2>
+    <p>Når din <code>Bullet</code> kan de 3 ting, mangler vi:</p>
+    <ul class="clean">
+      <li class="fragment">✔️ En <code>BULLET_SPEED</code>-konstant – <i class="muted">den har vi</i></li>
+      <li class="fragment">🆕 En ny <code>Bullet</code> i <b>GAME SETUP</b></li>
+      <li class="fragment">🆕 En ny behaviour – en funktion <code>move_bullets()</code>
+        <ul class="small">
+          <li>Er "space" trykket ned? → affyr kuglen</li>
+          <li>Er kuglen aktiv? → flyt den frem</li>
+        </ul>
+      </li>
+      <li class="fragment">🆕 Kald den nye funktion fra game loopet</li>
+    </ul>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 4 · trin 7</span>
+    <h2>Lav en ny kugle</h2>
+    <div class="grid-2">
+      <Code id="lvl4" small code={`#  Classes
+
+class Bullet(turtle.Turtle):
+    ...
+
+#  GAME SETUP
+...
+player.penup() # to not draw lines
+
+# Create a turtle for the bullet
+bullet = Bullet()
+
+#  EVENTS
+...`} lines="10-11" />
+      <ul class="clean">
+        <li><code>Bullet()</code> laver en ny kugle ud fra opskriften</li>
+        <li class="fragment cyan">→ i <b>GAME SETUP</b>, efter spilleren og <b>før</b> EVENTS</li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 4 · trin 8</span>
+    <h2>En ny behaviour</h2>
+    <div class="grid-2">
+      <Code id="lvl4" small code={`#  BEHAVIOURS
+...
+def move_spaceship():
+    ...
+
+def move_bullets():
+    if keys_pressed["???"] and not bullet.active:
+        bullet.fire(player)
+
+    if bullet.???:
+        bullet.move()
+
+#  GAME LOOP
+...`} lines="6|7-8|10-11" />
+      <ul class="clean small">
+        <li>→ i <b>BEHAVIOURS</b>, efter <code>move_spaceship</code></li>
+        <li class="fragment">Er tasten trykket ned – og er kuglen <b>ikke</b> allerede affyret? → affyr fra <code>player</code></li>
+        <li class="fragment">Er kuglen aktiv? → flyt den frem</li>
+        <li class="fragment yellow">Hvad skal der stå i stedet for <code>???</code></li>
+        <li class="fragment green"><code>"space"</code> og <code>active</code></li>
+      </ul>
+    </div>
+    <aside class="notes">Lad dem gætte ??? før svaret. not bullet.active betyder "kuglen er ikke i luften".</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 4 · trin 9</span>
+    <h2>Opdater game loopet</h2>
+    <div class="grid-2">
+      <Code id="lvl4" small code={`#  BEHAVIOURS
+...
+def move_bullets():
+    if keys_pressed["space"] and not bullet.active:
+        bullet.fire(player)
+
+    if bullet.active:
+        bullet.move()
+
+#  GAME LOOP
+
+def update():
+    move_spaceship()
+    move_bullets()
+
+    screen.update()
+    screen.ontimer(update, GAME_TICK)`} lines="14" />
+      <ul class="clean">
+        <li>Kald <code>move_bullets()</code> i <code>update</code></li>
+        <li class="fragment cyan">→ lige efter <code>move_spaceship()</code></li>
+        <li class="fragment green">▶ Prøv: skyd en kugle med space!</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 5</span>
+    <h2>Wrap kuglen – kan I huske?</h2>
+    <ul class="clean">
+      <li class="fragment">Vores <code>move_if_out_of_bounds</code>-funktion?</li>
+      <li class="fragment">… og at den tager en <code>Turtle</code> som parameter?</li>
+      <li class="fragment yellow">Hvordan tror I, vi kan bruge det?</li>
+      <li class="fragment">Kan I huske, at en <code>Bullet</code> faktisk er en <code>Turtle</code>?</li>
+      <li class="fragment yellow">Hvad tror I, der sker, når vi "wrapper" kuglen?</li>
+      <li class="fragment pink big">Stopper den nogensinde? 🤔</li>
+    </ul>
+    <aside class="notes">Lad dem svare på hvert spørgsmål. Svar: vi kan sende kuglen med til move_if_out_of_bounds. Men så flyver den rundt for evigt – derfor en levetid.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 5 · trin 1</span>
+    <h2>Kuglens levetid</h2>
+    <div class="grid-2">
+      <Code id="lvl5" small code={`#  CONSTANTS
+...
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+...`} lines="5" />
+      <ul class="clean">
+        <li>En levetid, så kuglen forsvinder efter noget tid</li>
+        <li class="fragment">75 game ticks ⏱️</li>
+        <li class="fragment">… og så tæller vi ned i hvert game loop</li>
+        <li class="fragment cyan">→ i <b>CONSTANTS</b>-sektionen</li>
+      </ul>
+    </div>
+    <aside class="notes">Et game tick er 20 ms, så 75 ticks er 1,5 sekund.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 5 · trin 2</span>
+    <h2>Sæt levetiden</h2>
+    <div class="grid-2">
+      <Code id="bullet5" small code={`class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        ...
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        ...
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        if abs(self.xcor()) > HALF_WIDTH or abs(self.ycor()) > HALF_HEIGHT:
+            self.hideturtle()
+            self.active = False`} lines="6|10" />
+      <ul class="clean small">
+        <li><code>ttl</code> = "<span class="yellow">Time To Live</span>"</li>
+        <li class="fragment">Det er god skik at lave variablerne i <code>__init__</code> – men ikke nødvendigt</li>
+        <li class="fragment cyan">Det vigtigste er <code>fire</code>: hver gang kuglen affyres, får den fuld levetid</li>
+        <li class="fragment">→ indsæt linjen i <b>både</b> <code>__init__</code> og <code>fire</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 5 · trin 3</span>
+    <h2>Nu skal vi tælle ned</h2>
+    <div class="grid-2">
+      <Code id="bullet5" small code={`class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        ...
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        ...
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        if abs(self.xcor()) > HALF_WIDTH or abs(self.ycor()) > HALF_HEIGHT:
+            self.hideturtle()
+            self.active = False
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False`} lines="19|20-22" />
+      <ul class="clean small">
+        <li>Hver gang kuglen flytter sig, trækker vi 1 fra <code>ttl</code></li>
+        <li class="fragment"><code>ttl -= 1</code> er det samme som <code>ttl = ttl - 1</code></li>
+        <li class="fragment">Er <code>ttl</code> mindre end 0? → skjul den, ikke aktiv mere</li>
+        <li class="fragment cyan">→ sidst i <code>move</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 5 · trin 4</span>
+    <h2>Og så skal vi "wrappe" kuglen</h2>
+    <div class="grid-2">
+      <Code id="bullet5" small code={`class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        ...
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        ...
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False`} lines="15" />
+      <ul class="clean small">
+        <li>Kald <code>move_if_out_of_bounds</code> lige efter vi har flyttet kuglen frem</li>
+        <li class="fragment pink">Slet det gamle kant-tjek med <code>abs</code> – nu flyver kuglen rundt i stedet</li>
+        <li class="fragment yellow">Hvad sker der, når vi sender <code>self</code> med som parameter?</li>
+        <li class="fragment green">→ kuglen selv bliver til <code>t</code> – en Bullet ER jo en Turtle!</li>
+        <li class="fragment green">▶ Prøv: skyd og se kuglen flyve rundt – og forsvinde</li>
+      </ul>
+    </div>
+    <aside class="notes">Lad dem svare på self-spørgsmålet. Det virker, selvom move_if_out_of_bounds står længere nede i filen, fordi den først bliver kaldt, når spillet kører.</aside>
+  </section>
+
+  <section data-background-gradient="radial-gradient(circle at 50% 50%, #4a0f4e, #05041a 70%)">
+    <span class="kicker">Niveau 6</span>
+    <h2 class="neon">Flere kugler</h2>
+    <p class="big">Det er da for kedeligt kun med én kugle!</p>
+    <p class="fragment big yellow">Er det ikke? 😏</p>
+    <div class="fragment" style="position: relative; height: 120px;">
+      <div class="fly-across" style="top: 20px;"><Ship size={60} flame /></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 6</span>
+    <h2>En turtle forsvinder aldrig 👻</h2>
+    <ul class="clean">
+      <li class="fragment">Når man først har lavet en <code>Turtle</code>, forsvinder den aldrig HELT</li>
+      <li class="fragment">Man kan skjule den – men ikke slette den</li>
+      <li class="fragment green">Derfor vil vi <b>genbruge</b> kuglerne ♻️</li>
+      <li class="fragment">Vi bestemmer et maksimum …</li>
+      <li class="fragment">… og laver en <span class="cyan">liste</span> til at gemme alle kuglerne i</li>
+    </ul>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 6 · trin 1</span>
+    <h2>Maksimum antal kugler</h2>
+    <div class="grid-2">
+      <Code id="lvl6" small code={`#  CONSTANTS
+...
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 20
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+...`} lines="5" />
+      <ul class="clean">
+        <li>Højst 20 kugler på én gang</li>
+        <li class="fragment cyan">→ i <b>CONSTANTS</b>-sektionen</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">Lister</span>
+    <h2>En liste til alle kuglerne</h2>
+    <p>En liste er en slags variabel, hvor man kan have <span class="yellow">mere end én værdi!</span></p>
+    <Code code={`# En tom liste
+my_list = []
+# Tilføj noget til listen
+my_list.append("bird")
+# Print det første element fra listen
+print(my_list[0])
+
+another_list = ["monkey"]
+# Print det første element fra listen
+print(another_list[0])`} lines="1-2|3-4|5-6|8-10" />
+    <p class="fragment small">Det første element er nummer <span class="pink">0</span> – ikke 1!</p>
+    <aside class="notes">Spørg: hvad bliver printet? (bird og monkey.) Man kan også lave en liste med noget i fra starten, som another_list.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 6 · trin 2</span>
+    <h2>Farvel til den ene kugle</h2>
+    <div class="grid-2">
+      <Code id="lvl6" small code={`#  GAME SETUP
+...
+player.penup() # to not draw lines
+
+# Create a turtle for the bullet
+bullet = Bullet()
+
+#  EVENTS
+...`} lines="5-6" />
+      <ul class="clean">
+        <li>Den ene kugle fra niveau 4 …</li>
+        <li class="fragment pink">… skal erstattes af en liste med mange kugler</li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 6 · trin 3</span>
+    <h2>Lav listen af kugler</h2>
+    <div class="grid-2">
+      <Code id="lvl6" small code={`#  GAME SETUP
+...
+player.penup() # to not draw lines
+
+# Create bullets
+bullets = []
+for i in range(???):
+    bullets.append(Bullet())
+
+#  EVENTS
+...`} lines="6|7|8" />
+      <ul class="clean small">
+        <li>En tom liste</li>
+        <li class="fragment yellow">Kan I huske, hvad <code>for i in range(...)</code> gør?</li>
+        <li class="fragment">Tilføj en ny <code>Bullet</code> til listen – hver gang</li>
+        <li class="fragment cyan">→ i <b>GAME SETUP</b>, i stedet for <code>bullet = Bullet()</code></li>
+        <li class="fragment yellow">Hvad skal der stå i stedet for <code>???</code> – kun det maksimale antal kugler?</li>
+        <li class="fragment green">Hint: du har lige lavet den som en konstant → <code>MAX_BULLETS</code></li>
+      </ul>
+    </div>
+    <aside class="notes">range(20) giver tallene 0 til 19 – løkken kører 20 gange. Lad dem gætte ??? før hintet.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 6</span>
+    <h2>Ny <code>move_bullets</code> behaviour</h2>
+    <p>I hvert game loop skal vi:</p>
+    <ol class="agenda">
+      <li class="fragment">Løbe listen igennem</li>
+      <li class="fragment">Flytte alle de aktive kugler</li>
+      <li class="fragment">Gemme en inaktiv kugle … hvis der er en</li>
+      <li class="fragment">Trykker man "space"? → affyr den inaktive kugle</li>
+    </ol>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 6 · trin 4</span>
+    <h2>Den gamle <code>move_bullets</code></h2>
+    <div class="grid-2">
+      <Code id="mb" code={`def move_bullets():
+    if keys_pressed["space"] and not bullet.active:
+        bullet.fire(player)
+
+    if bullet.active:
+        bullet.move()`} lines="2-6" />
+      <ul class="clean">
+        <li>Den virker kun med én <code>bullet</code></li>
+        <li class="fragment pink">… og den findes ikke mere!</li>
+        <li class="fragment cyan">→ vi skriver indholdet om</li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 6 · trin 5</span>
+    <h2>Flyt alle de aktive kugler</h2>
+    <div class="grid-2">
+      <Code id="mb" code={`def move_bullets():
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()`} lines="2|3-4" />
+      <ul class="clean">
+        <li>Løb listen igennem: én <code>bullet</code> ad gangen</li>
+        <li class="fragment">Er den aktiv? → flyt den</li>
+        <li class="fragment cyan">→ først i <code>move_bullets</code></li>
+      </ul>
+    </div>
+    <aside class="notes">For hver kugle i listen: hvis den flyver, så flyt den. Men hvordan finder vi en kugle, vi kan skyde med?</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Gem en inaktiv kugle</span>
+    <h2>Men … vi skal også huske en ledig kugle</h2>
+    <Code code={`def move_bullets():
+    inactive_bullet = None  # En variabel uden nogen værdi (None)
+    for bullet in bullets:
+        if not bullet.active:  # Hvis kuglen ikke er aktiv
+            inactive_bullet = bullet  # gem kuglen i variablen til senere
+        elif bullet.active:  # ellers hvis kuglen er aktiv
+            bullet.move()  # flyt den`} lines="2|4-5|6-7" />
+    <p class="fragment big yellow">Kan det gøres bedre? 🤔</p>
+    <p class="fragment green">Ja! Hvis den ikke er aktiv, er den jo inaktiv → brug bare <code>else</code></p>
+    <aside class="notes">Lad dem komme med forslag. elif bullet.active er unødvendig – hvis den ikke er "ikke aktiv", så er den aktiv.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 6 · trin 6</span>
+    <h2>En variabel til den ledige kugle</h2>
+    <div class="grid-2">
+      <Code id="mb" code={`def move_bullets():
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()`} lines="2" />
+      <ul class="clean">
+        <li><code>None</code> = ingenting – en variabel uden værdi</li>
+        <li class="fragment cyan">→ som det allerførste i <code>move_bullets</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 6 · trin 7</span>
+    <h2>Gem den inaktive kugle</h2>
+    <div class="grid-2">
+      <Code id="mb" code={`def move_bullets():
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+        else:
+            inactive_bullet = bullet`} lines="6-7" />
+      <ul class="clean">
+        <li>Ikke aktiv? → gem den i variablen til senere</li>
+        <li class="fragment cyan">→ som <code>else</code> til den <code>if</code>, der allerede er der</li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 6 · trin 8</span>
+    <h2>Affyr den inaktive kugle, HVIS …</h2>
+    <div class="grid-2">
+      <Code id="mb" code={`def move_bullets():
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        inactive_bullet.fire(player)`} lines="9|10" />
+      <ul class="clean small">
+        <li>1. Space er trykket ned, <b>OG</b></li>
+        <li>2. Vi fandt en inaktiv kugle – alle kuglerne kunne jo være aktive!</li>
+        <li class="fragment"><code>None</code> svarer til <span class="pink">False</span>, en kugle svarer til <span class="green">True</span></li>
+        <li class="fragment">Det er det samme som <code>and inactive_bullet is not None</code></li>
+        <li class="fragment cyan">→ sidst i <code>move_bullets</code>, efter løkken</li>
+        <li class="fragment green">▶ Prøv: tryk space én gang – og hold den inde!</li>
+      </ul>
+    </div>
+    <aside class="notes">Spørg: hvorfor skal vi tjekke inactive_bullet? (Alle 20 kugler kunne være i luften.) Bemærk indrykningen: if keys_pressed står uden for for-løkken.</aside>
+  </section>
+
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #3a0f6e, #05041a 70%)">
+    <span class="kicker">Nu er det jeres tur</span>
+    <h1 class="neon">Nu skal I bygge!</h1>
+    <div style="margin: 0.4em 0;"><Ship size={90} flame class="float" /></div>
+    <p class="big cyan">/python-asteroids/lektion-2-skyd/0-oversigt/</p>
+    <p class="fragment small">Var du her ikke sidst? Brug boksen <b>🙋 Jeg var her ikke sidst</b> på oversigten.</p>
+    <p class="fragment small yellow">Færdig før tid? Prøv ekstraopgaverne: hop på kanten, regnbuekugler og haglgevær!</p>
+    <aside class="notes">Kodeordet er raket. Gå rundt og hjælp. Typiske fejl: indrykning, glemt at kalde funktionen i update/move_spaceship, glemt self eller super().__init__().</aside>
+  </section>
+
+</SlideDeck>

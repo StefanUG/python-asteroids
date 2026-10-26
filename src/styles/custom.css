@@ -1,0 +1,327 @@
+/* ── Lesson images ─────────────────────────────────────────── */
+.sl-markdown-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+/* ── Task lists (made clickable in Footer.astro) ───────────── */
+.sl-markdown-content li.task-item {
+  list-style: none;
+}
+
+.sl-markdown-content ul:has(> li.task-item) {
+  padding-inline-start: 0.25rem;
+}
+
+.sl-markdown-content li.task-item > input[type="checkbox"] {
+  width: 1.1em;
+  height: 1.1em;
+  margin-inline-end: 0.5em;
+  vertical-align: -0.15em;
+  accent-color: var(--sl-color-accent);
+  cursor: pointer;
+}
+
+/* ── Catch-up box ("Jeg var her ikke sidst") ───────────────── */
+.catchup {
+  border: 2px dashed var(--sl-color-accent);
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  background: var(--sl-color-accent-low);
+}
+
+.catchup summary {
+  cursor: pointer;
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+  color: var(--sl-color-white);
+}
+
+.catchup-body {
+  padding: 0 1rem 1rem;
+}
+
+.catchup-body p,
+.catchup-body ol {
+  margin: 0.5rem 0;
+}
+
+.catchup-form,
+.catchup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.catchup-form input {
+  flex: 1 1 10rem;
+  background: var(--sl-color-black);
+  color: var(--sl-color-white);
+  border: 1px solid var(--sl-color-gray-4);
+  border-radius: 0.25rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 1rem;
+}
+
+.catchup button {
+  background: var(--sl-color-accent);
+  color: var(--sl-color-black);
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.4rem 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.catchup-error {
+  color: var(--sl-color-red-high, #f38ba8);
+}
+
+/* ── Solution image ─────────────────────────────────────────── */
+.solution-image {
+  display: block;
+  border: 2px solid var(--sl-color-gray-4, #45475a);
+  border-radius: 0.5rem;
+  margin: 1.5rem auto;
+  max-width: min(100%, 400px);
+}
+
+/* ── Solution block ────────────────────────────────────────── */
+.solution-block {
+  display: none;
+}
+
+body.solutions-visible .solution-block {
+  display: block;
+  border: 2px solid #a6e3a1;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin: 1.5rem 0;
+}
+
+.solution-header {
+  background: #a6e3a1;
+  padding: 0.35rem 0.85rem;
+}
+
+.solution-label {
+  color: #1e1e2e;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.solution-body {
+  padding: 0.75rem 1rem;
+}
+
+/* ── PythonRun ──────────────────────────────────────────────── */
+.python-run {
+  border: 2px solid var(--sl-color-accent);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin: 1.5rem 0;
+}
+
+.python-run-header {
+  background: var(--sl-color-accent);
+  padding: 0.35rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.python-run-label {
+  color: var(--sl-color-white);
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.python-run-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--sl-color-white);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 0.25rem;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.8em;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.python-run-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.python-run-editor {
+  border-top: 1px solid var(--sl-color-gray-5, #313244);
+}
+
+/* CodeMirror overrides: match font and min-height; theme handles colours */
+.python-run-editor .cm-editor {
+  font-size: 0.875em;
+}
+
+.python-run-editor .cm-scroller {
+  max-height: 14em;
+  overflow: auto !important;
+  font-family: var(--sl-font-mono, ui-monospace, monospace) !important;
+}
+
+.python-run-editor .cm-editor.cm-focused {
+  outline: none;
+}
+
+/* Native fullscreen via requestFullscreen() — browser handles viewport positioning */
+.python-run:fullscreen {
+  display: flex;
+  flex-direction: column;
+}
+
+.python-run:fullscreen .python-run-editor {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.python-run:fullscreen .python-run-editor .cm-editor {
+  height: 100%;
+}
+
+.python-run:fullscreen .python-run-editor .cm-scroller {
+  max-height: none !important;
+  height: 100%;
+  overflow: auto !important;
+}
+
+.python-run-resize-handle {
+  height: 7px;
+  background: var(--sl-color-gray-5, #313244);
+  cursor: ns-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.python-run-resize-handle::after {
+  content: '⋯';
+  color: var(--sl-color-gray-3, #6c7086);
+  font-size: 0.75em;
+  letter-spacing: 2px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.python-run-resize-handle:hover {
+  background: var(--sl-color-accent-high, var(--sl-color-accent));
+}
+
+.python-run:fullscreen .python-run-resize-handle {
+  display: none;
+}
+
+/* hidecode="true": run-only block - no editor, resize handle, reset or fullscreen */
+.python-run[data-hidecode] .python-run-editor,
+.python-run[data-hidecode] .python-run-resize-handle,
+.python-run[data-hidecode] [data-action="reset"],
+.python-run[data-hidecode] [data-action="fullscreen"] {
+  display: none;
+}
+
+.python-run-error-text {
+  color: #f38ba8;
+  display: block;
+}
+
+.python-run-fs-btn {
+  margin-left: auto;
+  font-size: 1em;
+}
+
+.python-run-turtle {
+  line-height: 0;
+}
+
+.python-run-turtle canvas {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  border: 1px solid var(--sl-color-gray-4, #45475a);
+}
+
+/* norun="true": game code that only runs on the learner's own computer */
+.python-run[data-norun] {
+  border-color: var(--sl-color-gray-4, #45475a);
+}
+
+.python-run[data-norun] .python-run-header {
+  background: var(--sl-color-gray-5, #313244);
+}
+
+.python-run-stdout {
+  background: var(--sl-color-gray-6, #1e1e2e);
+  color: var(--sl-color-gray-1, #cdd6f4);
+  font-family: var(--sl-font-mono, ui-monospace, monospace);
+  font-size: 0.875em;
+  padding: 0.75rem 1.25rem;
+  margin: 0;
+  border-top: 1px solid var(--sl-color-gray-5, #313244);
+  white-space: pre-wrap;
+}
+
+.python-run-input-row {
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--sl-color-gray-6, #1e1e2e);
+  padding: 0.5rem 1.25rem 0.75rem;
+  margin: 0;
+  border-top: 1px dashed var(--sl-color-gray-5, #313244);
+}
+
+/* Same specificity as the UA stylesheet's `[hidden] { display: none }` - must exclude it explicitly */
+.python-run-input-row:not([hidden]) {
+  display: flex;
+}
+
+.python-run-input-prompt {
+  color: var(--sl-color-gray-1, #cdd6f4);
+  font-family: var(--sl-font-mono, ui-monospace, monospace);
+  font-size: 0.875em;
+  white-space: pre-wrap;
+}
+
+.python-run-input-field {
+  flex: 1;
+  background: var(--sl-color-gray-5, #313244);
+  color: var(--sl-color-white);
+  font-family: var(--sl-font-mono, ui-monospace, monospace);
+  font-size: 0.875em;
+  border: 1px solid var(--sl-color-gray-4, #45475a);
+  border-radius: 0.25rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.python-run-input-field:focus {
+  outline: 2px solid var(--sl-color-accent);
+  outline-offset: 1px;
+}
+
+.python-run-input-submit {
+  background: var(--sl-color-accent);
+  color: var(--sl-color-white);
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 1em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.python-run-input-submit:hover {
+  background: var(--sl-color-accent-high, var(--sl-color-accent));
+}

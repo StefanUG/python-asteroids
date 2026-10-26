@@ -1,0 +1,246 @@
+---
+import SlideDeck from '../../layouts/SlideDeck.astro'
+import Code from '../../components/slides/Code.astro'
+import Ship from '../../components/slides/Ship.astro'
+import Asteroid from '../../components/slides/Asteroid.astro'
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+---
+
+<SlideDeck title="Lektion 7 – Gør det til dit eget" lesson={7}>
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #6e0f5a, #05041a 70%)">
+    <div style="position: relative; height: 160px;">
+      <div class="fly-across" style="top: 20px;"><Ship size={70} flame color="#ff4fd8" /></div>
+    </div>
+    <span class="kicker">Lektion 7</span>
+    <h1 class="neon">Gør det til dit eget</h1>
+    <h3>Dit spil · dine farver · dine idéer</h3>
+    <div style="margin-top: 0.6em;">
+      <Asteroid size={60} spin={8} color="#ffd84f" />
+      <Asteroid size={90} spin={14} color="#ff4fd8" />
+      <Asteroid size={50} spin={5} color="#3ef3ff" />
+    </div>
+    <aside class="notes">
+      Sidste gang! I dag er en halv lektion (ca. 45 min): ca. 30 min hvor de gør spillet til deres eget, og ca. 15 min demo.
+      Catch-up-kodeordet til lektion 7 er "supernova". Det låser den færdige kode fra niveau 19 op (19_thrust_animation.py) i boksen på oversigtssiden.
+      Sig det til dem, der mangler deres fil eller har en fil, der ikke virker – så alle starter samme sted.
+    </aside>
+  </section>
+
+  <section>
+    <span class="kicker">I dag</span>
+    <h2>Plan</h2>
+    <ol class="agenda">
+      <li class="fragment">Se hvor langt I er nået 🚀</li>
+      <li class="fragment">Idéer til at gøre spillet til jeres eget 🎨</li>
+      <li class="fragment">Vælg 1–3 ting og start sikkert 🛟</li>
+      <li class="fragment">Byg! (ca. 30 min) 🛠️</li>
+      <li class="fragment">Demo-tid! (ca. 15 min) 🏆</li>
+    </ol>
+    <aside class="notes">Hold intro kort – max 5-7 minutter. De skal have mest muligt tid til at bygge.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Se hvor langt I er nået</span>
+    <h2>19 niveauer på 6 gange</h2>
+    <div class="grid-3" style="margin-top: 0.5em;">
+      <div class="card fragment fade-up"><h3>🚀 Lektion 1</h3><p class="small">1 Skærm og rumskib<br />2 Styr rumskibet</p></div>
+      <div class="card fragment fade-up"><h3>💥 Lektion 2</h3><p class="small">3 Ud over kanten<br />4 Skyd én kugle<br />5 Kuglen flyver rundt<br />6 Flere kugler</p></div>
+      <div class="card fragment fade-up"><h3>🪨 Lektion 3</h3><p class="small">7 Genladetid<br />8 Asteroider<br />9 Skyd asteroiderne<br />10 Ikke de usynlige</p></div>
+      <div class="card fragment fade-up"><h3>🏁 Lektion 4</h3><p class="small">11 Game over<br />12 Point<br />13 Asteroiderne flytter sig<br />14 Nye asteroider</p></div>
+      <div class="card fragment fade-up"><h3>❤️ Lektion 5</h3><p class="small">15 Flere liv<br />16 Skjold efter et hit<br />17 Blink</p></div>
+      <div class="card fragment fade-up"><h3>🪐 Lektion 6</h3><p class="small">18 Flyv som i rummet<br />19 Raketflamme</p></div>
+    </div>
+    <aside class="notes">
+      Gå hurtigt igennem – én kort per klik. Spørg: "Hvilket niveau var det sjoveste?" og "Hvilket var det sværeste?". Tag 2-3 svar.
+    </aside>
+  </section>
+
+  <section data-background-gradient="radial-gradient(circle at 50% 50%, #0f3a6e, #05041a 70%)">
+    <p class="big">Fra en sort skærm til…</p>
+    <h1 class="neon fragment zoom-in">383 linjer kode</h1>
+    <p class="fragment fade-up big yellow">Et RIGTIGT spil – som I selv har skrevet! 🎉</p>
+    <div class="fragment fade-up" style="margin-top: 0.5em;">
+      <span class="pill">Events</span>
+      <span class="pill pink">Game loop</span>
+      <span class="pill yellow">Klasser</span>
+      <span class="pill green">Lister</span>
+      <span class="pill">Tilfældighed</span>
+      <span class="pill pink">Kollisioner</span>
+      <span class="pill yellow">Tid</span>
+      <span class="pill green">Rumfysik</span>
+    </div>
+    <aside class="notes">Ros dem! Det færdige spil er næsten 400 linjer. Det er meget for en begynder. Alt det har de lært undervejs.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Gør det til dit eget</span>
+    <h2 class="neon">Vælg dine idéer</h2>
+    <div class="grid-3" style="margin-top: 0.5em;">
+      <div class="card center fragment zoom-in"><span class="emoji-big">🎨</span><h3 class="pink">Farver</h3><p class="small">Baggrund, rumskib, skud, tekst</p></div>
+      <div class="card center fragment zoom-in"><span class="emoji-big">🔷</span><h3 class="cyan">Former</h3><p class="small">Dit eget rumskib, laser, sten</p></div>
+      <div class="card center fragment zoom-in"><span class="emoji-big">⌨️</span><h3 class="yellow">Taster</h3><p class="small">W, A, D – eller hvad du vil</p></div>
+      <div class="card center fragment zoom-in"><span class="emoji-big">🔤</span><h3 class="green">Skrifttype</h3><p class="small">Gammeldags computer-skrift</p></div>
+      <div class="card center fragment zoom-in"><span class="emoji-big pulse">💥</span><h3 class="orange">Del asteroiderne</h3><p class="small">Den største udfordring!</p></div>
+      <div class="card center fragment zoom-in"><span class="emoji-big">🐢</span><h3 class="pink">Bonus-spil</h3><p class="small">Skildpadde spiser bier</p></div>
+    </div>
+    <aside class="notes">Kort præsentation af hver side på hjemmesiden. De næste slides viser et lille smugkig på nogle af dem.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">🎨 Farver</span>
+    <h2>Ét ord – nyt rum</h2>
+    <Code id="farve" code={`BG_COLOR = "black"`} lines="" />
+    <div data-id="ship-farve"><Ship size={90} /></div>
+    <aside class="notes">Vis at én konstant ændrer hele baggrunden. Næste slide morpher koden.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">🎨 Farver</span>
+    <h2>Ét ord – nyt rum</h2>
+    <Code id="farve" code={`BG_COLOR = "light sky blue"
+
+# Player.__init__
+self.color("cadet blue", "firebrick")`} lines="1|3-4" />
+    <div data-id="ship-farve"><Ship size={90} flame color="#ff4fd8" /></div>
+    <p class="fragment small muted">Første farve = kanten · anden farve = indeni</p>
+    <aside class="notes">
+      Spørg: "Hvad tror I, de to farver betyder?" Afslør: kant og indre.
+      Husk at nævne, at raketflamme-formen (SPACESHIP_THRUST_SHAPE) har sine egne farver – det står på siden.
+    </aside>
+  </section>
+
+  <section>
+    <span class="kicker">🔷 Former</span>
+    <h2>Asteroider der ligner sten</h2>
+    <div class="grid-2" style="align-items: center;">
+      <img class="framed" src={`${base}images/asteroid_grid_shape.png`} alt="En klumpet asteroideform tegnet i et koordinatsystem" />
+      <div>
+        <Code code={`self.shape("asteroid")
+self.shapesize(5, 5)
+
+# move_asteroids
+asteroid.tilt(asteroid.speed)`} lines="1-2|4-5" />
+        <div class="fragment zoom-in"><Asteroid size={90} spin={4} color="#3ef3ff" /></div>
+      </div>
+    </div>
+    <aside class="notes">En form er bare en liste af punkter. tilt drejer formen uden at ændre retningen. Spørg: "Hvorfor kan man ikke se, at en cirkel drejer?"</aside>
+  </section>
+
+  <section>
+    <span class="kicker">⌨️ Taster</span>
+    <h2>Dine egne taster</h2>
+    <Code code={`screen.onkeypress(press_left, "a")
+screen.onkeypress(press_right, "d")
+screen.onkeypress(press_forward, "w")`} lines="1|2|3" />
+    <div class="fragment fade-up" style="margin-top: 0.6em;">
+      <span class="pill yellow big">W</span>
+      <span class="pill yellow big">A</span>
+      <span class="pill yellow big">D</span>
+    </div>
+    <p class="fragment small muted">Pas på CAPS LOCK – så er det "A" i stedet for "a"!</p>
+    <aside class="notes">Kun tasten i anførselstegn ændres. Funktionerne og keys_pressed er de samme. Husk også onkeyrelease-linjerne.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">💥 Den store udfordring</span>
+    <h2>Del asteroiderne</h2>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 1.2em; margin-top: 0.4em;">
+      <Asteroid size={150} spin={14} color="#ff8a3d" />
+      <span class="fragment big">→</span>
+      <span class="fragment"><Asteroid size={90} spin={9} color="#ff8a3d" /><Asteroid size={90} spin={11} color="#ff8a3d" /></span>
+      <span class="fragment big">→</span>
+      <span class="fragment"><Asteroid size={45} spin={5} color="#ff8a3d" /><Asteroid size={45} spin={6} /><Asteroid size={45} spin={4} color="#ff8a3d" /><Asteroid size={45} spin={7} /></span>
+    </div>
+    <p class="fragment fade-up">En asteroide, der laver sine egne <span class="yellow">børne-asteroider</span></p>
+    <aside class="notes">Den mest avancerede opgave – til dem der har lyst til en rigtig udfordring. Mange trin; sig at de skal tage ét trin ad gangen og sætte kryds. Ord: rekursion = noget der laver/bruger en mindre udgave af sig selv.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">🐢 Bonus</span>
+    <h2>Skildpadde spiser bier</h2>
+    <p class="emoji-big float">🐢 🐝 🐝 🐝</p>
+    <ul class="clean">
+      <li class="fragment">Et helt andet spil…</li>
+      <li class="fragment">…med <span class="cyan">præcis samme opbygning</span> som Asteroids</li>
+      <li class="fragment">Og det er <span class="pink">ikke færdigt</span> – det må du gøre!</li>
+    </ul>
+    <aside class="notes">Pointen: når man kan lave ét spil, kan man lave mange. Koden ligger klar til at kopiere på bonussiden. Nogle bier skal være vrede…</aside>
+  </section>
+
+  <section>
+    <span class="kicker">For de modige</span>
+    <h2>Idébank</h2>
+    <div style="margin-top: 0.6em; line-height: 2.4;">
+      <span class="pill fragment">🖱️ Følg musen</span>
+      <span class="pill pink fragment">💥 Eksplosioner</span>
+      <span class="pill yellow fragment">🌀 Drejende asteroider</span>
+      <span class="pill green fragment">🎲 Tilfældige former</span>
+      <span class="pill fragment">🛟 Ingen asteroider oven på rumskibet</span>
+      <span class="pill pink fragment">🎯 Bliv ramt af dine egne skud</span>
+    </div>
+    <p class="fragment muted" style="margin-top: 1em;">Ingen færdig vejledning – find selv ud af det, eller spørg om et hint!</p>
+    <aside class="notes">Til de hurtige. Spørg klassen: "Hvordan tror I, man kunne lave en eksplosion?" Tag et par idéer.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Start sikkert</span>
+    <h2>Lav en kopi først! 🛟</h2>
+    <ol class="agenda">
+      <li class="fragment">Åbn dit spil fra niveau 19</li>
+      <li class="fragment">Lav en ny fil, fx <code>mit_spil.py</code></li>
+      <li class="fragment">Kopier al koden over</li>
+      <li class="fragment">Kør den <span class="yellow">nye</span> fil</li>
+    </ol>
+    <p class="fragment fade-up">Så har du altid et spil, der virker 💾</p>
+    <aside class="notes">Vigtigt: de skal ikke ødelægge deres eneste fungerende version. Ingen fil? Brug catch-up-boksen (kodeord: supernova).</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Sådan arbejder du</span>
+    <h2>Én ting ad gangen</h2>
+    <div class="grid-3" style="margin-top: 0.6em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">✏️</span><h3>Ændr</h3><p class="small">Én lille ting</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">▶️</span><h3>Kør</h3><p class="small">Test med det samme</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">✅</span><h3>Virker?</h3><p class="small">Ja: næste! Nej: <code>Ctrl+Z</code></p></div>
+    </div>
+    <p class="fragment zoom-in big cyan" style="margin-top: 0.6em;">Vælg 1–3 ting – ikke det hele!</p>
+    <p class="fragment small muted">Søg i koden med <code>Ctrl+F</code> (Mac: <code>Cmd+F</code>)</p>
+    <aside class="notes">Det er bedre at blive færdig med én ting, der virker, end at være halvvejs med fem.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Tid</span>
+    <h2>Sådan bruger vi tiden</h2>
+    <div class="grid-2" style="margin-top: 0.6em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">🛠️</span><h3 class="cyan">ca. 30 min</h3><p>Gør spillet til dit eget</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big pulse">🏆</span><h3 class="pink">ca. 15 min</h3><p>Demo for de andre</p></div>
+    </div>
+    <aside class="notes">Giv et varsel 5 minutter før demo-tid, så de kan nå at få spillet til at køre.</aside>
+  </section>
+
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #6e3a0f, #05041a 70%)">
+    <span class="kicker">Til sidst</span>
+    <h1 class="neon">Demo-tid!</h1>
+    <p class="big">1–2 minutter hver · helt frivilligt</p>
+    <div class="grid-3" style="margin-top: 0.6em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">🎮</span><h3>Vis spillet</h3></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">✨</span><h3>Én ting du ændrede</h3></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">🧗</span><h3>Én ting der var svær</h3></div>
+    </div>
+    <p class="fragment zoom-in big yellow" style="margin-top: 0.6em;">👏 Vi klapper for alle!</p>
+    <aside class="notes">
+      Brug denne slide, når demoen starter. Spørg hvem der har lyst; lad dem komme op én ad gangen (eller gå rundt til skærmene).
+      Regler: lyt, klap for alle, ingen grin af fejl. Det er okay, hvis noget ikke virker – fortæl hvad du prøvede.
+      Afslut med at takke for forløbet og ros dem for at have bygget et rigtigt spil.
+    </aside>
+  </section>
+
+  <section data-background-gradient="radial-gradient(circle at 50% 50%, #3a0f6e, #05041a 70%)">
+    <Ship size={90} flame class="float" />
+    <h1 class="neon">Nu skal I bygge!</h1>
+    <p class="big">Find dagens sider her:</p>
+    <p><span class="pill">/python-asteroids/lektion-7-goer-det-til-dit-eget/0-oversigt/</span></p>
+    <p class="small muted">Ingen fil fra sidst? Brug boksen "Jeg var her ikke sidst" på oversigten.</p>
+    <aside class="notes">Catch-up-kodeord: supernova. Gå rundt og hjælp. Husk at varsle demo-tid.</aside>
+  </section>
+</SlideDeck>

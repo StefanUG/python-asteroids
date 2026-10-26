@@ -1,0 +1,771 @@
+---
+import SlideDeck from '../../layouts/SlideDeck.astro'
+import Code from '../../components/slides/Code.astro'
+import Ship from '../../components/slides/Ship.astro'
+import Asteroid from '../../components/slides/Asteroid.astro'
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+---
+<SlideDeck title="Lektion 6 – Rumfysik" lesson={6}>
+
+  <!-- 1. Title -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #3a0f6e, #05041a 70%)">
+    <div style="position: relative; height: 170px;">
+      <div class="fly-across" style="top: 20px;"><Ship size={70} flame /></div>
+    </div>
+    <span class="kicker">Lektion 6</span>
+    <h1 class="neon">Rumfysik</h1>
+    <h3>Glid gennem rummet – med flammer bagud</h3>
+    <div style="margin-top: 0.5em;">
+      <Asteroid size={60} spin={8} />
+      <Asteroid size={90} spin={14} color="#ff4fd8" />
+      <Asteroid size={50} spin={6} color="#3ef3ff" />
+    </div>
+    <aside class="notes">
+      Velkommen tilbage. I dag bliver rumskibet til et rigtigt rumskib: det glider, og det får en flamme.
+      Husk catch-up: Hvis nogen ikke var her sidst, eller deres kode ikke virker, kan de bruge boksen "Jeg var her ikke sidst" på oversigtssiden.
+      Kodeordet for lektion 6 er: nebula. Det giver koden efter niveau 17 (17_flash_upon_hit.py).
+      Tid: ca. 30 min præsentation og niveau 18, pause, ca. 45 min niveau 19 og ekstra.
+    </aside>
+  </section>
+
+  <!-- 2. Agenda -->
+  <section>
+    <span class="kicker">I dag</span>
+    <h2>Plan</h2>
+    <ol class="agenda">
+      <li class="fragment">Hvordan flyver man i rummet?</li>
+      <li class="fragment">Næse og kurs: heading og track</li>
+      <li class="fragment">Fart i x og y med cos og sin</li>
+      <li class="fragment">Max fart med Pythagoras</li>
+      <li class="fragment">Egne former og en flamme</li>
+      <li class="fragment">Byg niveau 18 og 19!</li>
+    </ol>
+    <aside class="notes">Kort overblik. I dag er der kun to niveauer, men der er lidt matematik. Vi tager det stille og roligt.</aside>
+  </section>
+
+  <!-- 3. Recap -->
+  <section>
+    <span class="kicker">Sidste gang</span>
+    <h2>Kan I huske?</h2>
+    <div class="grid-3" style="margin-top: 0.6em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">❤️</span><h3>Liv</h3><p class="small"><code>health</code> tæller ned, når du bliver ramt</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">⏱️</span><h3>Skjold</h3><p class="small"><code>time.time()</code> giver 3 sekunders pause efter et hit</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big blink">✨</span><h3>Blink</h3><p class="small">Rumskibet blinker, mens det ikke kan rammes</p></div>
+    </div>
+    <p class="fragment muted" style="margin-top: 0.8em;">Hvad sker der, når du slipper pil-op?</p>
+    <p class="fragment big yellow">Rumskibet stopper med det samme 🤔</p>
+    <aside class="notes">Spørg: Hvem kan huske, hvad is_invincible returnerer? Hvordan fik vi rumskibet til at blinke? Slut med spørgsmålet om pil-op, det leder videre til dagens emne.</aside>
+  </section>
+
+  <!-- 4. What we build -->
+  <section>
+    <span class="kicker">Det bygger vi</span>
+    <h2>Et rigtigt rumskib</h2>
+    <div class="grid-2" style="margin-top: 0.4em;">
+      <div class="center" style="text-align: center;">
+        <Ship size={130} flame class="float" />
+      </div>
+      <ul class="clean">
+        <li class="fragment">🚀 Pil-op giver et <span class="cyan">skub</span></li>
+        <li class="fragment">🧊 Rumskibet <span class="pink">glider</span> videre</li>
+        <li class="fragment">🧭 Drej og flyv sidelæns</li>
+        <li class="fragment">🏁 En <span class="yellow">max fart</span></li>
+        <li class="fragment">🔥 En flamme, når du giver gas</li>
+      </ul>
+    </div>
+    <aside class="notes">Vis gerne det færdige spil (19_thrust_animation.py) kort, hvis I har det klar. Lad dem prøve at forklare, hvad der er anderledes.</aside>
+  </section>
+
+  <!-- 5. How do ships move in space -->
+  <section>
+    <span class="kicker">Rummet</span>
+    <h2>Hvorfor stopper en cykel?</h2>
+    <ul class="clean" style="margin-top: 0.5em;">
+      <li class="fragment">🚲 Du holder op med at træde – og cyklen stopper til sidst. Hvorfor?</li>
+      <li class="fragment">💨 Luften og vejen <span class="pink">bremser</span> dig hele tiden</li>
+      <li class="fragment">🌌 I rummet er der ingen luft og ingen vej …</li>
+      <li class="fragment big yellow">… så intet bremser dig!</li>
+    </ul>
+    <p class="fragment muted small" style="margin-top: 0.6em;">Isaac Newton: Noget, der bevæger sig, bliver ved med at bevæge sig – indtil noget skubber til det.</p>
+    <aside class="notes">Spørg klassen først, lad dem gætte. Andre eksempler: en hockeypuck på is, en skøjteløber. I rummet er der næsten ingen friktion, så rumskibet glider for evigt.</aside>
+  </section>
+
+  <!-- 6. Now vs space -->
+  <section>
+    <span class="kicker">Før og nu</span>
+    <h2>To slags rumskibe</h2>
+    <div class="grid-2" style="margin-top: 0.6em;">
+      <div class="card fragment fade-up">
+        <h3>Nu 🚗</h3>
+        <p><code>forward(PLAYER_SPEED)</code></p>
+        <p class="small">Slip tasten → rumskibet står stille med det samme.</p>
+      </div>
+      <div class="card fragment fade-up">
+        <h3>I rummet 🚀</h3>
+        <p><code>thrust()</code> + <code>move()</code></p>
+        <p class="small">Pil-op giver et lille <span class="cyan">skub</span>. Farten bliver – også når du slipper.</p>
+      </div>
+    </div>
+    <p class="fragment big green" style="margin-top: 0.6em;">Rumskibet skal <em>huske</em> sin fart</p>
+    <aside class="notes">Pointe: vi skal gemme farten i variabler på Player, så den kan "huske" fra tick til tick.</aside>
+  </section>
+
+  <!-- Level 18 intro -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #0f3a6e, #05041a 70%)">
+    <span class="kicker">Niveau 18</span>
+    <h2 class="neon">Bevægelse som i rummet</h2>
+    <p class="muted">Hvad skal vi ændre?</p>
+    <ul class="clean" style="margin-top: 0.4em;">
+      <li class="fragment">➡️ En fart i <span class="orange">x</span>-retningen</li>
+      <li class="fragment">⬆️ En fart i <span class="cyan">y</span>-retningen</li>
+      <li class="fragment">🚀 Pil-op giver rumskibet <em>mere</em> fart</li>
+      <li class="fragment">🧊 Rumskibet bevæger sig i den retning, det har fart</li>
+    </ul>
+    <aside class="notes">I stedet for at flytte rumskibet direkte med forward, gemmer vi farten og flytter rumskibet med den hvert tick. Først lidt teori, så bygger vi trin for trin.</aside>
+  </section>
+
+  <!-- 7. Heading vs track -->
+  <section>
+    <span class="kicker">Næse og kurs</span>
+    <h2>Heading og track</h2>
+    <svg viewBox="0 0 520 300" width="720" height="415" aria-label="Et rumskib, der peger skråt op, men flyver lige til højre">
+      <defs>
+        <marker id="l6-ah-cyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3ef3ff" /></marker>
+        <marker id="l6-ah-pink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ff4fd8" /></marker>
+      </defs>
+      <line x1="20" y1="200" x2="170" y2="200" stroke="#ff4fd8" stroke-width="3" stroke-dasharray="6 10" opacity="0.6" />
+      <g transform="translate(200 200) rotate(45) scale(3)">
+        <polygon points="-7,20 0,-5 7,20" fill="#05041a" stroke="#e8e8f0" stroke-width="1" stroke-linejoin="round" />
+      </g>
+      <line x1="200" y1="200" x2="420" y2="200" stroke="#ff4fd8" stroke-width="5" marker-end="url(#l6-ah-pink)" class="fragment" data-fragment-index="2" />
+      <text x="300" y="240" fill="#ff4fd8" font-size="22" font-weight="700" class="fragment" data-fragment-index="2">track: hvor du flyver</text>
+      <line x1="200" y1="200" x2="300" y2="100" stroke="#3ef3ff" stroke-width="5" marker-end="url(#l6-ah-cyan)" class="fragment" data-fragment-index="1" />
+      <text x="240" y="80" fill="#3ef3ff" font-size="21" font-weight="700" class="fragment" data-fragment-index="1">heading: hvor næsen peger</text>
+    </svg>
+    <p class="fragment" data-fragment-index="3">Kan de to pile pege hver sin vej? <span class="fragment yellow" data-fragment-index="4">Ja – i rummet!</span></p>
+    <aside class="notes">
+      Heading = hvor næsen peger (det ændrer vi med venstre/højre). Track = hvor rumskibet faktisk flyver.
+      Indtil nu har de altid været ens, fordi forward flytter i næsens retning.
+      Metafor: skøjteløber der glider fremad og drejer kroppen, eller en bil der skrider i et sving.
+      Spørg: Hvis jeg drejer næsen og ikke giver gas, hvor flyver jeg så hen?
+    </aside>
+  </section>
+
+  <!-- 8. Speed in x and y -->
+  <section>
+    <span class="kicker">Fart i to dele</span>
+    <h2><code>speedx</code> og <code>speedy</code></h2>
+    <div class="grid-2" style="margin-top: 0.4em;">
+      <ul class="clean">
+        <li class="fragment">➡️ <code>speedx</code>: hvor meget til <span class="orange">højre</span> hvert tick</li>
+        <li class="fragment">⬆️ <code>speedy</code>: hvor meget <span class="cyan">op</span> hvert tick</li>
+        <li class="fragment">➖ Negativ = venstre / ned</li>
+        <li class="fragment small muted">speedx = 3, speedy = 0 → lige til højre<br />speedx = 2, speedy = 2 → skråt op</li>
+      </ul>
+      <div class="fragment">
+        <Code code={`def move(self):
+    x, y = self.pos()
+    x += self.speedx
+    y += self.speedy
+    self.goto(x, y)`} lines="2|3-4|5" />
+      </div>
+    </div>
+    <aside class="notes">Hver gang game loop kører, lægger vi farten til positionen. Forklar x, y = self.pos(): pos giver to tal, vi gemmer dem i to variabler på én gang. Spørg: Hvad sker der, hvis speedx er 0 og speedy er -5?</aside>
+  </section>
+
+  <!-- 9. cos and sin -->
+  <section>
+    <span class="kicker">Et skub i næsens retning</span>
+    <h2>cos og sin</h2>
+    <svg viewBox="0 0 520 300" width="620" height="358" aria-label="Retvinklet trekant: den skrå side er skubbet, den vandrette er cos, den lodrette er sin">
+      <line x1="60" y1="260" x2="400" y2="260" stroke="#ff9d3c" stroke-width="6" class="fragment" data-fragment-index="2" />
+      <text x="150" y="292" fill="#ff9d3c" font-size="22" font-weight="700" class="fragment" data-fragment-index="2">til siden: cos → speedx</text>
+      <line x1="400" y1="260" x2="400" y2="70" stroke="#3ef3ff" stroke-width="6" class="fragment" data-fragment-index="3" />
+      <text x="410" y="170" fill="#3ef3ff" font-size="22" font-weight="700" class="fragment" data-fragment-index="3">op: sin</text>
+      <text x="410" y="196" fill="#3ef3ff" font-size="22" font-weight="700" class="fragment" data-fragment-index="3">→ speedy</text>
+      <polyline points="380,260 380,240 400,240" fill="none" stroke="#a9a8d6" stroke-width="2" class="fragment" data-fragment-index="3" />
+      <line x1="60" y1="260" x2="400" y2="70" stroke="#ffe14f" stroke-width="6" />
+      <text x="140" y="140" fill="#ffe14f" font-size="22" font-weight="700">skub (PLAYER_THRUST)</text>
+      <path d="M 130 260 A 70 70 0 0 0 121 226" fill="none" stroke="#ff4fd8" stroke-width="3" class="fragment" data-fragment-index="1" />
+      <text x="140" y="248" fill="#ff4fd8" font-size="20" font-weight="700" class="fragment" data-fragment-index="1">heading</text>
+    </svg>
+    <p class="fragment small" data-fragment-index="4"><code>math</code> regner i <span class="yellow">radianer</span>, ikke grader → <code>math.radians(grader)</code></p>
+    <aside class="notes">
+      Forklar uden formler: Hvis jeg tager ét skridt skråt, hvor meget kommer jeg så til siden, og hvor meget op? Det regner cos og sin ud.
+      Heading 0: alt går til siden. Heading 90: alt går op. Heading 45: lidt af begge.
+      Radianer: en hel omgang er 360 grader eller ca. 6,28 radianer. math.radians omregner for os.
+      På niveau 18-siden er der en demo, der tegner pilen. Kør den gerne her.
+    </aside>
+  </section>
+
+  <!-- 11. Max speed -->
+  <section>
+    <span class="kicker">Max fart</span>
+    <h2>Pythagoras til undsætning</h2>
+    <div class="grid-2" style="margin-top: 0.4em;">
+      <svg viewBox="0 0 300 240" width="380" height="304" aria-label="Retvinklet trekant med siderne 3 og 4 og den skrå side 5">
+        <line x1="30" y1="200" x2="230" y2="200" stroke="#ff9d3c" stroke-width="6" />
+        <text x="110" y="230" fill="#ff9d3c" font-size="24" font-weight="700">speedx = 3</text>
+        <line x1="230" y1="200" x2="230" y2="50" stroke="#3ef3ff" stroke-width="6" />
+        <text x="238" y="130" fill="#3ef3ff" font-size="24" font-weight="700">4</text>
+        <line x1="30" y1="200" x2="230" y2="50" stroke="#ffe14f" stroke-width="6" class="fragment" data-fragment-index="1" />
+        <text x="60" y="110" fill="#ffe14f" font-size="24" font-weight="700" class="fragment" data-fragment-index="1">fart = 5</text>
+      </svg>
+      <ul class="clean">
+        <li class="fragment" data-fragment-index="2">3² + 4² = 9 + 16 = 25</li>
+        <li class="fragment" data-fragment-index="3">√25 = <span class="yellow">5</span></li>
+        <li class="fragment small" data-fragment-index="4"><code>** 2</code> = i anden<br /><code>** 0.5</code> = kvadratrod</li>
+        <li class="fragment" data-fragment-index="5">For hurtig? Gør <span class="orange">x</span> og <span class="cyan">y</span> <em>lige meget</em> mindre</li>
+        <li class="fragment small muted" data-fragment-index="6">Så flyver du samme vej – bare ikke hurtigere</li>
+      </ul>
+    </div>
+    <aside class="notes">
+      Den rigtige fart er den skrå side i trekanten. Nogle har måske hørt om Pythagoras i skolen, andre ikke – det gør ikke noget.
+      Spørg: Hvorfor gør vi ikke bare speedx og speedy mindre hver for sig? (Så ville retningen ændre sig.)
+    </aside>
+  </section>
+
+  <!-- Level 18 steps -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 18 · trin 1</span>
+    <h2>Et nyt bibliotek: <code>math</code></h2>
+    <div class="grid-2">
+      <Code id="lvl18" small code={`import turtle
+import random
+import time
+import math
+
+# CONSTANTS
+...`} lines="4" />
+      <ul class="clean">
+        <li>Matematik til vinkler og retninger</li>
+        <li class="fragment">Giver os <code>math.cos()</code> og <code>math.sin()</code></li>
+        <li class="fragment">Hjælper os med at regne bevægelse i forskellige retninger</li>
+        <li class="fragment cyan">→ øverst i filen, lige efter <code>import time</code></li>
+      </ul>
+    </div>
+    <aside class="notes">Ligesom vi hentede random og time, henter vi nu math.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 18 · trin 2</span>
+    <h2>Konstanter – før</h2>
+    <div class="grid-2">
+      <Code id="lvl18" small code={`import turtle
+import random
+import time
+import math
+
+# CONSTANTS
+...
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+PLAYER_START_HEALTH = 3
+PLAYER_GRACE_PERIOD = 3 # seconds
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+...`} lines="9|12" />
+      <ul class="clean">
+        <li>Find <code>PLAYER_SPEED</code> i <code># CONSTANTS</code></li>
+        <li class="fragment">Den skal <span class="pink">erstattes</span> af to nye konstanter</li>
+        <li class="fragment">Hvem bruger ellers <code>PLAYER_SPEED</code>? 🤔</li>
+        <li class="fragment yellow"><code>BULLET_SPEED</code>!</li>
+      </ul>
+    </div>
+    <aside class="notes">Lad dem selv finde linjen med BULLET_SPEED, der bruger PLAYER_SPEED.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 18 · trin 3</span>
+    <h2>Konstanter – efter</h2>
+    <div class="grid-2">
+      <Code id="lvl18" small code={`import turtle
+import random
+import time
+import math
+
+# CONSTANTS
+...
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_MAX_SPEED = 10  # Pixels to move player each tick
+PLAYER_THRUST = 0.1  # increase in speed per tick
+PLAYER_START_HEALTH = 3
+PLAYER_GRACE_PERIOD = 3 # seconds
+BULLET_SPEED = PLAYER_MAX_SPEED * 2  # Double of player speed
+...`} lines="9-10|9|10|13" />
+      <ul class="clean small">
+        <li><code>PLAYER_MAX_SPEED</code>: den <span class="yellow">største</span> fart, vi kan opnå</li>
+        <li class="fragment"><code>PLAYER_THRUST</code>: hvor meget fart vi får hvert tick med pil-op</li>
+        <li class="fragment"><code>BULLET_SPEED</code> bruger nu <code>PLAYER_MAX_SPEED</code> – ellers fejl, for <code>PLAYER_SPEED</code> findes ikke mere</li>
+        <li class="fragment">Hvor mange ticks tager det at nå max fart?</li>
+        <li class="fragment green">10 / 0.1 = 100 ticks ≈ 2 sekunder</li>
+      </ul>
+    </div>
+    <aside class="notes">Et tick er 20 ms (GAME_TICK), så 50 ticks i sekundet. 100 ticks er 2 sekunder.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 18 · trin 4</span>
+    <h2>Fart i x og y</h2>
+    <div class="grid-2">
+      <Code id="lvl18" small code={`# CONSTANTS
+...
+
+# Classes
+class Bullet(turtle.Turtle):
+    ...
+
+class Player(turtle.Turtle):
+    def __init__(self):
+        ...
+        self.health = PLAYER_START_HEALTH
+        self.last_hit = 0.0
+
+        self.speedx = 0
+        self.speedy = 0`} lines="14-15|14|15" />
+      <ul class="clean">
+        <li>Spilleren skal huske sin fart</li>
+        <li class="fragment"><code>speedx</code> = fart til højre (venstre hvis negativ)</li>
+        <li class="fragment"><code>speedy</code> = fart opad (nedad hvis negativ)</li>
+        <li class="fragment cyan">→ i <code>Player.__init__</code>, efter <code>self.last_hit</code></li>
+      </ul>
+    </div>
+    <aside class="notes">Spørg: Hvorfor starter de på 0? (Rumskibet holder stille, når spillet starter.)</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 18 · trin 5</span>
+    <h2><code>Player.thrust()</code> – giv gas!</h2>
+    <div class="grid-2">
+      <Code id="lvl18" small code={`# Classes
+class Player(turtle.Turtle):
+    def __init__(self):
+        ...
+        self.speedx = 0
+        self.speedy = 0
+    ...
+    def hit(self):
+        ...
+
+    def thrust(self):
+        track = math.radians(self.heading())
+        self.speedx += PLAYER_THRUST * math.cos(track)
+        self.speedy += PLAYER_THRUST * math.sin(track)
+        speed = (self.speedx ** 2 + self.speedy ** 2) ** 0.5
+        if speed > PLAYER_MAX_SPEED:
+            self.speedx = (self.speedx * PLAYER_MAX_SPEED) / speed
+            self.speedy = (self.speedy * PLAYER_MAX_SPEED) / speed`} lines="11-18|12|13|14|15|16-18" />
+      <ol class="small">
+        <li class="fragment">Find rumskibets retning i radianer</li>
+        <li class="fragment">Læg fart til i x-retningen (cos)</li>
+        <li class="fragment">Læg fart til i y-retningen (sin)</li>
+        <li class="fragment">Regn den samlede fart ud (Pythagoras)</li>
+        <li class="fragment">For hurtig? Sæt farten ned til max</li>
+        <li class="fragment cyan" style="list-style: none;">→ i <code>Player</code>, efter <code>hit()</code></li>
+      </ol>
+    </div>
+    <p class="fragment small muted"><code>+=</code> lægger skubbet <em>oven i</em> den fart, vi allerede har</p>
+    <aside class="notes">
+      Linje 12: næsens retning i radianer. Linje 13-14: læg en lille smule fart til i x og y. Linje 15: den samlede fart (Pythagoras fra før). Linje 16-18: for hurtig? Så gør vi den mindre.
+      PLAYER_THRUST er 0.1, så det tager ca. 100 ticks (2 sekunder) at nå max fart.
+    </aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 18 · trin 6</span>
+    <h2><code>Player.move()</code> – flyt rumskibet!</h2>
+    <div class="grid-2">
+      <Code id="lvl18" small code={`# Classes
+class Player(turtle.Turtle):
+    ...
+    def hit(self):
+        ...
+
+    def thrust(self):
+        track = math.radians(self.heading())
+        ...
+
+    def move(self):
+        x, y = self.pos()
+        x += self.speedx
+        y += self.speedy
+        self.goto(x, y)`} lines="11-15|12|13-14|15" />
+      <ul class="clean">
+        <li class="fragment">Hent den nuværende position</li>
+        <li class="fragment">Læg farten til positionen</li>
+        <li class="fragment">Flyt rumskibet til den nye position</li>
+        <li class="fragment cyan">→ i <code>Player</code>, efter <code>thrust()</code></li>
+      </ul>
+    </div>
+    <aside class="notes">Samme kode som vi så tidligere. Nu er alle de nye ting i Player-klassen på plads.</aside>
+  </section>
+
+  <!-- 12-13. move_spaceship before/after (auto-animate) -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 18 · trin 7 · før</span>
+    <h2><code>move_spaceship()</code></h2>
+    <Code id="l6-move" small code={`# BEHAVIOURS
+...
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.hit()`} lines="8-12|9" />
+    <p class="small muted">Find <code>move_spaceship()</code> under <code># BEHAVIOURS</code>. Rumskibet flytter sig kun, mens du holder pil-op nede</p>
+    <aside class="notes">Spørg: Hvad skal ændres, så rumskibet bliver ved med at flytte sig, når man slipper pil-op?</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 18 · trin 8 · efter</span>
+    <h2><code>move_spaceship()</code></h2>
+    <Code id="l6-move" small code={`# BEHAVIOURS
+...
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.thrust()
+
+    player.move()
+    move_if_out_of_bounds(player)
+    if check_collision(player):
+        player.hit()`} lines="8-9|11|12-14" />
+    <ul class="clean small">
+      <li class="fragment">✅ <code>player.thrust()</code> i stedet for <code>player.forward(PLAYER_SPEED)</code></li>
+      <li class="fragment">✅ <code>player.move()</code> efter alle <code>if</code>-blokkene, før <code>move_if_out_of_bounds(player)</code></li>
+    </ul>
+    <p class="fragment small"><span class="yellow">Pas på indrykningen:</span> <code>player.move()</code> og resten står <em>uden for</em> <code>if</code></p>
+    <aside class="notes">Vigtigt: move_if_out_of_bounds og check_collision skal rykkes ud. Ellers glider rumskibet ud af skærmen eller igennem asteroider, når man ikke trykker. Det er den mest typiske fejl i dag.</aside>
+  </section>
+
+  <!-- Level 18: game loop -->
+  <section>
+    <span class="kicker">Niveau 18 · GAME LOOP</span>
+    <h2>Hvem kalder <code>move()</code>?</h2>
+    <div class="grid-2">
+      <Code code={`# GAME LOOP
+def update():
+    move_spaceship()
+    animate_spaceship()
+    move_bullets()
+    move_asteroids()
+    ...`} lines="3" />
+      <ul class="clean">
+        <li><code>update()</code> kalder allerede <code>move_spaceship()</code></li>
+        <li class="fragment green">Ingen ændringer i <code># GAME LOOP</code> eller <code># START THE GAME</code></li>
+        <li class="fragment">Hvor tit flytter rumskibet sig?</li>
+        <li class="fragment yellow">50 gange i sekundet (<code>GAME_TICK = 20</code> ms)</li>
+      </ul>
+    </div>
+    <aside class="notes">Pointe: Fordi move() kaldes hvert tick, også når man ikke trykker, glider rumskibet videre.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 18 · kør spillet ▶</span>
+    <h2>Prøv det!</h2>
+    <ul class="clean">
+      <li class="fragment">🚀 Tryk pil-op for at give gas</li>
+      <li class="fragment">🧊 Rumskibet flyver videre, selvom du slipper tasten</li>
+      <li class="fragment">🧭 Du kan dreje, mens du flyver</li>
+      <li class="fragment yellow">Meget sværere at styre – præcis som i rigtig rumfart! 🚀</li>
+    </ul>
+    <aside class="notes">Lad dem flyve lidt. Spørg: Hvordan stopper man? (Drej rundt og giv gas den anden vej.)</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 18</span>
+    <h2>Hvad lærte vi?</h2>
+    <ul class="clean">
+      <li class="fragment">🌌 Bevægelse i rummet uden friktion</li>
+      <li class="fragment">📐 <code>math.cos()</code> og <code>math.sin()</code> giver bevægelse i alle retninger</li>
+      <li class="fragment">➡️⬆️ Fart i x og y: <code>speedx</code> og <code>speedy</code></li>
+      <li class="fragment">🏁 En max fart</li>
+      <li class="fragment yellow">At rumfart er svært! 🌌</li>
+    </ul>
+  </section>
+
+  <!-- Level 19 intro -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #6e2a0f, #05041a 70%)">
+    <span class="kicker">Niveau 19</span>
+    <h2 class="neon">Giv gas med flammer! 🔥</h2>
+    <Ship size={90} flame class="float" />
+    <p class="muted">Hvad skal vi ændre?</p>
+    <ul class="clean">
+      <li class="fragment">🔺 En ny form til rumskibet – en med ild bagved</li>
+      <li class="fragment">📝 Registrere begge former i turtle</li>
+      <li class="fragment">🔁 Skifte form, når man trykker/slipper pil-op</li>
+    </ul>
+    <aside class="notes">Det ville være sejt at kunne se ild komme ud bagved, når man giver gas.</aside>
+  </section>
+
+  <!-- 14. Custom shape from points -->
+  <section>
+    <span class="kicker">Niveau 19</span>
+    <h2>Tegn din egen form</h2>
+    <div class="grid-2" style="margin-top: 0.3em;">
+      <img class="framed" src={`${base}images/spaceship_grid_shape.png`} alt="Rumskibets form og flammen tegnet med punkter på et koordinatsystem" style="max-height: 470px;" />
+      <div>
+        <p class="fragment">En form = en liste af <span class="cyan">punkter</span></p>
+        <p class="fragment small">Prik-til-prik: turtle tegner streger mellem dem</p>
+        <div class="fragment">
+          <Code code={`SPACESHIP_SHAPE = ( (7,-20), (0,5), (-7,-20) )`} lines="" />
+        </div>
+        <p class="fragment small muted">Tegnet som om rumskibet peger op – turtle drejer det selv</p>
+      </div>
+    </div>
+    <aside class="notes">Spørg: Hvilket punkt er næsen? (0,5). Flammen genbruger de to bagerste hjørner, men midten ligger længere nede: (0,-30).</aside>
+  </section>
+
+  <!-- Level 19 steps -->
+  <section data-auto-animate>
+    <span class="kicker">Niveau 19 · trin 1</span>
+    <h2>Vores egen rumskib-form</h2>
+    <div class="grid-2">
+      <Code id="lvl19" small code={`# CONSTANTS
+...
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+SPACESHIP_SHAPE = ( (7,-20), (0,5), (-7,-20) )`} lines="6" />
+      <ul class="clean">
+        <li>I stedet for turtles <code>"triangle"</code></li>
+        <li class="fragment">Tre punkter: <span class="orange">højre hjørne</span>, <span class="cyan">top</span>, <span class="pink">venstre hjørne</span></li>
+        <li class="fragment cyan">→ i <code># CONSTANTS</code>, lige efter <code>HALF_HEIGHT</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 19 · trin 2</span>
+    <h2>En form med ild!</h2>
+    <Code id="lvl19" small code={`# CONSTANTS
+...
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+SPACESHIP_SHAPE = ( (7,-20), (0,5), (-7,-20) )
+SPACESHIP_THRUST_SHAPE = turtle.Shape('compound')
+SPACESHIP_THRUST_SHAPE.addcomponent(SPACESHIP_SHAPE, BG_COLOR, 'light grey')
+SPACESHIP_THRUST_SHAPE.addcomponent(( (7,-20), (0,-30), (-7,-20) ), BG_COLOR, 'orange')`} lines="7-9|7|8|9" />
+    <ul class="clean small" style="margin-top: 0.3em;">
+      <li class="fragment"><span class="pill">compound</span> = en sammensat form med flere dele</li>
+      <li class="fragment">Første del: rumskibet (lysegrå kant)</li>
+      <li class="fragment">Anden del: ilden (orange trekant bagved)</li>
+      <li class="fragment"><span class="pill pink">addcomponent(punkter, fyld, kant)</span></li>
+      <li class="fragment cyan">→ lige efter <code>SPACESHIP_SHAPE</code></li>
+    </ul>
+    <aside class="notes">En almindelig form kan kun have én farve. Den sammensatte form har en grå del og en orange del.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 19</span>
+    <h2>Hvad betyder alle de tal?</h2>
+    <div class="grid-2">
+      <svg viewBox="0 0 320 380" width="330" height="392" aria-label="Rumskibet som trekant og ilden som en trekant der peger nedad, med punkternes koordinater">
+        <polygon points="94,260 150,340 206,260" fill="none" stroke="#ff9d3c" stroke-width="4" stroke-linejoin="round" class="fragment" data-fragment-index="1" />
+        <polygon points="206,260 150,60 94,260" fill="none" stroke="#d3d3d3" stroke-width="4" stroke-linejoin="round" />
+        <text x="160" y="55" fill="#3ef3ff" font-size="20" font-weight="700">(0,5)</text>
+        <text x="212" y="258" fill="#ff9d3c" font-size="20" font-weight="700">(7,-20)</text>
+        <text x="14" y="258" fill="#ff4fd8" font-size="20" font-weight="700">(-7,-20)</text>
+        <text x="160" y="362" fill="#ffe14f" font-size="20" font-weight="700" class="fragment" data-fragment-index="2">(0,-30)</text>
+      </svg>
+      <ul class="clean small">
+        <li class="fragment" data-fragment-index="1">Ilden: <code>( (7,-20), (0,-30), (-7,-20) )</code></li>
+        <li class="fragment" data-fragment-index="1"><code>(7,-20)</code>: højre hjørne – samme som rumskibet</li>
+        <li class="fragment" data-fragment-index="2"><code>(0,-30)</code>: midten, længere nede</li>
+        <li class="fragment" data-fragment-index="3"><code>(-7,-20)</code>: venstre hjørne – samme som rumskibet</li>
+        <li class="fragment yellow" data-fragment-index="4">Ilden er en trekant, der peger den modsatte vej!</li>
+      </ul>
+    </div>
+    <aside class="notes">Spørg: Hvilket punkt skal ændres, hvis ilden skal være længere? (0,-30).</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 19 · trin 3</span>
+    <h2>Registrer formerne</h2>
+    <div class="grid-2">
+      <Code id="lvl19-setup" small code={`# GAME SETUP
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+screen.bgcolor(BG_COLOR)
+screen.tracer(0)
+
+screen.register_shape("spaceship", SPACESHIP_SHAPE)
+screen.register_shape("spaceship_thrust", SPACESHIP_THRUST_SHAPE)
+
+player = Player()`} lines="7-8|7|8" />
+      <ul class="clean small">
+        <li><code>register_shape</code> giver formen et <span class="yellow">navn</span></li>
+        <li class="fragment">Nu kan vi bruge <code>"spaceship"</code> og <code>"spaceship_thrust"</code> som former</li>
+        <li class="fragment cyan">→ i <code># GAME SETUP</code>, lige efter <code>screen.tracer(0)</code></li>
+        <li class="fragment">Hvorfor skal det stå <em>før</em> <code>player = Player()</code>?</li>
+        <li class="fragment green">Player bruger formen <code>"spaceship"</code> – den skal findes først!</li>
+      </ul>
+    </div>
+    <aside class="notes">Hvis register_shape kommer efter player = Player(), kender turtle ikke formen og giver en fejl.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 19 · trin 4 · før</span>
+    <h2>Opdater <code>Player.__init__</code></h2>
+    <div class="grid-2">
+      <Code id="lvl19-player" small code={`# Classes
+class Player(turtle.Turtle):
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines`} lines="5|7" />
+      <ul class="clean">
+        <li>Spilleren bruger stadig <code>"triangle"</code></li>
+        <li class="fragment">Og <code>shapesize</code> strækker trekanten</li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 19 · trin 4 · efter</span>
+    <h2>Opdater <code>Player.__init__</code></h2>
+    <div class="grid-2">
+      <Code id="lvl19-player" small code={`# Classes
+class Player(turtle.Turtle):
+    def __init__(self):
+        super().__init__()
+        self.shape("spaceship")
+        self.color("light grey", BG_COLOR)
+        self.penup()  # to not draw lines`} lines="5" />
+      <ul class="clean">
+        <li>✅ <code>"triangle"</code> → <code>"spaceship"</code></li>
+        <li class="fragment">✅ <span class="pink">Slet</span> linjen med <code>shapesize</code></li>
+        <li class="fragment muted small">Vores form har allerede den rigtige størrelse</li>
+      </ul>
+    </div>
+    <aside class="notes">Hvis shapesize bliver stående, bliver rumskibet strakt og ser mærkeligt ud.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 19 · trin 5</span>
+    <h2>Skift form i <code>animate_spaceship()</code></h2>
+    <div class="grid-2">
+      <Code small code={`# BEHAVIOURS
+...
+def animate_spaceship():
+    if player.is_invincible():
+        scaled = int(time.time() * 10)
+        is_invisible = scaled % 2
+        if is_invisible:
+            player.hideturtle()
+        else:
+            player.showturtle()
+    else:
+        player.showturtle()
+
+    if keys_pressed["Up"]:
+        player.shape("spaceship_thrust")
+    else:
+        player.shape("spaceship")`} lines="14-17|14-15|16-17" />
+      <ul class="clean small">
+        <li>Find <code>animate_spaceship()</code> under <code># BEHAVIOURS</code></li>
+        <li class="fragment cyan">→ sidst i funktionen, efter <code>else: player.showturtle()</code></li>
+        <li class="fragment yellow">ℹ️ Pas på indrykningen! Samme niveau som <code>if player.is_invincible():</code></li>
+      </ul>
+    </div>
+    <aside class="notes">Den typiske fejl: de nye linjer bliver rykket ind under else, så flammen kun virker, når man ikke er usårlig.</aside>
+  </section>
+
+  <!-- 16. Switch shape -->
+  <section>
+    <span class="kicker">Niveau 19 · kør spillet ▶</span>
+    <h2>Hvad sker der nu?</h2>
+    <div class="grid-2" style="margin-top: 0.4em;">
+      <ul class="clean small">
+        <li class="fragment" data-fragment-index="1">Tryk pil-op → <code>"spaceship_thrust"</code>: rumskib med ild 🔥</li>
+        <li class="fragment" data-fragment-index="2">Slip pil-op → <code>"spaceship"</code>: ilden forsvinder</li>
+        <li class="fragment" data-fragment-index="3">Game loop tjekker det 50 gange i sekundet</li>
+        <li class="fragment" data-fragment-index="3">Rumskibet glider stadig videre (fra niveau 18)</li>
+      </ul>
+      <div style="text-align: center;">
+        <span class="fragment" data-fragment-index="2"><Ship size={90} /></span>
+        <span class="fragment" data-fragment-index="1"><Ship size={90} flame /></span>
+      </div>
+    </div>
+    <aside class="notes">animate_spaceship kaldes allerede i update(), så der er ingen ændringer i GAME LOOP eller START THE GAME.</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 19 · bonus</span>
+    <h2>Lav din egen ild</h2>
+    <div class="grid-2">
+      <div class="card fragment fade-up">
+        <h3>🎨 Farve</h3>
+        <p class="small">Ret <code>'orange'</code> i <code>SPACESHIP_THRUST_SHAPE.addcomponent</code></p>
+        <ul class="clean small">
+          <li><code>'red'</code> – rød ild</li>
+          <li><code>'yellow'</code> – gul ild</li>
+          <li><code>'cyan'</code> – blå sci-fi ild</li>
+          <li><code>'white'</code> – hvid ild</li>
+        </ul>
+      </div>
+      <div class="card fragment fade-up">
+        <h3>🔥 Længde</h3>
+        <p class="small"><code>(0,-30)</code> styrer, hvor langt ilden rækker</p>
+        <ul class="clean small">
+          <li><code>(0,-40)</code> – længere ild</li>
+          <li><code>(0,-25)</code> – kortere ild</li>
+        </ul>
+        <p class="small yellow">Eksperimentér!</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 19</span>
+    <h2>Hvad lærte vi?</h2>
+    <ul class="clean">
+      <li class="fragment">🔺 Egne former af punkter</li>
+      <li class="fragment">🧩 Sammensatte former med flere dele</li>
+      <li class="fragment">📝 Registrere former med <code>register_shape</code></li>
+      <li class="fragment">🔁 Skifte form, når man trykker på en tast</li>
+      <li class="fragment yellow">Små animationer gør et spil meget federe! ✨</li>
+    </ul>
+  </section>
+
+  <!-- 17. Teaser -->
+  <section data-background-gradient="radial-gradient(circle at 50% 50%, #4a1050, #05041a 70%)">
+    <span class="kicker">Næste gang</span>
+    <h2 class="neon">Gør det til dit eget</h2>
+    <p class="fragment">Sidste gang ændrer du spillet, som <em>du</em> vil – og viser det frem! 🏆</p>
+    <div style="margin-top: 0.4em; line-height: 2.2;">
+      <span class="pill fragment">🎨 Farver</span>
+      <span class="pill pink fragment">🔺 Former</span>
+      <span class="pill yellow fragment">⌨️ Taster</span>
+      <span class="pill green fragment">🪨 Asteroider der splitter</span>
+      <span class="pill fragment">✨ Dine skøre idéer</span>
+    </div>
+    <p class="fragment big yellow" style="margin-top: 0.5em;">Tænk allerede nu: Hvad vil du ændre?</p>
+    <aside class="notes">Plant idéen: Næste gang er der tid til at gøre spillet til deres eget, og til sidst er der demo, hvor alle viser deres spil i 1-2 minutter. Bed dem skrive idéer ned.</aside>
+  </section>
+
+  <!-- 18. Build -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #0f3a6e, #05041a 70%)">
+    <span class="kicker">Nu er det jeres tur</span>
+    <h2 class="neon">Nu skal I bygge!</h2>
+    <Ship size={90} flame class="float" />
+    <p>Gå ind på</p>
+    <p class="big cyan">/python-asteroids/lektion-6-rumfysik/0-oversigt/</p>
+    <ul class="clean small">
+      <li class="fragment">✅ Start med niveau 18 – fortsæt i din egen fil</li>
+      <li class="fragment">🆘 Var du her ikke sidst? Brug boksen <em>"Jeg var her ikke sidst"</em> på oversigten</li>
+      <li class="fragment">⭐ Færdig? Prøv bremsen på ekstra-siden</li>
+    </ul>
+    <aside class="notes">Catch-up-kodeordet er "nebula". Gå rundt og hjælp især med indrykningen i move_spaceship og med at slette shapesize-linjen i niveau 19.</aside>
+  </section>
+
+</SlideDeck>

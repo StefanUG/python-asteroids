@@ -1,0 +1,75 @@
+---
+// "Jeg var her ikke sidst": a password from the teacher reveals the lesson's start file.
+import { catchup, REPO, BRANCH } from '../data/catchup'
+
+interface Props {
+  lesson: number
+}
+const { lesson } = Astro.props
+const entry = catchup[lesson]
+if (!entry) throw new Error(`No catch-up entry for lesson ${lesson}`)
+
+const blobUrl = `https://github.com/${REPO}/blob/${BRANCH}/python/${entry.file}`
+const rawUrl = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/python/${entry.file}`
+---
+
+<details class="catchup not-content" data-catchup data-password={entry.password}>
+  <summary>🙋 Jeg var her ikke sidst</summary>
+  <div class="catchup-body">
+    <p>
+      Ingen panik! Spørg underviseren om ugens kodeord. Så får du koden, som den ser ud efter
+      <strong>niveau {entry.level}</strong>, og kan starte samme sted som de andre.
+    </p>
+    <form class="catchup-form" data-role="form">
+      <label for={`catchup-${lesson}`}>Kodeord</label>
+      <input id={`catchup-${lesson}`} type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-role="input" />
+      <button type="submit">Lås op</button>
+    </form>
+    <p class="catchup-error" data-role="error" hidden>Det var ikke det rigtige kodeord. Prøv igen, eller spørg underviseren.</p>
+    <div class="catchup-unlocked" data-role="unlocked" hidden>
+      <p>🔓 Sådan gør du:</p>
+      <ol>
+        <li>Klik på <strong>Kopiér hele koden</strong> (eller åbn filen og kopiér den selv).</li>
+        <li>Lav en ny fil i dit projekt, fx <code>asteroids.py</code>, og sæt koden ind.</li>
+        <li>Kør filen og tjek, at spillet starter. Så er du klar!</li>
+      </ol>
+      <div class="catchup-actions">
+        <button type="button" data-role="copy" data-raw={rawUrl}>📋 Kopiér hele koden</button>
+        <a href={blobUrl}>Se {entry.file} på GitHub</a>
+        <a href={rawUrl}>Åbn som ren tekst</a>
+      </div>
+    </div>
+  </div>
+</details>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-catchup]').forEach(box => {
+    const password = (box.dataset.password ?? '').trim().toLowerCase()
+    const form = box.querySelector<HTMLFormElement>('[data-role="form"]')!
+    const input = box.querySelector<HTMLInputElement>('[data-role="input"]')!
+    const error = box.querySelector<HTMLElement>('[data-role="error"]')!
+    const unlocked = box.querySelector<HTMLElement>('[data-role="unlocked"]')!
+    const copyBtn = box.querySelector<HTMLButtonElement>('[data-role="copy"]')!
+
+    form.addEventListener('submit', e => {
+      e.preventDefault()
+      const ok = input.value.trim().toLowerCase() === password
+      error.hidden = ok
+      unlocked.hidden = !ok
+      form.hidden = ok
+    })
+
+    copyBtn.addEventListener('click', async () => {
+      const label = copyBtn.textContent
+      try {
+        const res = await fetch(copyBtn.dataset.raw!)
+        if (!res.ok) throw new Error(String(res.status))
+        await navigator.clipboard.writeText(await res.text())
+        copyBtn.textContent = '✓ Koden er kopieret'
+      } catch {
+        copyBtn.textContent = 'Det virkede ikke – brug linket i stedet'
+      }
+      setTimeout(() => { copyBtn.textContent = label }, 3000)
+    })
+  })
+</script>

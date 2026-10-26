@@ -1,0 +1,527 @@
+---
+import SlideDeck from '../../layouts/SlideDeck.astro'
+import Code from '../../components/slides/Code.astro'
+import Ship from '../../components/slides/Ship.astro'
+import Asteroid from '../../components/slides/Asteroid.astro'
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+---
+<SlideDeck title="Lektion 1 – Rumskibet" lesson={1}>
+
+  <!-- 1. Title -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #3a0f6e, #05041a 70%)">
+    <div style="position: relative; height: 150px;">
+      <div class="fly-across" style="top: 20px;"><Ship size={80} flame /></div>
+    </div>
+    <span class="kicker">Coding Pirates · Python · Lektion 1</span>
+    <h1 class="neon">ASTEROIDS</h1>
+    <h3>Rumskibet</h3>
+    <div style="margin-top: 0.5em;">
+      <Asteroid size={60} spin={9} />
+      <Asteroid size={90} spin={14} color="#ff4fd8" />
+      <Asteroid size={50} spin={6} color="#3ef3ff" />
+    </div>
+    <aside class="notes">
+      Velkommen! Præsentér jer selv (frivillige). Det her er første gang, så vi starter med en kort præsentation af hele forløbet.
+      Hurtig runde: navn + hvad husker I fra intro-holdet? (turtle, for-løkker, if, funktioner, random).
+      I dag er en halv gang (ca. 45 min): præsentation, installation, niveau 1 og 2. Ingen catch-up i dag.
+    </aside>
+  </section>
+
+  <!-- 3. Course overview -->
+  <section>
+    <span class="kicker">7 gange</span>
+    <h2>Det bygger vi</h2>
+    <div class="grid-2" style="margin-top: 0.4em; align-items: center;">
+      <ol class="agenda small">
+        <li class="fragment">Rumskibet</li>
+        <li class="fragment">Skyd!</li>
+        <li class="fragment">Asteroider</li>
+        <li class="fragment">Game over og point</li>
+        <li class="fragment">Liv og skjold</li>
+        <li class="fragment">Rumfysik</li>
+        <li class="fragment">Gør det til dit eget + demo 🏆</li>
+      </ol>
+      <div class="fragment zoom-in">
+        <img class="framed" src={`${base}images/asteroids-01-screenshot.png`} alt="Sort spilvindue med et lille gråt rumskib" />
+        <p class="small muted">… og det starter her, i dag!</p>
+      </div>
+    </div>
+    <aside class="notes">Fortæl at spillet vokser lidt hver gang. Til sidst gør de det til deres eget og viser det frem for de andre.</aside>
+  </section>
+
+  <!-- 4. Agenda -->
+  <section>
+    <span class="kicker">I dag</span>
+    <h2>Plan for i dag</h2>
+    <ol class="agenda">
+      <li>Sådan arbejder vi</li>
+      <li>Installér Python og en editor</li>
+      <li>Niveau 1: skærm og rumskib</li>
+      <li>Niveau 2: styr rumskibet</li>
+    </ol>
+    <p class="fragment muted">Ikke færdig med niveau 2? Så gør I det færdigt næste gang.</p>
+  </section>
+
+  <!-- 5. How we work -->
+  <section>
+    <span class="kicker">Sådan arbejder vi</span>
+    <h2>Dit spil, din fil</h2>
+    <div class="grid-3" style="margin-top: 0.6em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">📄</span><h3>Din egen fil</h3><p class="small">asteroids.py – hele forløbet</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">📋</span><h3>Kopiér</h3><p class="small">små stykker kode fra siden</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">🧭</span><h3>Find stedet</h3><p class="small">hvor skal koden stå?</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">❓</span><h3>???</h3><p class="small">udfyld selv de manglende bidder</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">☑️</span><h3>Tjek af</h3><p class="small">siden husker, hvor langt du er</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big pulse">🙋</span><h3>Spørg!</h3><p class="small">vi hjælper gerne</p></div>
+    </div>
+    <aside class="notes">
+      Vis kopiér/indsæt: markér, Ctrl/Cmd+C, klik det rigtige sted, Ctrl/Cmd+V.
+      Pointe: det svære (og sjove) er at finde UD AF hvor koden skal stå. Det er det, der gør dem til programmører.
+    </aside>
+  </section>
+
+  <!-- Copy + paste -->
+  <section>
+    <span class="kicker">Husk</span>
+    <h2>Kopiér og indsæt</h2>
+    <ol class="agenda">
+      <li class="fragment">Markér koden med musen (eller <kbd>Shift</kbd> + piletaster)</li>
+      <li class="fragment"><kbd>Ctrl</kbd> + <kbd>C</kbd>  /  <kbd>Cmd</kbd> + <kbd>C</kbd> for at kopiere</li>
+      <li class="fragment">Klik der i <em>din</em> kode, hvor den skal stå</li>
+      <li class="fragment"><kbd>Ctrl</kbd> + <kbd>V</kbd>  /  <kbd>Cmd</kbd> + <kbd>V</kbd> for at sætte ind</li>
+    </ol>
+    <p class="fragment small muted">Kodeboksene på siden har også en kopiér-knap.</p>
+  </section>
+
+  <!-- 6. Setup checklist -->
+  <section>
+    <span class="kicker">Klar, parat …</span>
+    <h2>Gør computeren klar</h2>
+    <ul class="clean" style="margin-top: 0.4em;">
+      <li class="fragment">🐍 Python fra <span class="cyan">python.org</span> <span class="small muted">(Windows: ✔ Add python.exe to PATH)</span></li>
+      <li class="fragment">🧑‍💻 <span class="pill">VS Code</span> eller <span class="pill pink">PyCharm</span></li>
+      <li class="fragment">📁 En mappe/et projekt: <code>asteroids</code></li>
+      <li class="fragment">📄 En fil: <code>asteroids.py</code></li>
+      <li class="fragment">🐢 Test: tegner turtle en streg?</li>
+    </ul>
+    <aside class="notes">
+      Alle følger siden "Installér Python og en editor". Gå rundt og hjælp. Typiske problemer:
+      Windows uden PATH-flueben, VS Code uden Python-udvidelse / uden environment, Homebrew-Python på Mac mangler python-tk.
+    </aside>
+  </section>
+
+  <!-- 7. Coordinate system -->
+  <section>
+    <span class="kicker">Turtles verden</span>
+    <h2>Koordinatsystemet</h2>
+    <div class="grid-2" style="align-items: center;">
+      <img class="framed" src={`${base}images/coordinate-system.svg`} alt="Koordinatsystem med (0, 0) i midten" />
+      <ul class="clean">
+        <li class="fragment">Hvor er <code>(0, 0)</code>?</li>
+        <li class="fragment cyan">→ i midten!</li>
+        <li class="fragment">Skærmen er 1200 bred. Hvad er <code>x</code> i højre kant?</li>
+        <li class="fragment cyan">→ 600 (og -600 i venstre)</li>
+      </ul>
+    </div>
+    <aside class="notes">Spørg klassen før I afslører svarene. Rumskibet starter i (0, 0) og peger mod højre.</aside>
+  </section>
+
+  <!-- 8. Sections map -->
+  <section>
+    <span class="kicker">Hold orden</span>
+    <h2>Et kort over koden</h2>
+    <Code code={`import turtle
+# CONSTANTS
+SCREEN_WIDTH = 1200
+# CLASSES  (lektion 2)
+# GAME SETUP
+player = turtle.Turtle()
+# EVENTS
+screen.onkeypress(press_left, "Left")
+# BEHAVIOURS
+def move_spaceship():
+# GAME LOOP
+def update():
+# START THE GAME
+screen.mainloop()`} lines="1|2-3|4|5-6|7-8|9-10|11-12|13-14" />
+    <aside class="notes">
+      Sektionerne er et kort over filen. Når der står "sæt ind i EVENTS", ved de, hvor de skal kigge.
+      Konstanter med STORE bogstaver. Python læser oppefra og ned, så START THE GAME står altid nederst.
+    </aside>
+  </section>
+
+  <!-- 9. After the function -->
+  <section>
+    <span class="kicker">Vigtigt!</span>
+    <h2>"Indsæt efter funktionen"</h2>
+    <div class="card center" style="margin-bottom: 0.5em;">
+      <p class="small"><span class="muted">Opgaven siger:</span> <span class="yellow">"Kopiér funktionen <code>press_right</code> og indsæt den efter funktionen <code>press_left</code>"</span></p>
+    </div>
+    <div class="grid-2">
+      <div class="fragment fade-up">
+        <p class="green">✅ Efter hele blokken</p>
+        <Code code={`def press_left():
+    keys_pressed["Left"] = True
+
+def press_right():
+    keys_pressed["Right"] = True`} lines="" />
+      </div>
+      <div class="fragment fade-up">
+        <p class="pink">❌ Efter første linje i funktionen</p>
+        <Code code={`def press_left():
+def press_right():
+    keys_pressed["Right"] = True
+    keys_pressed["Left"] = True`} lines="" />
+      </div>
+    </div>
+    <p class="fragment small muted">Funktionen er der, hvor der står <code>def</code>. Gå forbi de indrykkede linjer.</p>
+    <aside class="notes">Det her gik galt sidst vi kørte forløbet: børnene satte koden ind efter et KALD til funktionen. Brug lidt tid her.</aside>
+  </section>
+
+  <!-- Level 1, built section by section -->
+  <section>
+    <span class="kicker">Kommentarer</span>
+    <h2>Alt efter <code>#</code> er en note</h2>
+    <Code code={`#
+#  GAME SETUP
+#
+
+player.penup()  # to not draw lines`} lines="1-3|5" />
+    <ul class="clean">
+      <li class="fragment">Python springer kommentarer over</li>
+      <li class="fragment">I behøver ikke skrive dem af – men de hjælper dig senere</li>
+      <li class="fragment yellow">Skriv <strong>hvorfor</strong> – ikke <strong>hvad</strong></li>
+    </ul>
+    <aside class="notes">Mine kommentarer siger tit lidt "hvad" – det er for at hjælpe dem med at forstå koden i starten. Sektion-overskrifterne er dem, der er vigtigst at have med.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 1 · trin 1</span>
+    <h2>Hent turtle</h2>
+    <div class="grid-2">
+      <Code id="lvl1" small code={`import turtle`} lines="1" />
+      <ul class="clean">
+        <li>Så vi kan bruge turtle i vores kode</li>
+        <li class="fragment cyan">→ allerførste linje i din tomme fil</li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 1 · trin 2</span>
+    <h2>Konstanter</h2>
+    <div class="grid-2">
+      <Code id="lvl1" small code={`import turtle
+
+# CONSTANTS
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"`} lines="3-6|4|5|6" />
+      <ul class="clean">
+        <li>Bredden, højden og baggrundsfarven</li>
+        <li class="fragment">En <span class="yellow">konstant</span> er en variabel, der ikke ændrer sig, mens spillet kører</li>
+        <li class="fragment">STORE BOGSTAVER</li>
+        <li class="fragment cyan">Nemt at justere spillet senere – ét sted!</li>
+      </ul>
+    </div>
+    <aside class="notes">Lige efter import-linjen. Spørg: hvad sker der, hvis vi skriver 600 i stedet for 1200?</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 1 · trin 3</span>
+    <h2>Sæt skærmen op</h2>
+    <div class="grid-2">
+      <Code id="lvl1" small code={`import turtle
+
+# CONSTANTS
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+# GAME SETUP
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+screen.bgcolor(BG_COLOR)
+screen.tracer(0)`} lines="8-12|9|10|11|12" />
+      <ul class="clean small">
+        <li><code>Screen()</code> laver vinduet</li>
+        <li><code>setup</code> sætter størrelsen – med vores konstanter</li>
+        <li><code>bgcolor</code> sætter baggrundsfarven</li>
+        <li><code>tracer(0)</code> slår turtles langsomme animation fra – vi bestemmer selv, hvornår der tegnes</li>
+      </ul>
+    </div>
+    <aside class="notes">GAME SETUP kommer efter alle konstanterne. Bladr linje for linje.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 1 · trin 4</span>
+    <h2>Lav et rumskib</h2>
+    <div class="grid-2">
+      <Code id="lvl1" small code={`import turtle
+
+# CONSTANTS
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+# GAME SETUP
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+screen.bgcolor(BG_COLOR)
+screen.tracer(0)
+
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.penup()`} lines="14-17|14|15|16|17" />
+      <ul class="clean small">
+        <li>En ny turtle til spilleren</li>
+        <li>Formen er en trekant</li>
+        <li>Lysegrå kant, sort fyld</li>
+        <li><code>penup</code>: løft pennen, så den ikke tegner streger efter sig</li>
+      </ul>
+    </div>
+    <aside class="notes">Også i GAME SETUP, efter skærmen er sat op.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Niveau 1 · trin 5</span>
+    <h2>Start spillet</h2>
+    <div class="grid-2">
+      <Code id="lvl1" small code={`import turtle
+
+# CONSTANTS
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+# GAME SETUP
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+screen.bgcolor(BG_COLOR)
+screen.tracer(0)
+
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.penup()
+
+# START THE GAME
+screen.update()
+screen.mainloop()`} lines="19-21|20|21" />
+      <ul class="clean small">
+        <li><code>update</code>: tegn skærmen med rumskibet – vi slog jo <code>tracer</code> fra</li>
+        <li><code>mainloop</code>: luk ikke vinduet</li>
+        <li class="fragment yellow">Altid nederst i filen!</li>
+      </ul>
+    </div>
+    <aside class="notes">Efter både screen og player. Det her er hele niveau 1 – "samlet set".</aside>
+  </section>
+
+  <section>
+    <span class="kicker">Kør spillet ▶</span>
+    <h2>Ser det sådan ud?</h2>
+    <img class="framed" src={`${base}images/asteroids-01-screenshot.png`} alt="Sort spilvindue med et lille gråt rumskib i midten" />
+  </section>
+
+  <section>
+    <span class="kicker">Niveau 1 · bonus</span>
+    <h2>Et spidsere rumskib</h2>
+    <Code code={`# Stretch the triangle to be pointy
+player.shapesize(stretch_wid=0.75, stretch_len=1.5)`} lines="" />
+    <p class="fragment small">Kortere: <code>player.shapesize(0.75, 1.5)</code></p>
+    <p class="fragment big yellow">Hvor skal koden stå?</p>
+    <p class="fragment cyan">→ i GAME SETUP, sammen med de andre <code>player</code>-linjer</p>
+    <aside class="notes">Lad dem gætte først. På siden står den lige efter player.color(...).</aside>
+  </section>
+
+  <!-- 12. Events -->
+  <section>
+    <span class="kicker">Niveau 2</span>
+    <h2>Events: noget sker</h2>
+    <div class="grid-3" style="margin-top: 0.4em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">⌨️</span><p>En tast trykkes</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">🖱️</span><p>Musen klikker</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">⏰</span><p>Der går lidt tid</p></div>
+    </div>
+    <p class="fragment big yellow" style="margin-top: 0.6em;">… og vi <span class="neon">lytter</span> efter dem</p>
+    <div class="fragment"><Code code={`screen.listen()`} lines="" /></div>
+    <aside class="notes">Spørg: hvilke andre ting kan "ske" i et spil? (asteroide rammer, skud forsvinder …)</aside>
+  </section>
+
+  <!-- Names point at values -->
+  <section>
+    <span class="kicker">Husk: variabler</span>
+    <h2>Hvad bliver skrevet ud?</h2>
+    <Code code={`Stefan = "frivillig"
+name = Stefan
+print(name)`} lines="" />
+    <div class="grid-2" style="margin-top: 0.4em;">
+      <div class="card center fragment fade-up"><p class="big">A. Stefan</p></div>
+      <div class="card center fragment fade-up"><p class="big">B. frivillig</p></div>
+    </div>
+    <p class="fragment cyan">→ B! Et navn peger på en værdi. Et funktionsnavn peger på en funktion.</p>
+    <aside class="notes">Lad dem stemme med hænderne før svaret. Det er opvarmning til næste slide: vi kan give et funktionsnavn videre ligesom en variabel.</aside>
+  </section>
+
+  <!-- 14. Callbacks -->
+  <section>
+    <span class="kicker">Callback</span>
+    <h2>"Ring til mig, når …"</h2>
+    <Code code={`def press_left():
+    keys_pressed["Left"] = True
+
+screen.onkeypress(press_left, "Left")`} lines="1-2|4" />
+    <div class="grid-2" style="margin-top: 0.4em;">
+      <div class="card center fragment fade-up"><p class="green">✅ <code>press_left</code></p><p class="small">giv funktionen videre</p></div>
+      <div class="card center fragment fade-up"><p class="pink">❌ <code>press_left()</code></p><p class="small">kalder den med det samme</p></div>
+    </div>
+    <aside class="notes">
+      Metafor: du giver en ven dit nummer og siger "ring når filmen starter". Vennen ringer ikke nu – men når det sker.
+      Turtle gemmer funktionen og kalder den, når tasten trykkes. Derfor INGEN parenteser.
+    </aside>
+  </section>
+
+  <!-- 15. Press vs release -->
+  <section>
+    <span class="kicker">To events pr. tast</span>
+    <h2>Tryk ned … og slip</h2>
+    <ul class="clean">
+      <li class="fragment">Hvis vi kun lytter på "tast trykket", styrer computerens <span class="yellow">tastatur-gentagelse</span> det: a… aaaaaaa</li>
+      <li class="fragment">Og vi kan ikke dreje og flyve på samme tid 😕</li>
+      <li class="fragment">Hvad sker der, når jeg <span class="cyan">trykker</span> på en tast?</li>
+      <li class="fragment">Og når jeg <span class="pink">slipper</span> den igen?</li>
+    </ul>
+    <div class="grid-2 fragment" style="margin-top: 0.4em;">
+      <div class="card center"><span class="emoji-big">⬇️</span><h3><code>onkeypress</code></h3><p class="small">tasten trykkes ned</p></div>
+      <div class="card center"><span class="emoji-big">⬆️</span><h3><code>onkeyrelease</code></h3><p class="small">tasten slippes</p></div>
+    </div>
+    <p class="fragment small muted">Så kan vi dreje og flyve på samme tid!</p>
+    <aside class="notes">
+      Hvis man bare reagerer på "tast trykket", afhænger det af computerens tastatur-gentagelse (som når man holder A nede: aaaaaa) – og man kan kun én tast ad gangen.
+      Spørg: hvad kan vi bruge to forskellige funktioner til?
+    </aside>
+  </section>
+
+  <!-- 16-17. State in a dictionary, auto-animate -->
+  <section data-auto-animate>
+    <span class="kicker">Tilstand</span>
+    <h2>Spillet husker tasterne</h2>
+    <Code id="state" code={`keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}`} lines="1|2-5" />
+    <p class="fragment small">Et <span class="yellow">dictionary</span>: navn → værdi</p>
+    <aside class="notes">Tilstand (state) = hvordan spillet ser ud lige nu. Senere: point, liv, skud osv.</aside>
+  </section>
+
+  <section data-auto-animate>
+    <span class="kicker">Tilstand</span>
+    <h2>Events ændrer tilstanden</h2>
+    <Code id="state" code={`def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+screen.onkeypress(press_left, "Left")
+screen.onkeyrelease(release_left, "Left")`} lines="1-2|4-5|7-8" />
+  </section>
+
+  <!-- All keys -->
+  <section>
+    <span class="kicker">Din tur</span>
+    <h2>Lav selv resten</h2>
+    <table class="keys">
+      <thead><tr><th>Tast</th><th>Tryk ned</th><th>Slip</th></tr></thead>
+      <tbody>
+        <tr><td><code>"Left"</code></td><td><code>press_left</code></td><td><code>release_left</code></td></tr>
+        <tr class="fragment"><td><code>"Right"</code></td><td><code>press_right</code></td><td><code>release_right</code></td></tr>
+        <tr class="fragment"><td><code>"Up"</code></td><td><code>press_forward</code></td><td><code>release_forward</code></td></tr>
+        <tr class="fragment"><td><code>"space"</code></td><td><code>press_fire</code></td><td><code>release_fire</code></td></tr>
+      </tbody>
+    </table>
+    <p class="fragment small">8 funktioner i <code># EVENTS</code> – og så <code>screen.listen()</code> efterfulgt af 8 linjer med <code>onkeypress</code> / <code>onkeyrelease</code></p>
+    <aside class="notes">Mellemrumstasten (space) bruger vi først når vi skal skyde i lektion 2, men vi laver den nu.</aside>
+  </section>
+
+  <!-- Speed constants -->
+  <section>
+    <span class="kicker">Nye konstanter</span>
+    <h2>Hvor hurtigt?</h2>
+    <Code code={`GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick`} lines="2|3|1" />
+    <p class="fragment small">I <code># CONSTANTS</code> – så er det nemt at justere farten senere</p>
+    <aside class="notes">GAME_TICK forklares rigtigt under game loop om lidt.</aside>
+  </section>
+
+  <!-- 18. Behaviour -->
+  <section>
+    <span class="kicker">Adfærd</span>
+    <h2>Hvad gør den her?</h2>
+    <Code code={`def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(???)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)`} lines="1|2-3|4-5|6-7" />
+    <p class="fragment">Hvad skal stå i stedet for <code>???</code></p>
+    <p class="fragment small muted">Men … hvem kalder <code>move_spaceship()</code>? Og hvor tit?</p>
+  </section>
+
+  <!-- 19. Game loop as flipbook -->
+  <section data-background-gradient="radial-gradient(circle at 50% 50%, #0f2a6e, #05041a 70%)">
+    <span class="kicker">Game loop</span>
+    <h2 class="neon">Som en flipbog</h2>
+    <div class="grid-3" style="margin-top: 0.4em;">
+      <div class="card center fragment fade-up"><span class="emoji-big">🎮</span><h3>1. Opdatér</h3><p class="small">flyt ting ud fra tasterne</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">🖼️</span><h3>2. Tegn</h3><p class="small">tegn skærmen igen</p></div>
+      <div class="card center fragment fade-up"><span class="emoji-big">⏸️</span><h3>3. Pause</h3><p class="small">en bitte lille pause</p></div>
+    </div>
+    <div class="fragment" style="display: flex; gap: 1.2em; justify-content: center; margin-top: 0.8em;">
+      <div class="card" style="width: 160px;"><div style="transform: rotate(90deg); width: 40px;"><Ship size={40} flame /></div></div>
+      <div class="card" style="width: 160px; padding-left: 50px;"><div style="transform: rotate(90deg); width: 40px;"><Ship size={40} flame /></div></div>
+      <div class="card" style="width: 160px; padding-left: 90px;"><div style="transform: rotate(90deg); width: 40px;"><Ship size={40} flame /></div></div>
+    </div>
+    <p class="fragment small muted">Hver side = ét <span class="yellow">tick</span>. ca. 50 ticks i sekundet!</p>
+    <aside class="notes">Spørg om nogen har lavet en flipbog. Hver side flytter tegningen en lille smule – bladr hurtigt, så bevæger den sig.</aside>
+  </section>
+
+  <!-- 20. update + ontimer -->
+  <section>
+    <span class="kicker">Game loop</span>
+    <h2>Vores <code>update</code></h2>
+    <Code code={`GAME_TICK = 20  # milliseconds
+
+def update():
+    move_spaceship()
+
+    screen.update()
+    screen.ontimer(update, GAME_TICK)
+
+update()
+screen.mainloop()`} lines="1|3-4|6|7|9" />
+    <p class="fragment">Hvad tror I, <code>ontimer</code> gør?</p>
+    <p class="fragment small cyan">"Kald update igen om 20 millisekunder" – en callback igen!</p>
+    <aside class="notes">Pointe: update kalder sig selv igen og igen via ontimer. Bemærk: update uden parenteser i ontimer. Og nederst kalder vi update() én gang for at sætte gang i det.</aside>
+  </section>
+
+  <!-- 21. Build! -->
+  <section data-background-gradient="radial-gradient(circle at 50% 40%, #3a0f6e, #05041a 70%)">
+    <Ship size={90} flame class="float" />
+    <h2 class="neon">Nu skal I bygge!</h2>
+    <p class="big yellow">/python-asteroids/lektion-1-rumskibet/0-oversigt/</p>
+    <ol class="agenda small" style="margin-top: 0.4em;">
+      <li>Installér Python og en editor</li>
+      <li>Niveau 1 og 2</li>
+      <li>Færdig? Prøv ekstra-opgaverne ✨</li>
+    </ol>
+    <p class="small muted">Næste gang: har du ikke været her, er der en "Jeg var her ikke sidst"-boks på oversigten.</p>
+    <aside class="notes">Gå rundt og hjælp med installationen først – det tager typisk længst. Husk dem på at gemme, og at de skal bruge samme fil næste gang.</aside>
+  </section>
+
+</SlideDeck>
