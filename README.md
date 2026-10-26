@@ -1,5 +1,46 @@
-# Asteroid spil forløb
+# Asteroids Game Tutorial 🚀
 
+Build your own Asteroids game in Python using Turtle Graphics!
+
+## 📚 View the Tutorial
+
+**The complete tutorial is now available on GitHub Pages:**
+
+👉 **[https://StefanUG.github.io/CodingPirates_Asteroids](https://StefanUG.github.io/CodingPirates_Asteroids)**
+
+The website includes:
+- 20+ step-by-step lessons
+- Interactive code examples
+- Beautiful space-themed design
+- Easy navigation between lessons
+- Customization guide
+
+---
+
+## 🎮 About This Project
+
+This repository contains guided lessons to build your own Asteroids game in Python using Turtle Graphics built into the Python library - no external libraries needed!
+
+Perfect for learning:
+- Python programming basics
+- Game development concepts
+- Object-oriented programming
+- Event handling and game loops
+- Collision detection
+
+---
+
+## 🚀 Quick Start
+
+1. **Install Python 3.x** if you haven't already
+2. **Install PyCharm Community Edition** (recommended) or any Python IDE
+3. **Clone this repository** or download the files
+4. **Follow the lessons** on the GitHub Pages site
+5. **Run the example files** numbered `01_` through `20_` to see each stage
+
+---
+
+## 📖 Course Structure
 
 | Uge | 1. time                                                      | 2. time                                                                              |
 |:---:|--------------------------------------------------------------|--------------------------------------------------------------------------------------|
@@ -11,6 +52,116 @@
 |  -  | Let's have more than one life (16)                           | Let's add a grace period (17), Flash when hit (18)                                   |
 |  6  | Move with thrust like in space (19)                          | Thrust animation (20)                                                                |
 |  7  | Make it yours                                                | Demo to the others                                                                   |
+
+---
+
+## 📝 Lesson Overview
+
+### Part 1: Getting Started (Lessons 1-4)
+1. Create Screen and Player
+2. Make the spaceship move with events
+3. Make it move better with keypress and keyrelease
+4. Prevent player from exiting the screen (or appearing in the other side)
+
+### Part 2: Shooting Mechanics (Lessons 5-8)
+5. Make the spaceship shoot one bullet
+6. Add a lifetime to bullets and make them wrap screens
+7. Add more bullets (but oops, they fire too rapidly!)
+8. Add a Player class and cooldown/reload time
+
+### Part 3: Asteroids (Lessons 9-11)
+9. Add asteroids
+10. Shoot the asteroids
+11. Fix bullets not passing through (invisible asteroid issue)
+
+### Part 4: Game Features (Lessons 12-15)
+12. Game over if hitting asteroids
+13. Add score and display it
+14. Make the asteroids move
+15. Respawn asteroids
+
+### Part 5: Advanced Features (Lessons 16-20)
+16. Add health system with multiple lives
+17. Add a grace period after being hit
+18. Flash during grace period for visual feedback
+19. Move like in space (realistic physics)
+20. Add thrust animation
+
+### Make It Your Own!
+- Change background color
+- Change player shape or color
+- Change asteroid shape or color
+- Change keys that control the spaceship
+- Add your own features!
+
+---
+
+## 🌟 Advanced Ideas
+
+Want to take your game further? Try these challenges:
+
+- Break down asteroids when they are shot
+- Make the ship follow the mouse pointer and click to shoot
+- Make explosion animations
+- Make custom shapes for asteroids
+- Make random shapes for asteroids
+- Make the asteroids rotate as they move
+- Don't spawn asteroids on top of player
+- Handle getting hit by your own shots
+
+---
+
+## 🛠️ Repository Structure
+
+```
+├── lessons/               # Jekyll lesson pages (view on GitHub Pages)
+├── docs/                  # Original Trinket markdown files
+├── 01_*.py through 20_*.py # Example code for each lesson
+├── MIY_*.py              # Make It Yours examples
+├── _config.yml           # Jekyll configuration
+├── index.md              # GitHub Pages homepage
+└── README.md             # This file
+```
+
+---
+
+## 🌐 GitHub Pages Setup
+
+This repository uses GitHub Pages with Jekyll and the "Just the Docs" theme.
+
+### Viewing Locally
+
+To run the site locally:
+
+```bash
+# Install dependencies
+bundle install
+
+# Run Jekyll server
+bundle exec jekyll serve
+
+# Visit http://localhost:4000/CodingPirates_Asteroids
+```
+
+### Publishing Updates
+
+The site automatically deploys when you push to the `main` branch. GitHub Actions will build and publish the site.
+
+---
+
+## 📄 License
+
+This project is open source and available for educational purposes.
+
+---
+
+## 🙏 Acknowledgments
+
+This tutorial was created for CodingPirates workshops to teach Python game development in a fun and engaging way!
+
+---
+
+## 📚 Original Course Notes
 
 # Step by step
 
@@ -35,7 +186,9 @@
 - 19 move like in space
 - 20 add thrust animation
 
-More advanced
+---
+
+## 📚 Additional Resources & Inspiration
 
 - break down asteroids when they are shot
 - make the ship follow the mouse pointer and click to shoot
@@ -46,15 +199,9 @@ More advanced
 - don't spawn asteroids on top of player
 - get hit by one's own shots
 
-Make it yours!
+---
 
-- Change background color
-- Change player shape or color
-- Change asteroid shape or color
-- Change keys that control the spaceship
-
-
-## Noter om materialet
+## 👨‍🏫 Instructor Notes
 
 Følg-selv med materialet for lesson 2 var lidt for svært. Bør rettes til, så det bliver lidt lettere.
 
@@ -64,8 +211,9 @@ Skip move player og gå direkte til move better for at få mere tid til mere sp�
 "indsæt efter en funktion" instruktionerne sætter børnene bare ind efter et kald til en funktion. Ikke efter definitionen på den. 
 Gennemgå på et passende tidspunkt hvad der menes med sådan en sætning.
 
+---
 
-## Acceleration
+## 🔧 Technical Notes
 
 Track vs. Heading
 
@@ -82,7 +230,9 @@ def thrust():
             s1.speedx, s1.speedy = (s1.speedx * Spaceship.maxspeed) / speed, (s1.speedy * Spaceship.maxspeed)/speed
 ```
 
-## Inspiration
+---
+
+## 🎨 Inspiration & References
 
 The best implementation of the game so far:
 
