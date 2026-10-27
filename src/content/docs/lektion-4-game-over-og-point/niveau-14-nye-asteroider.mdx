@@ -1,0 +1,533 @@
+---
+title: "Niveau 14 – Nye asteroider"
+description: Lad skudte asteroider komme tilbage efter et stykke tid med en nedtælling.
+sidebar:
+  order: 24
+---
+
+Når du er god til spillet, er alle asteroiderne hurtigt skudt, og så er der ikke mere at lave. Efter dette niveau kommer en skudt asteroide **tilbage** efter et lille stykke tid, med en ny retning og fart. Så kan du blive ved med at samle point!
+
+Når noget dukker op igen i et spil, kalder man det at *respawne*.
+
+**Det nye i dag:** En **nedtælling**. Hver asteroide får sin egen tæller, som tæller ned én gang i hvert tick. Når den når 0, kommer asteroiden tilbage. Det minder om `fire_cooldown`, som du lavede til genladetiden.
+
+## Prøv det først: en nedtælling
+
+Her tæller vi ned, ligesom spillet gør det i hvert tick. Løkken spiller game loopet:
+
+```python.run
+respawn_in = 5
+visible = False
+
+tick = 0
+while not visible:
+    tick += 1
+    respawn_in -= 1
+    print("Tick", tick, "- respawn om", respawn_in)
+    if respawn_in == 0:
+        visible = True
+        print("Asteroiden er tilbage!")
+```
+
+Prøv at ændre:
+- Start tælleren på `10` i stedet for `5`.
+- Hvad sker der, hvis du ændrer `== 0` til `== 2`?
+
+## Hvor lang tid skal de være væk?
+
+Vi måler tiden i antal *game ticks*. Ét tick er 20 millisekunder (det er `GAME_TICK`). Så 150 ticks er 150 × 20 = 3000 millisekunder, altså **3 sekunder**. Vi gemmer det i en konstant:
+
+```python
+ASTEROID_RESPAWN_AFTER = 150  # respawn after number of game ticks
+```
+
+- [ ] Sæt koden ind i `# CONSTANTS` sektionen, f.eks. efter `ASTEROID_SPEED_MAX = 5`
+
+## En tæller på asteroiden
+
+Når en asteroide bliver ramt, skal den selv tælle ned, indtil den kan komme tilbage. Så hver asteroide skal have sin egen tæller. Vi kalder den `respawn_in` og starter den på 0:
+
+```python
+        self.respawn_in = 0
+```
+
+- [ ] Sæt koden ind i `Asteroid.__init__` funktionen, f.eks. lige efter `self.radius = 30`
+
+## Når asteroiden bliver ramt
+
+Lad os lære `Asteroid`-klassen, hvad der skal ske, når en asteroide bliver ramt. Det bliver en ny funktion på klassen, `hit`. Den skal:
+- skjule asteroiden
+- starte nedtællingen
+
+```python
+    def hit(self):
+        self.hideturtle()
+        self.respawn_in = ASTEROID_RESPAWN_AFTER
+```
+
+- [ ] Sæt koden ind i `Asteroid` klassen, **efter** hele `__init__`-funktionen (efter alle dens indrykkede linjer). `def hit(self):` skal have samme indrykning som `def __init__(self):`.
+
+## Kald `hit`, når en kugle rammer
+
+Der hvor vi før bare skjulte asteroiden, skal vi nu kalde `hit` i stedet. Så bliver nedtællingen også startet.
+
+Før:
+```python
+            if hit_asteroid:
+                hit_asteroid.hideturtle()
+```
+
+Efter:
+```python
+            if hit_asteroid:
+                hit_asteroid.???()
+```
+
+- [ ] I `move_bullets` funktionen: ret linjen under `if hit_asteroid:`, så den kalder `hit` funktionen på den ramte asteroide. Hvad skal der stå i stedet for `???`?
+
+## Tæl ned, når asteroiden ikke er synlig
+
+I `move_asteroids` har vi allerede en `if asteroid.isvisible():`-blok. Den flytter de synlige asteroider. Nu laver vi en `else:`-del til den, som tager sig af de **usynlige** (skudte) asteroider:
+- tæl `respawn_in` én ned
+- hvis tælleren er nået 0, så nulstil asteroiden med `reset()`
+
+```python
+        else:
+            asteroid.respawn_in -= 1
+            if asteroid.respawn_in == 0:
+                asteroid.reset()
+```
+
+- [ ] Indsæt koden i `move_asteroids` funktionen, så den bliver `else`-delen til den eksisterende `if asteroid.isvisible():`-blok. Den skal stå efter linjen `player.alive = False`.
+
+:::note[Husk indrykningen på `else`]
+`else` skal have **samme indrykning** som den `if`, den hører til.
+
+En `if`-blok uden `else`:
+
+```python
+if something:
+    do_stuff()
+```
+
+En `if`-blok med en `else`-del:
+
+```python
+if something:
+    do_stuff()
+else:
+    do_something_else()
+```
+
+Her hører `else:` til `if asteroid.isvisible():`, ikke til `if abs(player.distance(asteroid)) ...`. Så den skal stå længere ude.
+:::
+
+## Men hvad gør `reset()`?
+
+Vi har jo ikke lavet nogen `reset`-funktion på `Asteroid`. Det gør vi nu!
+
+Skal asteroiden have samme retning og fart, som da den blev skudt? Det synes jeg ikke! Så `reset` skal give den en ny tilfældig retning og fart, og så vise den igen. Koden til retning og fart har vi allerede i `__init__`. Den **flytter** vi ned i `reset`:
+
+```python
+    def reset(self):
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+        self.showturtle()
+```
+
+- [ ] Find de to linjer i `Asteroid.__init__`, som sætter heading og speed (`self.setheading(...)` og `self.speed = ...`), og **slet dem**.
+- [ ] Indsæt `reset`-funktionen i `Asteroid`-klassen, efter hele `__init__`-funktionen. Den må gerne stå før eller efter `hit` – rækkefølgen er ligegyldig. `def reset(self):` skal have samme indrykning som `def hit(self):`.
+
+## Kald `reset` fra `__init__`
+
+En ny asteroide skal stadig have en tilfældig retning og fart. Men den kode er jo flyttet ud af `__init__`. Løsningen: `__init__` kalder bare `reset`!
+
+```python
+        self.reset()
+```
+
+- [ ] Indsæt koden i `Asteroid.__init__` funktionen, der hvor du før slettede de to linjer (til sidst i `__init__`)
+
+Det er god skik, at alle variabler på et objekt bliver lavet i `__init__`. Så vi giver også `speed` en startværdi der, før vi kalder `reset`:
+
+```python
+        self.speed = 0
+```
+
+- [ ] Indsæt koden i `Asteroid.__init__` funktionen, lige **før** `self.reset()`
+
+## Prøv spillet
+
+- [ ] Start spillet og skyd en asteroide. Kommer den tilbage efter ca. 3 sekunder?
+- [ ] Får den en ny retning og fart, når den kommer tilbage?
+- [ ] Bliver du ved med at få point?
+
+:::tip[Typiske fejl]
+- `AttributeError: 'Asteroid' object has no attribute 'hit'` (eller `'reset'`): Står `def hit(self):` og `def reset(self):` med samme indrykning som `def __init__(self):`? Hvis de er rykket for langt ind, hører de til `__init__` i stedet for klassen.
+- Asteroiderne kommer aldrig tilbage: Har du ændret `hit_asteroid.hideturtle()` til `hit_asteroid.hit()`? Ellers starter nedtællingen aldrig.
+- Asteroiderne står stille: Har du husket `self.reset()` i `__init__`? Og står `self.speed = 0` **før** `self.reset()`, ikke efter?
+- `else:` giver fejl: Tjek, at den har samme indrykning som `if asteroid.isvisible():`.
+:::
+
+:::caution[Pas på!]
+En asteroide kommer tilbage samme sted, som den blev skudt. Hvis du lige står der, bliver det GAME OVER. Kan du finde på en løsning? Det er en god ekstra-opgave.
+:::
+
+## Hjælp
+
+Sådan kan `Asteroid`-klassen se ud:
+
+```python.run norun="true"
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+        self.speed = 0
+        self.respawn_in = 0
+        self.reset()
+
+    def reset(self):
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+        self.showturtle()
+
+    def hit(self):
+        self.hideturtle()
+        self.respawn_in = ASTEROID_RESPAWN_AFTER
+```
+
+Og sådan kan `move_asteroids` se ud:
+
+```python.run norun="true"
+def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid)
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.alive = False
+        else:
+            asteroid.respawn_in -= 1
+            if asteroid.respawn_in == 0:
+                asteroid.reset()
+```
+
+<Solution title="Hele koden efter niveau 14">
+
+```python.run norun="true"
+import turtle
+import random
+
+"""
+Let the asteroids respawn
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+MAX_ASTEROIDS = 10
+ASTEROID_SPEED_MIN = 1
+ASTEROID_SPEED_MAX = 5
+ASTEROID_RESPAWN_AFTER = 150  # respawn after number of game ticks
+
+FONT_FAMILY = "Courier New"
+SCORE_FONT = (FONT_FAMILY, 16, "normal")
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+        self.alive = True
+        self.score = 0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+        self.speed = 0
+        self.respawn_in = 0
+        self.reset()
+
+    def reset(self):
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+        self.showturtle()
+
+    def hit(self):
+        self.hideturtle()
+        self.respawn_in = ASTEROID_RESPAWN_AFTER
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = Player()
+
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+# Create asteroids
+asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroids.append(Asteroid())
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def check_collision(with_turtle):
+    # Check for collisions between the player and asteroids
+    for asteroid in asteroids:
+        if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.alive = False
+
+    
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hit()
+                bullet.hideturtle()
+                bullet.active = False
+                player.score += 1
+                draw_score()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid) # let the kids figure this one out for a while
+            # also this one:
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.alive = False
+        else:
+            asteroid.respawn_in -= 1
+            if asteroid.respawn_in == 0:
+                asteroid.reset()
+
+
+def draw_score():
+    score_pen.clear()
+    score_pen.write(player.score, font=SCORE_FONT)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    move_bullets()
+    move_asteroids()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.goto(0, 0)
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+
+
+#
+#  START THE GAME
+#
+
+draw_score()
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

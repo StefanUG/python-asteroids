@@ -1,0 +1,474 @@
+---
+title: "Niveau 4 – Skyd én kugle"
+description: Lav en Bullet-klasse og få rumskibet til at skyde.
+sidebar:
+  order: 14
+---
+
+Nu skal rumskibet kunne **skyde**! Når du er færdig med dette niveau, kan du trykke på mellemrumstasten (space), og så flyver en kugle ud fra rumskibet i den retning, det peger.
+
+**Det nye i dag:** en **klasse**. En klasse er en opskrift på en ny slags ting i dit program. Vi laver en klasse, der hedder `Bullet` (kugle). Den er en turtle – men en turtle, der kan lidt mere.
+
+## Hvad er en klasse?
+
+Kender du klassificeringer fra dyreriget? Biologer deler dyr ind i grupper:
+
+- **Hvirveldyr** er dyr med rygrad.
+- **Varmblodede dyr** er hvirveldyr, der holder deres egen kropstemperatur.
+- **Pattedyr** og **fugle** er begge varmblodede dyr.
+
+<img src={import.meta.env.BASE_URL + "images/classification-of-animals.jpg"} alt="Tegning af hvordan dyr deles ind i grupper: hvirveldyr og hvirvelløse dyr, og videre ned i pattedyr, fugle, fisk og så videre" />
+
+En fugl **er** et dyr. Den kan alt det, et dyr kan (spise), og så kan den noget mere (flyve). Klasser i programmering virker på samme måde. En klasse beskriver en slags ting, der har nogle egenskaber og kan nogle ting.
+
+Prøv at køre det her eksempel:
+
+```python.run
+class Animal:
+
+    def __init__(self):
+        self.hungry = True
+
+    def eat(self):
+        print("Dyret spiser")
+        self.hungry = False
+
+
+class Bird(Animal):
+
+    def __init__(self):
+        super().__init__()
+        self.flying = False
+
+    def fly(self):
+        print("Fuglen flyver")
+        self.flying = True
+
+
+ant = Animal()
+ant.eat()
+
+hawk = Bird()
+print("Er høgen sulten?", hawk.hungry)
+hawk.eat()
+hawk.fly()
+print("Er høgen sulten?", hawk.hungry)
+print("Flyver høgen?", hawk.flying)
+```
+
+Her er de vigtigste ting:
+
+- `class Bird(Animal):` betyder "en `Bird` er et `Animal`". Derfor kan høgen både `eat()` og `fly()`.
+- `__init__` er en særlig funktion, der bliver kørt **hver gang**, vi laver en ny ting med `Bird()`. Her gør vi tingen klar, for eksempel at den er sulten fra start.
+- `super().__init__()` betyder "kør også `__init__` fra den klasse, jeg bygger videre på". Så bliver høgen først gjort klar som et dyr, og derefter som en fugl.
+- `self` betyder "mig selv" – den ting, funktionen arbejder på lige nu. `self.hungry` er høgens egen variabel.
+- En funktion inde i en klasse kaldes en **metode**. `eat` og `fly` er metoder.
+
+Prøv at ændre koden:
+
+- Lav en metode `sing` i `Bird`, der printer en fuglesang, og kald den med `hawk.sing()`.
+- Prøv at slette linjen `super().__init__()` og kør igen. Hvad sker der med `hawk.hungry`? Hvorfor?
+
+## En kugle er en turtle!
+
+En turtle kan allerede flytte sig. Men vores kugle skal kunne lidt mere:
+
+- **affyres** – fra det sted, rumskibet er
+- **flytte sig** – hurtigt fremad
+- senere: **ramme asteroider**
+
+Så vores `Bullet` skal være en `turtle.Turtle`, ligesom en fugl er et dyr.
+
+## Kuglens hastighed
+
+Kuglen skal flyve dobbelt så hurtigt som rumskibet. Vi gemmer hastigheden som en konstant:
+
+```python
+BULLET_SPEED = PLAYER_SPEED * ???
+```
+
+- [ ] Sæt koden ind i `CONSTANTS`-sektionen, lige under `PLAYER_SPEED`.
+- [ ] Erstat `???`, så `BULLET_SPEED` er dobbelt så meget som `PLAYER_SPEED`.
+
+## En ny sektion til vores klasser
+
+Klasser får deres egen sektion i koden. Lav en ny kommentar efter konstanterne (efter `HALF_HEIGHT`) og før `GAME SETUP`:
+
+```python
+#
+#  Classes
+#
+```
+
+Klassen skal stå **før** `GAME SETUP`, fordi vi skal bruge den, når vi laver kuglen i `GAME SETUP`.
+
+- [ ] Indsæt kommentaren efter konstanterne og før `GAME SETUP`.
+
+## En ny klasse til vores kugle
+
+Vi starter simpelt med skelettet til `Bullet`-klassen:
+
+```python
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.active = False
+
+    def fire(self, start):
+        self.active = True
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+```
+
+- `class Bullet(turtle.Turtle):` betyder "en `Bullet` er en turtle". Derfor kan den alt det, en turtle kan, for eksempel `forward`.
+- `super().__init__()` gør kuglen klar som en almindelig turtle. Uden den virker turtle-delen ikke.
+- `self.active` holder styr på, om kuglen flyver lige nu. Fra start er den **ikke** aktiv (`False`).
+- `fire` bliver kaldt, når kuglen skydes af. `move` bliver kaldt i hvert game loop, når kuglen flyver.
+
+:::note[En lille note til self]
+Alle metoder inde i en klasse skal have `self` som den første parameter. Inde i klassen ved vi nemlig ikke, hvad kuglen kommer til at hedde udenfor. Derfor skriver vi `self.forward(BULLET_SPEED)` inde i klassen. Udenfor klassen bruger vi variablens navn, for eksempel `bullet.move()`.
+:::
+
+- [ ] Sæt koden ind i den nye `Classes`-sektion.
+
+## Hver ny kugle (`__init__`)
+
+Når en ny kugle bliver lavet, skal vi gøre den klar. Indsæt disse linjer i `__init__`, lige under `super().__init__()`:
+
+```python
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+```
+
+1. Kuglen bliver en lille firkant: `shape` og `shapesize`. `0.2` betyder 20 % af normal størrelse.
+2. Den bliver lysegrå: `color`.
+3. Vi løfter pennen, så den ikke tegner streger: `penup`.
+4. Vi skjuler den, så man ikke kan se den, før den bliver skudt af: `hideturtle`.
+
+Linjerne skal rykkes ind med 8 mellemrum, fordi de står inde i en metode, som står inde i en klasse.
+
+- [ ] Sæt alle kodelinjerne ind i `__init__`, under `super().__init__()`.
+
+## Når kuglen affyres (`fire`)
+
+Læg mærke til parameteren `start` i `def fire(self, start):`. Hvad tror du, det er? Det er den turtle, kuglen skal skydes **fra** – altså rumskibet!
+
+Indsæt disse linjer i `fire`, under `self.active = True`:
+
+```python
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+```
+
+1. Kuglen flyttes hen til rumskibet. Vi tager x og y fra `start`.
+2. Kuglen peger samme vej som rumskibet. Vi tager retningen (`heading`) fra `start`.
+3. Nu viser vi kuglen.
+
+- [ ] Sæt alle kodelinjerne ind i `fire`, under `self.active = True`.
+
+## Når kuglen flytter sig (`move`)
+
+Kuglen flytter sig allerede fremad i `move`. Men hvad nu, hvis den flyver ud over kanten? Så skal vi skjule den og sætte den til **ikke aktiv**, så den kan skydes igen.
+
+```python
+        # Border checking for bullet
+        # abs turns any number to a positive number
+        if abs(self.xcor()) > HALF_WIDTH or abs(self.ycor()) > HALF_HEIGHT:
+            self.hideturtle()
+            self.active = False
+```
+
+`abs` laver et tal positivt: `abs(-700)` er `700`. Så kan vi tjekke både venstre og højre kant på én gang. Betingelsen er sand, hvis kuglen er for langt ude til siden **eller** (`or`) for langt oppe eller nede.
+
+- [ ] Sæt kodelinjerne ind i `move`, under `self.forward(BULLET_SPEED)`.
+
+## Lav en kugle
+
+Nu har vi opskriften. Så kan vi lave en rigtig kugle. Det gør vi i `GAME SETUP`-sektionen, under rumskibet:
+
+```python
+# Create a turtle for the bullet
+bullet = Bullet()
+```
+
+Når vi skriver `Bullet()`, bliver `__init__` kørt, og vi får en ny, skjult kugle.
+
+- [ ] Sæt koden ind i `GAME SETUP`-sektionen, under koden til `player` og før `EVENTS`.
+
+## En ny behaviour til kuglen
+
+Nu skal vi have en ny funktion i `BEHAVIOURS`, der styrer kuglen. Vi kalder den `move_bullets`. Den skal gøre to ting:
+
+1. Hvis space er trykket ned – og kuglen **ikke** allerede flyver – skal kuglen affyres fra rumskibet.
+2. Hvis kuglen er aktiv, skal den flyttes frem.
+
+```python
+def move_bullets():
+    if keys_pressed["???"] and not bullet.active:
+        bullet.fire(player)
+
+    if bullet.???:
+        bullet.move()
+```
+
+Læg mærke til `bullet.fire(player)`. Her sender vi rumskibet med som parameter. Inde i `fire` hedder det `start`.
+
+- [ ] Lav funktionen `move_bullets` i `BEHAVIOURS`-sektionen, efter hele `def move_spaceship():`-blokken (efter dens indrykkede linjer).
+- [ ] Ret `???` til, så koden virker. Kig i `keys_pressed`, hvad mellemrumstasten hedder. Og hvad hedder variablen, der fortæller, om kuglen flyver?
+
+## Opdatér game loop
+
+Den nye funktion skal kaldes i hvert game loop:
+
+```python
+    move_bullets()
+```
+
+- [ ] Indsæt koden i `update`-funktionen, lige under `move_spaceship()`.
+
+## Prøv spillet
+
+- [ ] Start spillet og tryk på space. Flyver der en kugle ud fra rumskibet?
+- [ ] Drej rumskibet og skyd igen. Flyver kuglen i den rigtige retning?
+- [ ] Hvad sker der, hvis du trykker space igen, mens kuglen flyver?
+
+:::tip[Typiske fejl]
+- **`NameError: name 'Bullet' is not defined`**: Klassen skal stå **før** `bullet = Bullet()`. Tjek, at `Classes`-sektionen er over `GAME SETUP`.
+- **`AttributeError: ... has no attribute ...`** når du laver kuglen: Har du husket `super().__init__()` som det første i `__init__`?
+- **`TypeError: ... missing 1 required positional argument`**: Har du glemt `self` som første parameter i en af metoderne?
+- **Der sker ingenting, når du trykker space**: Har du husket at kalde `move_bullets()` i `update`?
+:::
+
+## Hjælp
+
+Sådan kan hele `Bullet`-klassen se ud:
+
+```python.run norun="true"
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+
+    def fire(self, start):
+        self.active = True
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+
+        # Border checking for bullet
+        # abs turns any number to a positive number
+        if abs(self.xcor()) > HALF_WIDTH or abs(self.ycor()) > HALF_HEIGHT:
+            self.hideturtle()
+            self.active = False
+```
+
+Og sådan kan `move_bullets` se ud:
+
+```python.run norun="true"
+def move_bullets():
+    if keys_pressed["space"] and not bullet.active:
+        bullet.fire(player)
+
+    if bullet.active:
+        bullet.move()
+```
+
+<Solution title="Hele koden efter niveau 4">
+
+```python.run norun="true"
+import turtle
+
+"""
+Make the spaceship shoot one bullet
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+
+    def fire(self, start):
+        self.active = True
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+
+        # Border checking for bullet
+        # abs turns any number to a positive number
+        if abs(self.xcor()) > HALF_WIDTH or abs(self.ycor()) > HALF_HEIGHT:
+            self.hideturtle()
+            self.active = False
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.shapesize(stretch_wid=0.75, stretch_len=1.5) # Stretch the triangle to be pointy
+player.penup() # to not draw lines
+
+# Create a turtle for the bullet
+bullet = Bullet()
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+
+    
+def move_bullets():
+    if keys_pressed["space"] and not bullet.active:
+        bullet.fire(player)
+
+    if bullet.active:
+        bullet.move()
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    move_bullets()
+
+    screen.update()
+    screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+
+
+#
+#  START THE GAME
+#
+
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

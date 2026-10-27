@@ -1,0 +1,433 @@
+---
+title: "Niveau 11 – Game over"
+description: Stop spillet, når rumskibet flyver ind i en asteroide, og skriv GAME OVER på skærmen.
+sidebar:
+  order: 21
+---
+
+Kan rumskibet flyve lige igennem asteroiderne? Det er da ikke meningen! Efter dette niveau slutter spillet, når du flyver ind i en asteroide, og der står **GAME OVER** midt på skærmen.
+
+**Det nye i dag:** Spillet skal huske, om spilleren stadig er i live. Det gemmer vi i en variabel, der enten er `True` eller `False`, ligesom `bullet.active`. Og så skal en Turtle lære at **skrive tekst** på skærmen.
+
+## Prøv det først: en Turtle der skriver
+
+En Turtle kan ikke kun tegne streger. Den kan også skrive tekst med `write`. Med `font=(...)` bestemmer du skrifttype, størrelse og stil. Med `align="center"` står teksten midt over det sted, hvor Turtlen er.
+
+```python.run
+import turtle
+
+pen = turtle.Turtle()
+pen.penup()
+pen.color("red")
+pen.goto(0, 0)
+pen.write("GAME OVER", align="center", font=("Courier New", 40, "normal"))
+
+pen.color("blue")
+pen.goto(0, -60)
+pen.write("Prøv igen!", align="center", font=("Arial", 20, "bold"))
+```
+
+Prøv at ændre:
+- størrelsen fra `40` til `60`
+- `"normal"` til `"bold"` eller `"italic"`
+- `align="center"` til `align="left"` eller `align="right"`. Hvor havner teksten nu?
+
+`font=("Courier New", 40, "normal")` er tre ting i én parentes: **skrifttype**, **størrelse** og **stil**. Sådan en gruppe værdier i parentes hedder en *tuple*.
+
+## Kan I huske `check_collision`?
+
+Vi lavede `check_collision` til kuglerne. Den tager en Turtle som parameter og tjekker, om den Turtle rammer en af asteroiderne.
+
+Kan vi så også bruge den til rumskibet? Er vores `Player` en Turtle? **Ja da!** `Player` er jo lavet ud fra `turtle.Turtle`. Så vi kan skrive `check_collision(player)`.
+
+Men hvor skal vi tjekke det? Det giver mening at tjekke **lige efter vi har flyttet rumskibet**. Og hvad skal der så ske? Det kommer nu.
+
+## `Player.alive`
+
+Vi skal huske lidt mere *tilstand* om spilleren. Tilstand (på engelsk *state*) er det, spillet skal huske om noget, mens det kører. Spilleren husker allerede `fire_cooldown`. Nu skal den også huske, om den er i live: `alive`.
+
+```python
+        self.alive = True
+```
+
+Når spillet starter, er spilleren i live, så vi starter med `True`.
+
+- [ ] Indsæt `self.alive = True` i `Player.__init__` funktionen, f.eks. lige efter `self.fire_cooldown = 0`. Den skal have samme indrykning som `self.fire_cooldown = 0`.
+
+Når rumskibet rammer en asteroide, sætter vi `alive` til `False`:
+
+```python
+        if check_collision(player):
+            player.alive = False
+```
+
+`check_collision(player)` giver en asteroide tilbage, hvis rumskibet rammer en, og ellers `None`. En asteroide tæller som sand i en `if`, og `None` tæller som falsk. Så linjen under `if` sker kun, når der er et sammenstød.
+
+- [ ] Indsæt `if`-blokken i `move_spaceship` funktionen under `# BEHAVIOURS`, lige efter linjen `move_if_out_of_bounds(player)`. Den skal have **samme indrykning** som `move_if_out_of_bounds(player)`, så den står inde i `if keys_pressed["Up"]:`.
+
+:::note[Hvorfor inde i `if keys_pressed["Up"]:`?]
+Rumskibet flytter sig kun, når du trykker pil op. Så det er kun der, det kan flyve ind i en asteroide. (Asteroiderne står stille lige nu. Det ændrer vi i niveau 13.)
+:::
+
+## Når spilleren ikke er `alive` mere
+
+Hvad skal der så ske? Og hvor skal vi tjekke det?
+
+Spillet kører, fordi `update` hele tiden beder om at blive kaldt igen med `screen.ontimer(update, GAME_TICK)`. Hvis vi **lader være** med at kalde `ontimer`, så stopper game loopet. Så vi tjekker det til sidst i `update`, lige før vi beder om et nyt game loop:
+
+```python
+    if player.alive:
+        screen.ontimer(update, GAME_TICK)
+    else:
+        # GAME OVER
+```
+
+Læs det som: "Hvis spilleren er i live, så kør spillet videre. Ellers er det game over." Men hvordan skriver vi "GAME OVER"? Det kommer lige her.
+
+## En pen til at skrive med
+
+Vi laver en ny Turtle, som kun skal skrive tekst. Vi kalder den `pen` og giver den hvid farve. `visible=False` betyder, at selve Turtlen er usynlig. Vi vil kun se teksten, ikke en pil.
+
+```python
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+```
+
+- [ ] Indsæt koden i `# GAME SETUP` sektionen, f.eks. lige efter `player = Player()`
+
+## Skrifttype
+
+Vi gider ikke skrive navnet på skrifttypen igen og igen, så vi gemmer den i en konstant. Vi bruger "Courier New". Det er en skrifttype, hvor alle bogstaver er lige brede (på engelsk *fixed width*). Den ligner gammeldags computerskrift og passer godt til vores spil.
+
+```python
+FONT_FAMILY = "Courier New"
+```
+
+- [ ] Indsæt koden i `# CONSTANTS` sektionen, f.eks. efter `MAX_ASTEROIDS = 10`
+
+Nu kan pennen skrive sådan her:
+
+```python
+pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+```
+
+## Gør `update` færdig
+
+Nu kan vi gøre `if`/`else` i game loopet færdig:
+
+```python
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+```
+
+- [ ] Indsæt koden i `update` funktionen under `# GAME LOOP`, så den **erstatter** den nuværende linje med `screen.ontimer`. Den skal stå efter `screen.update()`.
+
+Pennen står i midten af skærmen (0, 0), fordi vi aldrig har flyttet den. Så `align="center"` gør, at GAME OVER står lige i midten.
+
+## Prøv spillet
+
+- [ ] Start spillet og flyv ind i en asteroide. Står der GAME OVER, og stopper spillet?
+- [ ] Skyd en asteroide og flyv derhen, hvor den var. Der må **ikke** blive game over, for den er jo væk.
+
+:::tip[Typiske fejl]
+- `NameError: name 'FONT_FAMILY' is not defined`: Har du sat konstanten ind under `# CONSTANTS`? Er det stavet ens begge steder?
+- `IndentationError` eller `expected an indented block`: `else:` skal stå lige under `if`, med samme indrykning. Og linjen med `pen.write` skal rykkes ind under `else:`.
+- Der sker ingenting ved sammenstød: Står `if check_collision(player):` inde i `move_spaceship`, efter `move_if_out_of_bounds(player)`?
+:::
+
+## Hjælp
+
+Sådan kan `move_spaceship` se ud, når du er færdig:
+
+```python.run norun="true"
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.alive = False
+```
+
+Og sådan kan `update` se ud:
+
+```python.run norun="true"
+def update():
+    move_spaceship()
+    move_bullets()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+```
+
+<Solution title="Hele koden efter niveau 11">
+
+```python.run norun="true"
+import turtle
+import random
+
+"""
+Game over if hitting an asteroid
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+MAX_ASTEROIDS = 10
+
+FONT_FAMILY = "Courier New"
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+        self.alive = True
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = Player()
+
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+# Create asteroids
+asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroids.append(Asteroid())
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def check_collision(with_turtle):
+    # Check for collisions between the player and asteroids
+    for asteroid in asteroids:
+        if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.alive = False
+
+    
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hideturtle()
+                bullet.hideturtle()
+                bullet.active = False
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    move_bullets()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+
+
+#
+#  START THE GAME
+#
+
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

@@ -1,0 +1,110 @@
+---
+title: "Installér Python og en editor"
+description: Gør din computer klar til at kode Asteroids i Python.
+sidebar:
+  order: 1
+---
+
+import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+I intro-forløbet kodede du direkte i browseren. Vores Asteroids-spil bruger nogle turtle-funktioner, som ikke virker i browseren. Derfor skal spillet laves på **din egen computer**. Til det skal du bruge to ting:
+
+- **Python**, som er det program, der kører din kode.
+- En **editor**, som er det program, du skriver koden i. Du kan vælge **VS Code** eller **PyCharm**. Begge er gratis og fine.
+
+## 1. Installér Python
+
+<Steps>
+
+1. Gå til [python.org/downloads](https://www.python.org/downloads/) og klik på den gule knap **Download Python 3.x**.
+
+2. Åbn filen, du har hentet, og følg installationen.
+
+   **På Windows:** Sæt flueben i **Add python.exe to PATH** nederst i det første vindue, *før* du klikker **Install Now**. Det er vigtigt!
+
+3. Når installationen er færdig, kan du lukke vinduet.
+
+</Steps>
+
+- [ ] Jeg har installeret Python
+
+## 2. Installér en editor og lav dit projekt
+
+Vælg den editor, du vil bruge. Spørg en voksen, hvis du ikke kan bestemme dig. Vi kan hjælpe med begge.
+
+<Tabs>
+<TabItem label="VS Code">
+
+<Steps>
+
+1. Hent VS Code fra [code.visualstudio.com](https://code.visualstudio.com/) og installér det.
+
+2. Åbn VS Code. Klik på **Extensions** i venstre side (ikonet med fire firkanter, eller `Ctrl+Shift+X` / `Cmd+Shift+X`). Søg efter **Python** og installér udvidelsen fra **Microsoft**.
+
+3. Lav en ny mappe til dit spil, fx `asteroids` i din Dokumenter-mappe.
+
+4. I VS Code: vælg **File → Open Folder...** og vælg din `asteroids`-mappe.
+
+5. Åbn **Command Palette** med `Ctrl+Shift+P` (Windows) eller `Cmd+Shift+P` (Mac). Skriv **Python: Create Environment** og tryk Enter. Vælg **Venv**, og vælg så den Python, du lige har installeret.
+
+   Et "environment" er en lille kasse til dit projekt, hvor Python og dets ting bor. Du kan se, det virkede, når der dukker en mappe op, der hedder `.venv`.
+
+6. Lav en ny fil: **File → New File...**, og kald den `asteroids.py`. Sørg for, at den ligger i din `asteroids`-mappe.
+
+7. Du kører din fil ved at klikke på ▶ (**Run Python File**) øverst til højre.
+
+</Steps>
+
+</TabItem>
+<TabItem label="PyCharm">
+
+<Steps>
+
+1. Hent PyCharm fra [jetbrains.com/pycharm/download](https://www.jetbrains.com/pycharm/download/) og installér det. Vælg den **gratis** udgave (Community). Du skal ikke købe noget.
+
+2. Åbn PyCharm og vælg **New Project**.
+
+3. Kald projektet `asteroids`. Lad PyCharm lave et nyt **virtualenv** (det er valgt i forvejen), og vælg den Python, du lige har installeret. Klik **Create**.
+
+   Et "virtualenv" er en lille kasse til dit projekt, hvor Python og dets ting bor.
+
+4. Højreklik på projektmappen `asteroids` i venstre side, og vælg **New → Python File**. Kald filen `asteroids`. PyCharm sætter selv `.py` på.
+
+5. Du kører din fil ved at klikke på den grønne ▶ øverst, eller ved at højreklikke i filen og vælge **Run 'asteroids'**.
+
+</Steps>
+
+</TabItem>
+</Tabs>
+
+- [ ] Jeg har installeret en editor
+- [ ] Jeg har lavet en mappe/et projekt, der hedder `asteroids`
+- [ ] Jeg har en tom fil, der hedder `asteroids.py`
+
+## 3. Test at turtle virker
+
+Lad os prøve, om alt virker. Kopiér denne kode ind i din `asteroids.py` og kør den:
+
+```python
+import turtle
+
+t = turtle.Turtle()
+t.forward(100)
+turtle.done()
+```
+
+Der skal åbne sig et vindue, hvor en lille pil tegner en streg. Luk vinduet, når du har set det.
+
+- [ ] Jeg har kørt testprogrammet, og der kom en streg
+- [ ] Jeg har slettet testkoden igen, så filen er tom og klar til spillet
+
+:::caution[Mac med Python fra Homebrew]
+Hvis du har installeret Python med Homebrew (`brew install python`), får du en fejl om `tkinter`, når du kører koden. Så skal du også køre `brew install python-tk` i en terminal. Har du installeret Python fra python.org, er alt med i forvejen.
+:::
+
+:::tip[Husk]
+- **Gem tit!** `Ctrl+S` (Windows) eller `Cmd+S` (Mac).
+- Du bruger **den samme fil** hele forløbet. Næste gang fortsætter du i din `asteroids.py`, så husk hvor den ligger.
+:::
+
+Når testen virker, er du klar til [Sådan er koden bygget op](/python-asteroids/lektion-1-rumskibet/2-kodens-opbygning/).

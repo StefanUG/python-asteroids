@@ -1,0 +1,131 @@
+---
+title: "Sådan er koden bygget op"
+description: Sektionerne i koden, indrykning, og hvor ny kode skal stå.
+sidebar:
+  order: 2
+---
+
+Spillet bliver til en lang fil. Derfor holder vi orden fra starten. Så kan du hurtigt finde det sted, hvor ny kode skal sættes ind.
+
+## Et kort over filen: sektioner
+
+Vi deler koden op i **sektioner**. Hver sektion starter med en kommentar-overskrift. Alt efter et `#` er en **kommentar**: Python springer det over, men det hjælper dig, når du læser koden.
+
+Sådan kommer din fil til at se ud. Rækkefølgen er altid den samme:
+
+```python
+import turtle
+
+#
+#  CONSTANTS
+#
+
+#
+#  CLASSES
+#
+
+#
+#  GAME SETUP
+#
+
+#
+#  EVENTS
+#
+
+#
+#  BEHAVIOURS
+#
+
+#
+#  GAME LOOP
+#
+
+#
+#  START THE GAME
+#
+```
+
+| Sektion | Hvad står der? |
+|---|---|
+| `import` | Øverst. Henter turtle (og senere andre moduler). |
+| `CONSTANTS` | Konstanter: tal og farver, vi kan skrue på, fx skærmens størrelse. |
+| `CLASSES` | Klasser. Dem lærer du om i lektion 2. |
+| `GAME SETUP` | Vi sætter spillet op: skærmen og rumskibet. |
+| `EVENTS` | Hvad der skal ske, når du trykker på en tast. |
+| `BEHAVIOURS` | Adfærd: hvordan tingene i spillet opfører sig, fx hvordan rumskibet flytter sig. |
+| `GAME LOOP` | Spil-løkken, der kører igen og igen. |
+| `START THE GAME` | Starter spillet. Står **altid nederst**. |
+
+Du skal ikke lave alle sektionerne nu. Vi tilføjer dem, efterhånden som vi får brug for dem.
+
+:::tip[Hvorfor sektioner?]
+Når en opgave siger "sæt koden ind i `# EVENTS`-sektionen", ved du præcis, hvor du skal kigge. Python læser koden **oppefra og ned**, så ting skal laves, før de bliver brugt. Derfor står konstanterne øverst, og start af spillet nederst.
+:::
+
+## Indrykning: hvad hører til hvad?
+
+De mellemrum, der står foran en linje, hedder **indrykning**. Indrykningen fortæller Python, hvilke linjer der hører til en funktion, en `if` eller en løkke. Det kender du fra intro-forløbet.
+
+```python
+def press_left():
+    keys_pressed["Left"] = True    # rykket ind: hører til press_left
+
+screen.listen()                    # ikke rykket ind: hører IKKE til press_left
+```
+
+Brug altid 4 mellemrum (eller Tab-tasten, som laver 4 mellemrum for dig).
+
+## Hvad betyder "indsæt efter funktionen"?
+
+Tit står der fx: **"Indsæt koden efter funktionen `press_left`"**. Det betyder: efter **hele** `def press_left():`-blokken, altså efter den sidste indrykkede linje. Den nye kode starter helt ude til venstre.
+
+Lad os sige, at du skal indsætte funktionen `press_right` efter funktionen `press_left`.
+
+✅ **Rigtigt** – efter hele blokken, ikke rykket ind:
+
+```python
+def press_left():
+    keys_pressed["Left"] = True
+
+def press_right():
+    keys_pressed["Right"] = True
+```
+
+
+❌ **Forkert** – lige efter linien med `def press_left():`, så får du nemlig fejl:
+
+```python
+def press_left():
+def press_right():
+    keys_pressed["Right"] = True
+    keys_pressed["Left"] = True
+```
+
+
+❌ **Forkert** – inde i blokken (rykket ind), så den bliver en del af `press_left`:
+
+```python
+def press_left():
+    keys_pressed["Left"] = True
+    def press_right():
+        keys_pressed["Right"] = True
+```
+
+❌ **Forkert** – efter en linje, der *bruger* `press_left`. Den linje er ikke funktionen, den bruger den bare:
+
+```python
+screen.onkeypress(press_left, "Left")
+def press_right():
+    keys_pressed["Right"] = True
+```
+
+Funktionen er der, hvor der står `def press_left():`. Find den linje, gå ned forbi de indrykkede linjer, og sæt den nye kode ind der.
+
+## Konstanter skrives med STORE bogstaver
+
+En **konstant** er en variabel, som ikke ændrer sig, mens spillet kører, fx `SCREEN_WIDTH = 1200`. Vi skriver dem med STORE bogstaver, så man kan se, at de er konstanter. Vil du ændre spillet, fx gøre skærmen større, skal du kun rette ét sted.
+
+- [ ] Jeg ved, hvilke sektioner koden er delt op i
+- [ ] Jeg ved, hvad "indsæt efter funktionen" betyder
+
+Nu er du klar til [Niveau 1 – Skærm og rumskib](/python-asteroids/lektion-1-rumskibet/niveau-01-skaerm-og-rumskib/).

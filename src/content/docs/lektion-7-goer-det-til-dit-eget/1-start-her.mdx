@@ -1,0 +1,74 @@
+---
+title: "Start her"
+description: Lav en kopi af dit færdige spil, så du trygt kan eksperimentere.
+sidebar:
+  order: 1
+---
+
+Før du begynder at ændre ting, skal dit spil, der virker, være i sikkerhed. Så kan du eksperimentere lige så vildt, du vil – og hvis alt går i stykker, har du stadig det gamle spil.
+
+## Find dit færdige spil
+
+Du starter fra dit spil, som det så ud efter **niveau 19** (rumskibet med raketflammen).
+
+- [ ] Åbn din egen fil fra sidste gang, og kør den. Virker spillet?
+
+Har du ikke din fil, eller virker den ikke? Så brug boksen **"Jeg var her ikke sidst"** på [oversigten](/python-asteroids/lektion-7-goer-det-til-dit-eget/0-oversigt/). Spørg underviseren om kodeordet, så får du hele den færdige kode.
+
+## Lav en kopi
+
+Nu laver vi en ny fil, som du må ændre i. Den gamle fil rører du ikke.
+
+1. Lav en ny fil i dit projekt, for eksempel `mit_spil.py`.
+2. Åbn din gamle fil, marker al koden (`Ctrl+A`, på Mac `Cmd+A`) og kopier den (`Ctrl+C` / `Cmd+C`).
+3. Gå til den nye fil og sæt koden ind (`Ctrl+V` / `Cmd+V`).
+4. Kør den **nye** fil. Spillet skal virke præcis som før.
+
+- [ ] Jeg har lavet en ny fil med en kopi af mit spil
+- [ ] Den nye fil kører, og spillet virker
+
+:::caution[Kør den rigtige fil]
+Tjek, at det er den **nye** fil, du kører. Ellers ændrer du i én fil og kører en anden, og så sker der ingenting!
+:::
+
+## Find det, du vil ændre
+
+Koden er lang – næsten 400 linjer! Men den er delt op i afsnit, som du kender: `# CONSTANTS`, `# CLASSES`, `# GAME SETUP`, `# EVENTS`, `# BEHAVIOURS`, `# GAME LOOP` og `# START THE GAME`.
+
+Brug **søg** for at finde ting hurtigt: tryk `Ctrl+F` (på Mac `Cmd+F`) og skriv for eksempel `color` eller `shape`.
+
+- [ ] Prøv at søge efter `color` i din fil. Hvor mange steder står det?
+
+## Skift skærmstørrelse
+
+Passer vinduet ikke til din skærm? Måske er det for stort, så du ikke kan se det hele. Eller måske har du en stor skærm og vil have mere plads.
+
+Størrelsen står øverst i `# CONSTANTS`:
+
+```python
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+```
+
+Ret tallene, for eksempel til:
+
+```python
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 600
+```
+
+Resten af spillet bruger `HALF_WIDTH` og `HALF_HEIGHT`, som bliver regnet ud fra de to tal. Derfor flyver rumskibet stadig rundt om kanten de rigtige steder.
+
+- [ ] Ret `SCREEN_WIDTH` og `SCREEN_HEIGHT`, så vinduet passer til din skærm
+- [ ] Kør spillet, og flyv ud over kanten. Kommer du ind på den anden side?
+
+## Sådan arbejder du bedst
+
+:::tip[Én ting ad gangen]
+1. Ændr **én** ting.
+2. Kør spillet.
+3. Virker det? Super – så tag den næste ting.
+4. Gik det galt? Fortryd med `Ctrl+Z` (`Cmd+Z`), eller kig på fejlbeskeden. Den fortæller, hvilken linje der er problemer med.
+:::
+
+Vælg nu, hvad du vil lave, på [oversigten](/python-asteroids/lektion-7-goer-det-til-dit-eget/0-oversigt/).

@@ -1,0 +1,79 @@
+---
+title: "Taster"
+description: Styr rumskibet med dine egne taster, for eksempel W, A og D.
+sidebar:
+  order: 4
+---
+
+Mange spil styres med **W**, **A**, **S** og **D** i stedet for piletasterne. Det kan dit spil også!
+
+## Find tasterne i koden
+
+I `# EVENTS`, lige efter `screen.listen()`, står de linjer, der kobler tasterne til funktionerne:
+
+```python
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+```
+
+Hver linje siger: "Når **denne tast** bliver trykket ned (eller sluppet), så kald **denne funktion**." Tasten er det sidste i parentesen, for eksempel `"Left"`.
+
+## Skift til W, A og D
+
+Udskift linjerne med dem her. Kun tasterne er ændret – funktionerne er de samme:
+
+```python
+screen.listen()
+screen.onkeypress(press_left, "a")
+screen.onkeypress(press_right, "d")
+screen.onkeypress(press_forward, "w")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "a")
+screen.onkeyrelease(release_right, "d")
+screen.onkeyrelease(release_forward, "w")
+screen.onkeyrelease(release_fire, "space")
+```
+
+- [ ] Skift tasterne i `# EVENTS`
+- [ ] Kør spillet, og styr med W, A og D
+
+:::note[Hvad med "Left" og "Up" i keys_pressed?]
+Ordbogen `keys_pressed` har stadig navnene `"Left"`, `"Right"` og `"Up"`. Det er helt i orden! De er bare navne på, **hvad** rumskibet skal gøre. Det er linjerne med `onkeypress` og `onkeyrelease`, der bestemmer, **hvilken tast** der gør det.
+:::
+
+## Pas på CAPS LOCK
+
+Hvis CAPS LOCK er slået til, sender tasterne store bogstaver, `"A"` i stedet for `"a"`. Så sker der ingenting! Vil du være sikker, kan du **også** lytte på de store bogstaver. Sæt disse linjer ind under de andre:
+
+```python
+screen.onkeypress(press_left, "A")
+screen.onkeypress(press_right, "D")
+screen.onkeypress(press_forward, "W")
+screen.onkeyrelease(release_left, "A")
+screen.onkeyrelease(release_right, "D")
+screen.onkeyrelease(release_forward, "W")
+```
+
+- [ ] Tilføj linjerne med store bogstaver
+- [ ] Slå CAPS LOCK til, og test, at du stadig kan styre
+
+## Andre taster
+
+Du kan bruge næsten alle taster. Bogstaver skrives som små bogstaver, `"x"`. Nogle særlige taster har deres egne navne:
+
+| Tast | Navn i koden |
+|---|---|
+| Piletaster | `"Left"`, `"Right"`, `"Up"`, `"Down"` |
+| Mellemrum | `"space"` |
+| Enter | `"Return"` |
+
+:::tip[Idé]
+Måske vil du skyde med `"Return"` eller `"x"` i stedet for mellemrum? Eller kan du både bruge piletasterne **og** W, A, D ved at beholde de gamle linjer og tilføje de nye?
+:::

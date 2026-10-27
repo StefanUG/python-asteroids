@@ -1,0 +1,501 @@
+---
+title: "Niveau 12 – Point"
+description: Giv spilleren et point for hver asteroide, og skriv scoren på skærmen.
+sidebar:
+  order: 22
+---
+
+Hvor god er du egentlig? Efter dette niveau får du **et point** for hver asteroide, du skyder, og scoren står i øverste venstre hjørne af skærmen.
+
+**Det nye i dag:** En variabel, der tæller point, ligesom en tæller i en løkke. Og så skal vi skrive et **tal** på skærmen, selvom `write` og `+` helst vil have **tekst**.
+
+## Prøv det først: tal og tekst
+
+I Python er `5` et tal, og `"5"` er tekst. Du kan regne med tal, men ikke med tekst. Og du kan sætte tekst sammen med `+`, men ikke tekst og tal. Derfor findes `str()`, som laver et tal om til tekst:
+
+```python.run
+score = 0
+score += 1
+score += 1
+print("SCORE: " + str(score))
+
+score = score + 10
+print(f"SCORE: {score}")
+```
+
+Prøv at ændre:
+- Fjern `str(` og `)` så der står `"SCORE: " + score`. Hvilken fejl får du?
+- Læg flere point til, før du skriver scoren ud.
+
+Den sidste linje er en *f-string*, som du kender fra introholdet. Den laver også tallet om til tekst for dig.
+
+:::note[Og hvad med `write`?]
+Turtlens `write` er flink: Giver du den et tal, laver den selv tallet om til tekst. Derfor kan vi skrive `score_pen.write(player.score, ...)` uden `str()`. Men skal du sætte tekst og tal sammen med `+`, skal du bruge `str()`.
+:::
+
+## `Player.score`
+
+Endnu mere tilstand om spilleren! Nu skal spilleren også huske sin `score`. Vi starter på 0:
+
+```python
+        self.score = 0
+```
+
+- [ ] Indsæt `self.score = 0` i `Player.__init__` funktionen, f.eks. lige efter `self.alive = True`
+
+Hver gang en kugle rammer en asteroide, lægger vi en til scoren. `+= 1` betyder "læg 1 til det, der er i forvejen":
+
+```python
+                player.score += 1
+```
+
+- [ ] Indsæt `player.score += 1` i `move_bullets` funktionen inde i `if hit_asteroid:`, f.eks. efter `bullet.active = False`. Den skal have samme indrykning som `bullet.active = False`.
+
+## Skrift til scoren
+
+Det er fint, at spillet husker scoren, men vi vil jo også **se** den. Vi kommer til at skrive flere ting med samme skrifttype, størrelse og stil, så vi gemmer hele fonten i en konstant:
+
+```python
+SCORE_FONT = (FONT_FAMILY, 16, "normal")
+```
+
+- [ ] Indsæt koden i `# CONSTANTS` sektionen, lige efter `FONT_FAMILY = "Courier New"`. Den skal stå **efter** `FONT_FAMILY`, fordi den bruger den.
+
+## Teksten, der ikke ændrer sig
+
+Ordet "SCORE:" ændrer sig aldrig, så det skriver vi bare én gang, når spillet starter. Vi bruger vores `pen` fra niveau 11:
+
+1. `penup()`, så den ikke tegner en streg, når den flytter sig.
+2. Flyt den op i øverste venstre hjørne. `-HALF_WIDTH` er venstre kant, og `HALF_HEIGHT` er toppen. Vi rykker den lidt ind fra kanten.
+3. Skriv "SCORE: ".
+
+```python
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+```
+
+- [ ] Indsæt koden i `# GAME SETUP` sektionen, lige efter `pen.color("white")`
+
+## Teksten, der ændrer sig
+
+Når en Turtle har skrevet noget, kan man ikke bare viske et enkelt ord ud. Man kan kun:
+
+1. fjerne alt på hele skærmen, eller
+2. fjerne **alt**, hvad én bestemt Turtle har skrevet, med `clear()`.
+
+Hvis `pen` både skrev "SCORE:" og tallet, ville `pen.clear()` også fjerne "SCORE:". Derfor laver vi en ny Turtle, `score_pen`, som **kun** skriver tallet. Så kan vi viske tallet ud og skrive et nyt, uden at røre resten.
+
+```python
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+```
+
+Den står 70 pixels længere til højre end `pen`, altså lige efter "SCORE: ".
+
+- [ ] Indsæt koden i `# GAME SETUP` sektionen, lige efter de andre `pen`-linjer (altså lige efter `pen.write("SCORE: ", font=SCORE_FONT)`)
+
+## En funktion, der skriver scoren
+
+Vi skal skrive scoren igen, hver gang den ændrer sig. Så laver vi en funktion, `draw_score`. Den visker det gamle tal ud og skriver det nye:
+
+```python
+def draw_score():
+    score_pen.clear()
+    score_pen.write(player.score, font=SCORE_FONT)
+```
+
+- [ ] Indsæt funktionen i `# BEHAVIOURS` sektionen, lige før `# GAME LOOP` sektionen starter (altså efter hele `def move_bullets():`-blokken)
+
+## Kald funktionen
+
+Nu skal vi kalde `draw_score()`:
+- når spillet starter, så der står 0
+- hver gang scoren ændrer sig
+
+```python
+draw_score()
+```
+
+- [ ] Indsæt `draw_score()` i `# START THE GAME` sektionen, lige før `update()`
+- [ ] Indsæt `draw_score()` i `move_bullets` funktionen, lige efter `player.score += 1` (med samme indrykning)
+
+:::note[Men `draw_score` står jo længere nede end `move_bullets`?]
+Det er okay! Python skal kende funktionen, når den bliver **kørt**, ikke når den bliver skrevet. `move_bullets` bliver først kørt, når spillet starter helt nede i bunden af filen. Til den tid kender Python `draw_score`.
+:::
+
+## Flyt `pen` tilbage til midten
+
+Hov! Vi skrev "SCORE:" med den samme `pen`, som skriver GAME OVER. Og nu står den oppe i hjørnet. Så GAME OVER ville komme til at stå deroppe. Vi flytter den til midten, lige før vi skriver GAME OVER:
+
+```python
+        pen.goto(0, 0)
+```
+
+- [ ] Indsæt koden i `update` funktionen under `else:`, lige **før** linjen med `pen.write("GAME OVER", ...)`
+
+## Prøv spillet
+
+- [ ] Start spillet. Står der `SCORE: 0` øverst til venstre?
+- [ ] Skyd en asteroide. Bliver scoren 1? Og står det nye tal pænt, uden det gamle tal under?
+- [ ] Flyv ind i en asteroide. Står GAME OVER stadig midt på skærmen?
+
+:::tip[Typiske fejl]
+- Tallene står oven i hinanden: Har du husket `score_pen.clear()` i `draw_score`?
+- "SCORE:" forsvinder: Skriver du tallet med `pen` i stedet for `score_pen`?
+- Scoren bliver ved med at være 0: Har du kaldt `draw_score()` lige efter `player.score += 1`?
+- `NameError: name 'SCORE_FONT' is not defined`: Står konstanten under `# CONSTANTS`, efter `FONT_FAMILY`?
+:::
+
+## Hjælp
+
+Sådan kan `# GAME SETUP` med pennene se ud:
+
+```python.run norun="true"
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+```
+
+Sådan kan `move_bullets` og `draw_score` se ud:
+
+```python.run norun="true"
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hideturtle()
+                bullet.hideturtle()
+                bullet.active = False
+                player.score += 1
+                draw_score()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+def draw_score():
+    score_pen.clear()
+    score_pen.write(player.score, font=SCORE_FONT)
+```
+
+Og sådan kan slutningen af filen se ud:
+
+```python.run norun="true"
+def update():
+    move_spaceship()
+    move_bullets()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.goto(0, 0)
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+
+
+#
+#  START THE GAME
+#
+
+draw_score()
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+<Solution title="Hele koden efter niveau 12">
+
+```python.run norun="true"
+import turtle
+import random
+
+"""
+Let's keep a score
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+MAX_ASTEROIDS = 10
+
+FONT_FAMILY = "Courier New"
+SCORE_FONT = (FONT_FAMILY, 16, "normal")
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+        self.alive = True
+        self.score = 0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = Player()
+
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+# Create asteroids
+asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroids.append(Asteroid())
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def check_collision(with_turtle):
+    # Check for collisions between the player and asteroids
+    for asteroid in asteroids:
+        if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.alive = False
+
+    
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hideturtle()
+                bullet.hideturtle()
+                bullet.active = False
+                player.score += 1
+                draw_score()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+def draw_score():
+    score_pen.clear()
+    score_pen.write(player.score, font=SCORE_FONT)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    move_bullets()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.goto(0, 0)
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+
+
+#
+#  START THE GAME
+#
+
+draw_score()
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

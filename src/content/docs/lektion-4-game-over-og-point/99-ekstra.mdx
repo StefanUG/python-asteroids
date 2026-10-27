@@ -1,0 +1,156 @@
+---
+title: "Ekstra: gør det til dit eget"
+description: Ekstra-opgaver til lektion 4 – en flot GAME OVER og flere point for små asteroider.
+sidebar:
+  order: 99
+---
+
+Blev du færdig før tid? Her er to udfordringer. Du bestemmer selv, hvor vild du vil gøre det. Find gerne på dine egne idéer!
+
+Opgaverne passer til koden, som den ser ud efter [niveau 14](/python-asteroids/lektion-4-game-over-og-point/niveau-14-nye-asteroider/).
+
+## En kæmpe flot GAME OVER
+
+Lige nu er GAME OVER hvid og ret stille. Gør den **stor**, **farverig** og måske endda **blinkende**, og vis spilleren, hvor mange point det blev til.
+
+Det er `else:`-delen i `update` under `# GAME LOOP`, der skriver GAME OVER. Det er der, du skal ændre.
+
+Start simpelt:
+- Gør skriften større, f.eks. `96` i stedet for `68`.
+- Prøv `"bold"` i stedet for `"normal"`.
+- Giv pennen en farve med `pen.color("red")`, lige før du skriver.
+- Skriv den endelige score under GAME OVER.
+
+:::tip[Hint: skriv scoren]
+Du skal sætte tekst og tal sammen, så husk `str()`: `"SCORE: " + str(player.score)`. Flyt pennen lidt ned med `pen.goto(0, -80)`, før du skriver, så teksten ikke står oven i GAME OVER.
+:::
+
+:::tip[Hint: blink]
+Game loopet er stoppet, når det er game over. Men du kan lave en ny funktion, der kalder sig selv igen med `screen.ontimer`, ligesom `update` gør. Hver gang kan den viske teksten ud med `clear()` og skrive den igen i en ny tilfældig farve med `random.choice(...)`.
+:::
+
+:::tip[Hint: brug en ny pen]
+Hvis du visker ud med `pen.clear()`, forsvinder "SCORE:" i hjørnet også. Lav derfor en ny pen kun til GAME OVER, ligesom vi lavede `score_pen` i niveau 12.
+:::
+
+Andre idéer: en skygge (skriv teksten først i mørk farve lidt forskudt, og så i lys farve ovenpå), eller en lille besked som "Godt forsøg, pirat!" nedenunder.
+
+<Solution title="Forslag: blinkende GAME OVER med slutscore">
+
+Under `# CONSTANTS`, efter `SCORE_FONT`:
+
+```python.run norun="true"
+GAME_OVER_FONT = (FONT_FAMILY, 96, "bold")
+GAME_OVER_COLORS = ["red", "orange", "yellow", "magenta", "cyan"]
+```
+
+Under `# GAME SETUP`, efter `score_pen`-linjerne:
+
+```python.run norun="true"
+game_over_pen = turtle.Turtle(visible=False)
+game_over_pen.penup()
+game_over_pen.goto(0, -20)
+```
+
+Under `# BEHAVIOURS`, efter `def draw_score():`-blokken:
+
+```python.run norun="true"
+def flash_game_over():
+    game_over_pen.clear()
+    game_over_pen.color(random.choice(GAME_OVER_COLORS))
+    game_over_pen.write("GAME OVER", align="center", font=GAME_OVER_FONT)
+    screen.update()
+    screen.ontimer(flash_game_over, 300)
+```
+
+Og i `update` bliver `else:`-delen:
+
+```python.run norun="true"
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        flash_game_over()
+        pen.goto(0, -80)
+        pen.write("SCORE: " + str(player.score), align="center", font=(FONT_FAMILY, 32, "normal"))
+```
+
+</Solution>
+
+## Flere point for små asteroider
+
+Små asteroider er sværere at ramme. Burde de så ikke give flere point? Lad hver asteroide få en **tilfældig størrelse**, og giv flere point, jo mindre den er.
+
+Det skal du ændre:
+- `Asteroid`-klassen: Hver asteroide skal have en størrelse, en `radius` der passer til størrelsen, og et antal `points`.
+- `move_bullets`: I stedet for `player.score += 1` skal spilleren have asteroidens point.
+
+:::tip[Hint: størrelse og radius]
+`self.shapesize(3, 3)` gør cirklen 3 gange så stor som normalt. En normal cirkel er 20 pixels bred, så med størrelse 3 er radius 30. Det er derfor, der står `self.radius = 30`. Med størrelse `size` er radius altså `size * 10`.
+:::
+
+:::tip[Hint: brug `reset`]
+Læg den tilfældige størrelse i `reset`, ikke i `__init__`. Så får en asteroide også en ny størrelse, når den kommer tilbage. `__init__` kalder jo selv `reset`.
+:::
+
+:::tip[Hint: point efter størrelse]
+Med størrelser fra 1 til 3 kan du f.eks. regne point ud sådan her: `4 - size`. Så giver den mindste 3 point, og den største 1 point.
+:::
+
+Andre idéer: Giv bonus for **hurtige** asteroider med `player.score += hit_asteroid.speed`. Eller giv asteroiderne en farve efter, hvor mange point de giver.
+
+<Solution title="Forslag: point efter størrelse">
+
+Under `# CONSTANTS`, efter `ASTEROID_RESPAWN_AFTER`:
+
+```python.run norun="true"
+ASTEROID_SIZE_MIN = 1
+ASTEROID_SIZE_MAX = 3
+```
+
+Hele `Asteroid`-klassen:
+
+```python.run norun="true"
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+        self.points = 0
+        self.speed = 0
+        self.respawn_in = 0
+        self.reset()
+
+    def reset(self):
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+        size = random.randint(ASTEROID_SIZE_MIN, ASTEROID_SIZE_MAX)
+        self.shapesize(size, size)
+        self.radius = size * 10
+        self.points = ASTEROID_SIZE_MAX + 1 - size  # smallest gives most points
+        self.showturtle()
+
+    def hit(self):
+        self.hideturtle()
+        self.respawn_in = ASTEROID_RESPAWN_AFTER
+```
+
+I `move_bullets` bliver `if hit_asteroid:`-blokken:
+
+```python.run norun="true"
+            if hit_asteroid:
+                hit_asteroid.hit()
+                bullet.hideturtle()
+                bullet.active = False
+                player.score += hit_asteroid.points
+                draw_score()
+```
+
+</Solution>

@@ -1,0 +1,727 @@
+---
+title: "Niveau 18 – Flyv som i rummet"
+description: Giv rumskibet fart i x og y, så det glider videre som i rigtigt rum.
+sidebar:
+  order: 28
+---
+
+Lige nu er rumskibet lidt for nemt at styre. Det stopper med det samme, når du slipper pil-op. Sådan er det ikke i rummet!
+
+I rummet er der ingen luft. Der er altså intet, der bremser dig. Hvis noget først er i gang med at flyve, så **bliver det ved** med at flyve, indtil noget andet skubber til det. Det fandt en klog mand ved navn Isaac Newton ud af for mange år siden.
+
+Efter dette niveau:
+
+- giver pil-op et lille **skub** i den retning, næsen peger
+- glider rumskibet videre, når du slipper tasten
+- kan du dreje rundt og flyve "baglæns" eller sidelæns
+
+## Det nye i dag: heading og track
+
+Der er to forskellige retninger at holde styr på:
+
+- **Heading** er der, hvor **næsen peger**. Det er den, du ændrer med pil-venstre og pil-højre. Du kender den allerede fra turtle: `player.heading()`.
+- **Track** er der, hvor du **faktisk flyver hen**.
+
+Indtil nu har de to altid været ens, for vi brugte `player.forward(...)`, som flytter turtlen lige frem i næsens retning. Men tænk på en skøjteløber: Hun kan glide fremad og samtidig dreje hovedet og kroppen til siden. Hun peger én vej, men glider en anden vej. Sådan bliver det med vores rumskib.
+
+### Fart i to dele: speedx og speedy
+
+For at rumskibet kan glide i én retning og pege i en anden, skal det huske sin fart. Vi deler farten op i to tal:
+
+- `speedx` er hvor meget rumskibet flytter sig **til højre** hver gang i game loop (negativ betyder til venstre).
+- `speedy` er hvor meget det flytter sig **opad** (negativ betyder nedad).
+
+Hvis `speedx` er 3 og `speedy` er 0, flyver rumskibet lige til højre. Hvis begge er 2, flyver det skråt op mod højre.
+
+### Et skub i næsens retning: cos og sin
+
+Når du trykker pil-op, skal rumskibet få et lille skub i den retning, næsen peger. Men vi skal vide, hvor meget af skubbet der går **til siden** (x), og hvor meget der går **opad** (y). Det kan matematik-funktionerne `math.cos` og `math.sin` regne ud for os:
+
+- `math.cos(vinkel)` siger, hvor meget af et skridt der går til siden.
+- `math.sin(vinkel)` siger, hvor meget af et skridt der går opad.
+
+Der er bare én ting: `math` regner ikke i grader, men i noget, der hedder **radianer**. En hel omgang er 360 grader, men cirka 6,28 radianer. Du behøver ikke kunne regne om selv, for `math.radians(grader)` gør det for dig.
+
+Prøv det her. Programmet tegner en pil i en bestemt retning og viser, hvor meget af pilen der går til siden (orange) og opad (blå):
+
+```python.run
+import turtle
+import math
+
+heading = 30   # grader: 0 = højre, 90 = op, 180 = venstre
+length = 150   # hvor lang pilen er
+
+angle = math.radians(heading)
+x = length * math.cos(angle)
+y = length * math.sin(angle)
+print("Til siden (x):", round(x, 1))
+print("Opad (y):", round(y, 1))
+
+t = turtle.Turtle()
+t.color("orange")
+t.goto(x, 0)
+t.color("blue")
+t.goto(x, y)
+t.penup()
+t.goto(0, 0)
+t.pendown()
+t.color("red")
+t.goto(x, y)
+```
+
+:::tip[Prøv at ændre]
+- Sæt `heading` til `0`, `90`, `180` og `270`. Hvad sker der med x og y? Hvornår bliver de negative?
+- Prøv `45`. Hvorfor er x og y næsten lige store?
+- Prøv at gøre `length` dobbelt så stor. Hvad sker der med x og y?
+:::
+
+### En maksimal fart
+
+Hvis du holder pil-op nede længe, får rumskibet et skub igen og igen. Så ville det blive hurtigere og hurtigere for evigt. Det er ikke sjovt at spille, så vi laver en **max fart**.
+
+Men hvor hurtigt flyver rumskibet egentlig, når farten er delt op i `speedx` og `speedy`? Her hjælper **Pythagoras**: Den rigtige fart er den skrå side i en retvinklet trekant, hvor de to andre sider er `speedx` og `speedy`.
+
+- fart = √(speedx² + speedy²)
+- I Python skriver vi `(speedx ** 2 + speedy ** 2) ** 0.5`. `** 2` betyder "i anden", og `** 0.5` betyder kvadratrod.
+- Eksempel: speedx = 3 og speedy = 4 giver √(9 + 16) = √25 = 5.
+
+Hvis farten er for stor, gør vi **både** `speedx` og `speedy` lige meget mindre. Så flyver rumskibet stadig i samme retning, bare ikke hurtigere end max.
+
+Prøv at køre denne lille simulation. Rumskibet giver gas mod højre (heading 0) i 3 ticks, drejer så op (heading 90) og bliver ved med at give gas:
+
+```python.run
+import math
+
+PLAYER_THRUST = 1
+PLAYER_MAX_SPEED = 5
+speedx = 0
+speedy = 0
+heading = 0
+
+for tick in range(8):
+    if tick == 3:
+        heading = 90  # drej næsen op
+    angle = math.radians(heading)
+    speedx += PLAYER_THRUST * math.cos(angle)
+    speedy += PLAYER_THRUST * math.sin(angle)
+    speed = (speedx ** 2 + speedy ** 2) ** 0.5
+    if speed > PLAYER_MAX_SPEED:
+        speedx = (speedx * PLAYER_MAX_SPEED) / speed
+        speedy = (speedy * PLAYER_MAX_SPEED) / speed
+        speed = PLAYER_MAX_SPEED
+    print(f"Tick {tick}: heading={heading} speedx={round(speedx, 2)} speedy={round(speedy, 2)} fart={round(speed, 2)}")
+```
+
+Læg mærke til, at `speedx` ikke forsvinder, når næsen peger op. Rumskibet glider stadig mod højre, mens det langsomt får mere fart opad. Og farten stopper ved 5.
+
+:::tip[Prøv at ændre]
+- Sæt `PLAYER_MAX_SPEED` op til `100`. Hvad sker der med farten?
+- Prøv `heading = 180` i stedet for `90`. Hvad sker der med `speedx`? Det er sådan, man bremser i rummet: man vender sig om og giver gas den anden vej!
+:::
+
+## Byg det ind i spillet
+
+Fortsæt i din egen fil fra niveau 17.
+
+Kommer du i problemer, kan du finde hjælp i [bunden af siden](#hjælp) ⬇
+
+### Et nyt bibliotek: math
+
+For at regne vinkler og retninger ud skal vi bruge matematik-funktionerne fra biblioteket `math`.
+
+```python
+import math
+```
+
+- [ ] Indsæt `import math` øverst i filen, på en linje lige efter `import time`
+
+### Nye konstanter
+
+Vi skal ændre, hvordan spillerens fart virker. I stedet for `PLAYER_SPEED = 10` skal vi have:
+
+```python
+PLAYER_MAX_SPEED = 10  # Pixels to move player each tick
+PLAYER_THRUST = 0.1  # increase in speed per tick
+```
+
+`PLAYER_THRUST` er hvor meget fart, rumskibet får, hver gang game loop kører, mens du holder pil-op nede. `PLAYER_MAX_SPEED` er den største fart, rumskibet kan få. Med 0,1 skal du altså holde pil-op nede i 100 ticks (ca. 2 sekunder) for at nå max fart.
+
+- [ ] Find `PLAYER_SPEED` i `# CONSTANTS` sektionen og **erstat** den linje med de to konstanter herover
+
+### Opdater BULLET_SPEED
+
+`PLAYER_SPEED` findes ikke mere, så den linje, der brugte den, skal også rettes. Ellers får du en fejl om, at `PLAYER_SPEED` ikke er defineret.
+
+```python
+BULLET_SPEED = PLAYER_MAX_SPEED * 2  # Double of player speed
+```
+
+- [ ] Find `BULLET_SPEED` linjen i `# CONSTANTS` sektionen og ret den, så den bruger `PLAYER_MAX_SPEED` i stedet for `PLAYER_SPEED`
+
+### Fart i x- og y-retning
+
+Spilleren skal huske sin fart i både x- og y-retning. Når spillet starter, står rumskibet stille, så begge starter på 0.
+
+```python
+        self.speedx = 0
+        self.speedy = 0
+```
+
+- [ ] Sæt koden ind i `Player.__init__` funktionen, efter linjen `self.last_hit = 0.0`. Linjerne skal være rykket lige så meget ind som `self.last_hit`.
+
+`speedx` er fart til højre (eller venstre, hvis den er negativ). `speedy` er fart opad (eller nedad, hvis den er negativ).
+
+### Player.thrust() – giv rumskibet mere fart!
+
+Nu laver vi en ny metode, som giver rumskibet et lille skub i den retning, næsen peger. Den gør det samme som simulationen ovenfor:
+
+```python
+    def thrust(self):
+        track = math.radians(self.heading())
+        self.speedx += PLAYER_THRUST * math.cos(track)
+        self.speedy += PLAYER_THRUST * math.sin(track)
+        speed = (self.speedx ** 2 + self.speedy ** 2) ** 0.5
+        if speed > PLAYER_MAX_SPEED:
+            self.speedx = (self.speedx * PLAYER_MAX_SPEED) / speed
+            self.speedy = (self.speedy * PLAYER_MAX_SPEED) / speed
+```
+
+Linje for linje:
+
+1. `track = math.radians(self.heading())` finder næsens retning og regner den om til radianer. Det er den retning, skubbet kommer i. (Variablen hedder `track`, fordi det er den retning, vi skubber rumskibets kurs hen imod.)
+2. `self.speedx += ...` lægger den del af skubbet, der går til siden, oven i farten i x.
+3. `self.speedy += ...` lægger den del af skubbet, der går opad, oven i farten i y.
+4. `speed = ...` regner den samlede fart ud med Pythagoras.
+5. `if speed > PLAYER_MAX_SPEED:` er sand, når rumskibet er blevet for hurtigt. Så gør vi både `speedx` og `speedy` mindre, så farten bliver præcis `PLAYER_MAX_SPEED`, og retningen er den samme.
+
+Læg mærke til, at vi bruger `+=`. Vi lægger skubbet **oven i** den fart, rumskibet allerede har. Vi starter ikke forfra.
+
+- [ ] Sæt koden ind i `Player` klassen, efter **hele** `def hit(self):` blokken (altså efter linjen `self.alive = False`). `def thrust(self):` skal være rykket lige så meget ind som `def hit(self):`.
+
+### Player.move() – flyt rumskibet!
+
+Nu skal rumskibet flytte sig ud fra sin fart:
+
+```python
+    def move(self):
+        x, y = self.pos()
+        x += self.speedx
+        y += self.speedy
+        self.goto(x, y)
+```
+
+- `x, y = self.pos()` henter rumskibets position. `pos()` giver to tal tilbage på én gang, og her gemmer vi det første i `x` og det andet i `y`.
+- Så lægger vi farten til positionen.
+- Til sidst flytter vi rumskibet til den nye position med `goto`.
+
+- [ ] Sæt koden ind i `Player` klassen, efter hele `def thrust(self):` blokken
+
+### Opdater move_spaceship()
+
+Til sidst skal vi bruge de nye metoder. Pil-op skal nu kalde `player.thrust()` i stedet for `player.forward(PLAYER_SPEED)`. Og rumskibet skal flytte sig **hver** gang game loop kører, også når du ikke trykker på noget. Derfor skal `player.move()` stå **uden for** alle `if`-blokkene.
+
+Den nye `move_spaceship()` funktion skal se sådan ud:
+
+```python
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.thrust()
+
+    player.move()
+    move_if_out_of_bounds(player)
+    if check_collision(player):
+        player.hit()
+```
+
+:::caution[Pas på indrykningen]
+Før stod `move_if_out_of_bounds(player)` og `if check_collision(player):` **inde i** `if keys_pressed["Up"]:` blokken. Nu skal de rykkes **ud**, så de står på samme niveau som `player.move()`. Ellers tjekker spillet kun kanten og kollisioner, mens du holder pil-op nede, og rumskibet kan glide ud af skærmen og igennem asteroider.
+:::
+
+- [ ] Find `move_spaceship` funktionen i `# BEHAVIOURS` sektionen
+- [ ] Ret den, så `if keys_pressed["Up"]:` blokken kalder `player.thrust()` i stedet for `player.forward(PLAYER_SPEED)`
+- [ ] Sæt `player.move()` ind lige efter alle `if`-blokkene, men før `move_if_out_of_bounds(player)`
+- [ ] Ryk `move_if_out_of_bounds(player)` og `if check_collision(player):` blokken ud, så de står på samme niveau som `player.move()`
+
+## Prøv spillet
+
+- [ ] Start spillet og tryk pil-op. Rumskibet starter langsomt og bliver hurtigere.
+- [ ] Slip pil-op. Rumskibet glider videre.
+- [ ] Drej, mens du glider. Næsen drejer, men rumskibet flyver stadig samme vej.
+- [ ] Prøv at bremse ved at vende næsen om og give gas den anden vej.
+- [ ] Flyv ud over kanten uden at trykke pil-op. Kommer du ind på den anden side?
+- [ ] Glid ind i en asteroide uden at trykke pil-op. Mister du liv?
+
+Det er meget sværere at styre nu. Præcis som i rigtig rumfart! 🚀
+
+:::tip[Typiske fejl]
+- `NameError: name 'math' is not defined`: Du mangler `import math` øverst.
+- `NameError: name 'PLAYER_SPEED' is not defined`: Du har glemt at rette `BULLET_SPEED`, eller der står stadig `player.forward(PLAYER_SPEED)` i `move_spaceship`.
+- `AttributeError: 'Player' object has no attribute 'thrust'`: `def thrust(self):` er ikke rykket rigtigt ind, så den ligger ikke inde i `Player` klassen. Eller navnet er stavet forkert.
+- Rumskibet bevæger sig slet ikke: Du har glemt at kalde `player.move()` i `move_spaceship`.
+- Rumskibet bevæger sig kun, mens du holder pil-op nede: `player.move()` er rykket for langt ind, så den står inde i `if keys_pressed["Up"]:`.
+:::
+
+## Hjælp
+
+Sådan ser konstanterne ud nu:
+
+```python.run norun="true"
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_MAX_SPEED = 10  # Pixels to move player each tick
+PLAYER_THRUST = 0.1  # increase in speed per tick
+PLAYER_START_HEALTH = 3
+PLAYER_GRACE_PERIOD = 3 # seconds
+BULLET_SPEED = PLAYER_MAX_SPEED * 2  # Double of player speed
+```
+
+Sådan ser slutningen af `Player.__init__` og de to nye metoder ud. `...` betyder, at der står kode, som ikke er ændret:
+
+```python.run norun="true"
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        ...
+        self.health = PLAYER_START_HEALTH
+        self.last_hit = 0.0
+
+        self.speedx = 0
+        self.speedy = 0
+
+    ...
+
+    def hit(self):
+        if not self.is_invincible():
+            self.health -= 1
+            self.last_hit = time.time()
+            draw_health()
+
+        if self.health == 0:
+            self.alive = False
+
+    def thrust(self):
+        track = math.radians(self.heading())
+        self.speedx += PLAYER_THRUST * math.cos(track)
+        self.speedy += PLAYER_THRUST * math.sin(track)
+        speed = (self.speedx ** 2 + self.speedy ** 2) ** 0.5
+        if speed > PLAYER_MAX_SPEED:
+            self.speedx = (self.speedx * PLAYER_MAX_SPEED) / speed
+            self.speedy = (self.speedy * PLAYER_MAX_SPEED) / speed
+
+    def move(self):
+        x, y = self.pos()
+        x += self.speedx
+        y += self.speedy
+        self.goto(x, y)
+```
+
+Før og efter i `move_spaceship`:
+
+```python.run norun="true"
+# FØR
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.hit()
+
+# EFTER
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.thrust()
+
+    player.move()
+    move_if_out_of_bounds(player)
+    if check_collision(player):
+        player.hit()
+```
+
+<Solution title="Hele koden efter niveau 18">
+
+```python.run norun="true"
+import turtle
+import random
+import time
+import math
+
+"""
+Movement like in space
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_MAX_SPEED = 10  # Pixels to move player each tick
+PLAYER_THRUST = 0.1  # increase in speed per tick
+PLAYER_START_HEALTH = 3
+PLAYER_GRACE_PERIOD = 3 # seconds
+BULLET_SPEED = PLAYER_MAX_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+MAX_ASTEROIDS = 10
+ASTEROID_SPEED_MIN = 1
+ASTEROID_SPEED_MAX = 5
+ASTEROID_RESPAWN_AFTER = 150  # respawn after number of game ticks
+
+FONT_FAMILY = "Courier New"
+SCORE_FONT = (FONT_FAMILY, 16, "normal")
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+        self.alive = True
+        self.score = 0
+        self.health = PLAYER_START_HEALTH
+        self.last_hit = 0.0
+
+        self.speedx = 0
+        self.speedy = 0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+    def is_invincible(self):
+        # a chance to talk about return values
+        return self.last_hit + PLAYER_GRACE_PERIOD > time.time()
+
+    def hit(self):
+        if not self.is_invincible():
+            self.health -= 1
+            self.last_hit = time.time()
+            draw_health()
+
+        if self.health == 0:
+            self.alive = False
+
+    def thrust(self):
+        track = math.radians(self.heading())
+        self.speedx += PLAYER_THRUST * math.cos(track)
+        self.speedy += PLAYER_THRUST * math.sin(track)
+        speed = (self.speedx ** 2 + self.speedy ** 2) ** 0.5
+        if speed > PLAYER_MAX_SPEED:
+            self.speedx = (self.speedx * PLAYER_MAX_SPEED) / speed
+            self.speedy = (self.speedy * PLAYER_MAX_SPEED) / speed
+
+    def move(self):
+        x, y = self.pos()
+        x += self.speedx
+        y += self.speedy
+        self.goto(x, y)
+
+
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+        self.speed = 0
+        self.respawn_in = 0
+        self.reset()
+
+    def reset(self):
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+        self.showturtle()
+
+    def hit(self):
+        self.hideturtle()
+        self.respawn_in = ASTEROID_RESPAWN_AFTER
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = Player()
+
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 60)
+pen.write("HEALTH: ", font=SCORE_FONT)
+
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+
+health_pen = turtle.Turtle(visible=False)
+health_pen.color("white")
+health_pen.penup()
+health_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 60)
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+# Create asteroids
+asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroids.append(Asteroid())
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def check_collision(with_turtle):
+    # Check for collisions between the player and asteroids
+    for asteroid in asteroids:
+        if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+
+
+def animate_spaceship():
+    if player.is_invincible():
+        scaled = int(time.time() * 10)
+        is_invisible = scaled % 2
+        if is_invisible:
+            player.hideturtle()
+        else:
+            player.showturtle()
+    else:
+        player.showturtle()
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.thrust()
+
+    player.move()
+    move_if_out_of_bounds(player)
+    if check_collision(player):
+        player.hit()
+
+
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hit()
+                bullet.hideturtle()
+                bullet.active = False
+                player.score += 1
+                draw_score()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid) # let the kids figure this one out for a while
+            # also this one:
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.hit()
+        else:
+            asteroid.respawn_in -= 1
+            if asteroid.respawn_in == 0:
+                asteroid.reset()
+
+
+def draw_score():
+    score_pen.clear()
+    score_pen.write(player.score, font=SCORE_FONT)
+
+
+def draw_health():
+    health_pen.clear()
+    health_pen.write(player.health, font=SCORE_FONT)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    animate_spaceship()
+    move_bullets()
+    move_asteroids()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.goto(0, 0)
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+
+
+#
+#  START THE GAME
+#
+
+draw_score()
+draw_health()
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

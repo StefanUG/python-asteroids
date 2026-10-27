@@ -1,0 +1,590 @@
+---
+title: "Niveau 16 – Skjold efter et hit"
+description: Brug tid med time.time() og giv rumskibet 3 sekunders beskyttelse efter hvert hit.
+sidebar:
+  order: 26
+---
+
+I sidste niveau forsvandt alle 3 liv næsten på én gang, fordi spillet tæller et hit hvert eneste game tick, så længe du rører asteroiden. Nu giver vi rumskibet et **skjold i 3 sekunder** efter hvert hit. Så har du tid til at flyve væk. Mens skjoldet er tændt, bliver rumskibet rødt.
+
+**Det nye i dag:**
+1. **Tid** i Python med `time.time()`.
+2. En funktion, der **svarer** `True` eller `False` med `return` – og at bruge svaret i en `if`. Du kender `return` fra intro-holdet, hvor en funktion gav et tal eller en farve tilbage. Nu giver den et ja/nej tilbage.
+
+## Prøv idéen først: hvad er klokken i Python?
+
+`time.time()` giver antal sekunder siden **1. januar 1970 kl. 00:00**. Det er et aftalt "startpunkt", som alle computere bruger. Tænk på det som et kæmpe stopur, der blev startet i 1970 og aldrig er blevet stoppet. Tallet er stort, men det smarte er, at vi kan trække to tider fra hinanden og se, hvor mange sekunder der gik imellem.
+
+```python.run
+import time
+
+start = time.time()
+print("Sekunder siden 1. januar 1970:", start)
+
+tal = 0
+for i in range(100000):
+    tal = tal + i
+
+slut = time.time()
+print("Det tog", slut - start, "sekunder at lægge tallene sammen")
+```
+
+Prøv at ændre:
+- Gør tallet i `range(...)` større eller mindre. Tager det længere eller kortere tid?
+- Kør koden flere gange. Kan du se, at det første tal bliver større hver gang?
+
+## Prøv idéen: en funktion der svarer ja eller nej
+
+Forestil dig, at spillet startede for 20 sekunder siden, og at du blev ramt lige nu. Så er `last_hit` lig med `20`. Skjoldet varer 3 sekunder. Er du beskyttet ved sekund 22? Ved sekund 24?
+
+```python.run
+PLAYER_GRACE_PERIOD = 3
+last_hit = 20
+
+def is_invincible(now):
+    return last_hit + PLAYER_GRACE_PERIOD > now
+
+print("Er jeg beskyttet ved sekund 22?", is_invincible(22))
+
+for now in range(20, 26):
+    if is_invincible(now):
+        print(now, "sekunder: skjold – du kan ikke blive ramt")
+    else:
+        print(now, "sekunder: pas på, du kan blive ramt")
+```
+
+`last_hit + PLAYER_GRACE_PERIOD > now` er et **spørgsmål**: "Er 20 + 3 større end tiden nu?". Svaret er enten `True` (sandt) eller `False` (falsk). `return` sender svaret tilbage, og så kan vi bruge funktionen direkte i en `if`.
+
+Prøv at ændre:
+- Sæt `PLAYER_GRACE_PERIOD` til 5. Hvornår slukker skjoldet nu?
+- Sæt `last_hit` til 22. Hvad sker der?
+
+## Hvor mange sekunder før vi kan blive ramt igen?
+
+Lad os sige 3 sekunder. Det burde være tid nok til at komme væk fra asteroiden.
+
+```python
+PLAYER_GRACE_PERIOD = 3 # seconds
+```
+
+- [ ] Sæt koden ind i `# CONSTANTS`-sektionen, f.eks. lige efter `PLAYER_START_HEALTH`.
+
+## At holde styr på tiden
+
+For at bruge `time.time()` skal vi have fat i biblioteket `time`. Et bibliotek er en samling færdig kode, ligesom `turtle` og `random`.
+
+```python
+import time
+```
+
+- [ ] Sæt `import time` helt øverst i filen, på en linje lige efter `import random`.
+
+## Hvornår blev spilleren sidst ramt?
+
+Spilleren skal huske, **hvornår** den sidst blev ramt. Vi starter med `0.0`, som betyder "1. januar 1970" – altså for meget, meget lang tid siden. Så har du ikke skjold, når spillet starter.
+
+```python
+        self.last_hit = 0.0
+```
+
+- [ ] Sæt koden ind i `Player`-klassens `__init__`-funktion, lige efter `self.health = PLAYER_START_HEALTH`.
+
+Senere, hver gang spilleren bliver ramt, gemmer vi tiden lige nu sådan her (du skal ikke skrive den endnu):
+
+```python
+self.last_hit = time.time()
+```
+
+## Udødelig!
+
+Nu skal vi regne ud, om spilleren har skjold lige nu. Vi har tre tal, og de er alle i sekunder:
+
+- `self.last_hit`: hvornår du sidst blev ramt
+- `PLAYER_GRACE_PERIOD`: hvor længe skjoldet varer (3)
+- `time.time()`: tiden lige nu
+
+Skjoldet slukker ved `last_hit + PLAYER_GRACE_PERIOD`. Hvis det tidspunkt er **større** end tiden nu, er det ikke sket endnu – og så er du udødelig.
+
+Det er meget at skrive hver gang, og det er svært at læse. Så vi laver en funktion med et godt navn: `is_invincible` ("er uovervindelig").
+
+```python
+    def is_invincible(self):
+        return self.last_hit + PLAYER_GRACE_PERIOD > time.time()
+```
+
+- [ ] Sæt koden ind i `Player`-klassen, lige **før** `def hit(self):`. Husk 4 mellemrum foran `def` og 8 foran `return`.
+
+## Opdateret `hit`-funktion i `Player`
+
+Nu skal `hit` tjekke reglerne:
+
+- Hvis spilleren **ikke** er udødelig lige nu:
+  - træk et liv fra: `self.health -= 1`
+  - husk tiden lige nu: `self.last_hit = time.time()`
+  - skriv det nye antal liv: `draw_health()`
+- Til sidst: hvis der er 0 liv tilbage, så sæt `alive` til `False`.
+
+```python
+    def hit(self):
+        if not self.is_invincible():
+            self.health -= 1
+            self.last_hit = time.time()
+            draw_health()
+
+        if self.health == 0:
+            self.alive = False
+```
+
+`not` vender svaret om: `not True` er `False`, og `not False` er `True`. Så linjerne under `if not self.is_invincible():` kører kun, når du **ikke** har skjold.
+
+- [ ] Erstat hele den nuværende `hit`-funktion i `Player`-klassen med koden herover.
+
+## Hvordan kan vi se, at vi er udødelige?
+
+Til at starte med gør vi rumskibet rødt, så længe skjoldet er tændt. Vi laver en ny funktion, som kaldes i hvert game tick:
+
+```python
+def animate_spaceship():
+    if player.is_invincible():
+        player.color("red", BG_COLOR)
+    else:
+        player.color("light grey", BG_COLOR)
+```
+
+Her bruger vi svaret fra `is_invincible()` direkte i en `if`. Er svaret `True`, bliver skibet rødt. Ellers bliver det lysegråt igen.
+
+- [ ] Sæt koden ind i `# BEHAVIOURS`-sektionen, lige før `def move_spaceship():` (altså efter hele `def check_collision(with_turtle):`-blokken).
+
+## Kald `animate_spaceship` fra game loop
+
+Funktionen gør ingenting, før vi kalder den. Den skal kaldes i hvert game tick.
+
+```python
+    animate_spaceship()
+```
+
+- [ ] Sæt koden ind i `update`-funktionen i `# GAME LOOP`-sektionen, lige efter linjen `move_spaceship()`. Husk 4 mellemrum foran.
+
+## Prøv spillet
+
+- [ ] Flyv ind i en asteroide. Bliver rumskibet rødt?
+- [ ] Mister du kun ét liv, selvom du bliver i asteroiden lidt?
+- [ ] Bliver rumskibet gråt igen efter ca. 3 sekunder?
+- [ ] Prøv at sætte `PLAYER_GRACE_PERIOD` til 1 eller 10. Hvad føles bedst?
+
+:::tip[Typiske fejl]
+- `NameError: name 'time' is not defined`: du mangler `import time` øverst.
+- `AttributeError: ... has no attribute 'last_hit'`: du mangler `self.last_hit = 0.0` i `__init__`.
+- Rumskibet bliver aldrig rødt: har du husket at kalde `animate_spaceship()` i `update`?
+- Skibet er rødt fra start: tjek at `last_hit` starter på `0.0` og ikke på `time.time()`.
+- Glemt parenteser: det hedder `self.is_invincible()` og `time.time()` – med `()` til sidst.
+:::
+
+## Hjælp
+
+Sådan ser hele `Player`-klassen ud, når du er færdig:
+
+```python.run norun="true"
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+        self.alive = True
+        self.score = 0
+        self.health = PLAYER_START_HEALTH
+        self.last_hit = 0.0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+    def is_invincible(self):
+        return self.last_hit + PLAYER_GRACE_PERIOD > time.time()
+
+    def hit(self):
+        if not self.is_invincible():
+            self.health -= 1
+            self.last_hit = time.time()
+            draw_health()
+
+        if self.health == 0:
+            self.alive = False
+```
+
+Sådan ser `update` ud:
+
+```python.run norun="true"
+def update():
+    move_spaceship()
+    animate_spaceship()
+    move_bullets()
+    move_asteroids()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.goto(0, 0)
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+```
+
+<Solution title="Hele koden efter niveau 16">
+
+```python.run norun="true"
+import turtle
+import random
+import time
+
+"""
+Let's add a grace period
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+PLAYER_START_HEALTH = 3
+PLAYER_GRACE_PERIOD = 3 # seconds
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+MAX_ASTEROIDS = 10
+ASTEROID_SPEED_MIN = 1
+ASTEROID_SPEED_MAX = 5
+ASTEROID_RESPAWN_AFTER = 150  # respawn after number of game ticks
+
+FONT_FAMILY = "Courier New"
+SCORE_FONT = (FONT_FAMILY, 16, "normal")
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+        self.alive = True
+        self.score = 0
+        self.health = PLAYER_START_HEALTH
+        self.last_hit = 0.0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+    def is_invincible(self):
+        # a chance to talk about return values
+        return self.last_hit + PLAYER_GRACE_PERIOD > time.time()
+
+    def hit(self):
+        if not self.is_invincible():
+            self.health -= 1
+            self.last_hit = time.time()
+            draw_health()
+
+        if self.health == 0:
+            self.alive = False
+
+
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+        self.speed = 0
+        self.respawn_in = 0
+        self.reset()
+
+    def reset(self):
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+        self.showturtle()
+
+    def hit(self):
+        self.hideturtle()
+        self.respawn_in = ASTEROID_RESPAWN_AFTER
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = Player()
+
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 60)
+pen.write("HEALTH: ", font=SCORE_FONT)
+
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+
+health_pen = turtle.Turtle(visible=False)
+health_pen.color("white")
+health_pen.penup()
+health_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 60)
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+# Create asteroids
+asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroids.append(Asteroid())
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def check_collision(with_turtle):
+    # Check for collisions between the player and asteroids
+    for asteroid in asteroids:
+        if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+
+
+def animate_spaceship():
+    if player.is_invincible():
+        player.color("red", BG_COLOR)
+    else:
+        player.color("light grey", BG_COLOR)
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.hit()
+
+
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hit()
+                bullet.hideturtle()
+                bullet.active = False
+                player.score += 1
+                draw_score()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid) # let the kids figure this one out for a while
+            # also this one:
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.hit()
+        else:
+            asteroid.respawn_in -= 1
+            if asteroid.respawn_in == 0:
+                asteroid.reset()
+
+
+def draw_score():
+    score_pen.clear()
+    score_pen.write(player.score, font=SCORE_FONT)
+
+
+def draw_health():
+    health_pen.clear()
+    health_pen.write(player.health, font=SCORE_FONT)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    animate_spaceship()
+    move_bullets()
+    move_asteroids()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.goto(0, 0)
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+
+
+#
+#  START THE GAME
+#
+
+draw_score()
+draw_health()
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

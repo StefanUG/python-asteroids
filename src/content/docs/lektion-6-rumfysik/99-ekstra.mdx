@@ -1,0 +1,213 @@
+---
+title: "Ekstra: gør det til dit eget"
+description: Byg en bremse og skud, der arver rumskibets fart – plus flere idéer.
+sidebar:
+  order: 99
+---
+
+Er du færdig med niveau 19? Sejt! Her er nogle udfordringer, hvor du selv skal tænke lidt mere. Du må gerne lave dine egne versioner. Det er **dit** spil.
+
+Fortsæt i din egen fil. Hvis noget går helt galt, kan du altid kopiere koden fra niveau 19 og starte forfra.
+
+## Bremse 🛑
+
+I rigtig rumfart skal man vende rumskibet om og give gas den anden vej for at bremse. Det er svært! Lad os snyde lidt og lave en **bremse** på pil-ned, så du kan nå at undvige asteroiderne.
+
+### Idéen: gange med 0,9
+
+Hvis vi trækker et fast tal fra farten, kan den ende med at blive negativ, og så flyver rumskibet pludselig baglæns. I stedet **ganger** vi farten med et tal lidt under 1, for eksempel `0.9`. Så beholder rumskibet 90 % af farten hver gang. Farten bliver mindre og mindre, men skifter aldrig retning.
+
+Prøv at se, hvad der sker med farten, hvis vi bremser i 20 ticks:
+
+```python.run
+PLAYER_BRAKE = 0.9
+speed = 10
+
+for tick in range(20):
+    speed = speed * PLAYER_BRAKE
+    print("Tick", tick, "fart:", round(speed, 2))
+```
+
+:::tip[Prøv at ændre]
+- Hvad sker der med `PLAYER_BRAKE = 0.5`? Og med `0.99`?
+- Hvad sker der med `PLAYER_BRAKE = 1`? Og med `1.1`? (Det er ikke en bremse mere!)
+:::
+
+Fordi vi ganger **både** `speedx` og `speedy` med det samme tal, bliver rumskibet ved med at flyve i samme retning, bare langsommere.
+
+### Det skal du ændre
+
+1. **`# CONSTANTS`**: Lav en ny konstant `PLAYER_BRAKE = 0.9`.
+2. **`Player` klassen**: Lav en ny metode `brake(self)`, som ganger `self.speedx` og `self.speedy` med `PLAYER_BRAKE`.
+3. **`# EVENTS`**: Tilføj `"Down"` til `keys_pressed`, og lav `press_brake()` og `release_brake()`, ligesom du har gjort med de andre taster. Husk `screen.onkeypress` og `screen.onkeyrelease` for `"Down"`.
+4. **`move_spaceship()`**: Kald `player.brake()`, når `keys_pressed["Down"]` er sand.
+
+:::tip[Hint]
+Kig på, hvordan pil-op virker: `"Up"` i `keys_pressed`, funktionerne `press_forward` og `release_forward`, og de to linjer med `"Up"` nederst i `# EVENTS`. Bremsen skal laves på præcis samme måde, bare med `"Down"`.
+:::
+
+:::tip[Hint]
+`self.speedx *= PLAYER_BRAKE` betyder det samme som `self.speedx = self.speedx * PLAYER_BRAKE`.
+:::
+
+:::tip[Hint]
+Husk komma efter `"space": False` i `keys_pressed`, når du tilføjer en ny linje under den.
+:::
+
+Gør det til dit eget: Måske skal bremsen også vise en lille flamme foran rumskibet? Eller måske må bremsen kun bruges, når du har point nok?
+
+<Solution title="Bremse">
+
+I `# CONSTANTS`:
+
+```python.run norun="true"
+PLAYER_BRAKE = 0.9  # keep 90% of the speed each tick while braking
+```
+
+I `Player` klassen, for eksempel efter `move`:
+
+```python.run norun="true"
+    def brake(self):
+        self.speedx *= PLAYER_BRAKE
+        self.speedy *= PLAYER_BRAKE
+```
+
+I `# EVENTS`:
+
+```python.run norun="true"
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False,
+    "Down": False
+}
+
+def press_brake():
+    keys_pressed["Down"] = True
+
+def release_brake():
+    keys_pressed["Down"] = False
+
+# sammen med de andre onkeypress/onkeyrelease linjer:
+screen.onkeypress(press_brake, "Down")
+screen.onkeyrelease(release_brake, "Down")
+```
+
+I `# BEHAVIOURS`:
+
+```python.run norun="true"
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.thrust()
+    if keys_pressed["Down"]:
+        player.brake()
+
+    player.move()
+    move_if_out_of_bounds(player)
+    if check_collision(player):
+        player.hit()
+```
+
+</Solution>
+
+## Skud der arver rumskibets fart 🚀💨
+
+Har du lagt mærke til noget mærkeligt? Hvis du flyver hurtigt fremad og skyder, flyver skuddene lige så hurtigt som altid. I det rigtige rum ville skuddet få **rumskibets fart med** oven i sin egen. Hvis du kaster en bold ud af vinduet i en bil, der kører, flyver bolden jo også fremad sammen med bilen.
+
+### Idéen: læg rumskibets fart oven i
+
+Skuddet flytter sig allerede `BULLET_SPEED` frem i sin retning med `forward`. Nu skal det **også** flytte sig rumskibets `speedx` og `speedy`, ligesom i `Player.move()`. Skuddet skal huske rumskibets fart fra det øjeblik, det blev skudt.
+
+Prøv at se, hvad der sker, når rumskibet flyver mod højre med fart 8 og skyder i forskellige retninger:
+
+```python.run
+import math
+
+ship_speedx = 8
+ship_speedy = 0
+BULLET_SPEED = 20
+
+for heading in [0, 90, 180]:
+    angle = math.radians(heading)
+    bullet_x = BULLET_SPEED * math.cos(angle) + ship_speedx
+    bullet_y = BULLET_SPEED * math.sin(angle) + ship_speedy
+    print(f"Skud mod {heading} grader: speedx={round(bullet_x, 1)} speedy={round(bullet_y, 1)}")
+```
+
+Skud fremad bliver hurtigere (28), skud bagud bliver langsommere (-12), og skud opad driver lidt mod højre.
+
+### Det skal du ændre
+
+1. **`Bullet.__init__`**: Giv skuddet `self.speedx = 0` og `self.speedy = 0`.
+2. **`Bullet.fire(self, start)`**: `start` er rumskibet, der skyder. Kopier dens `speedx` og `speedy` over i skuddet.
+3. **`Bullet.move(self)`**: Efter `self.forward(BULLET_SPEED)`, læg skuddets `speedx` og `speedy` til positionen, ligesom i `Player.move()`. Gør det **før** `move_if_out_of_bounds(self)`.
+
+:::tip[Hint]
+I `fire` kan du skrive `self.speedx = start.speedx`. `self` er skuddet, og `start` er rumskibet.
+:::
+
+:::tip[Hint]
+Kig på `Player.move()`. Du kan bruge de samme linjer: `x, y = self.pos()`, læg farten til og `self.goto(x, y)`.
+:::
+
+Gør det til dit eget: Prøv at sætte `BULLET_SPEED` ned, nu hvor skuddene får ekstra fart. Hvad føles bedst?
+
+<Solution title="Skud der arver rumskibets fart">
+
+Hele `Bullet` klassen:
+
+```python.run norun="true"
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+        self.speedx = 0
+        self.speedy = 0
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.speedx = start.speedx  # keep the speed of the player
+        self.speedy = start.speedy
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        x, y = self.pos()
+        x += self.speedx
+        y += self.speedy
+        self.goto(x, y)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+```
+
+</Solution>
+
+## Flere idéer
+
+Her er nogle idéer, du kan prøve helt selv. Der er ingen løsning, så du må selv finde ud af det:
+
+- **Friktion altid:** Gør spillet lidt nemmere ved altid at bremse en lille smule, også når du ikke trykker på noget. Gang farten med for eksempel `0.99` i `Player.move()` hver gang. Hvor meget friktion er sjovest?
+- **Flakkende flamme:** Lav to eller tre flamme-former med forskellige farver (for eksempel orange, gul og rød), og registrer dem alle med `screen.register_shape`. Brug `random.choice` i `animate_spaceship()` til at vælge en tilfældig af dem, mens pil-op er trykket ned. Så ser det ud, som om ilden blafrer!
+
+:::note[Næste gang: gør det til dit eget]
+Næste gang skal du gøre spillet helt til dit eget og vise det frem for de andre til sidst. Tænk allerede nu over, hvad du vil ændre: farver, former, taster, nye regler eller noget helt skørt?
+:::

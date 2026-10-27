@@ -1,0 +1,40 @@
+---
+title: "Oversigt"
+description: "Lektion 6: rumskibet flyver som i rigtigt rum og får en raketflamme."
+sidebar:
+  order: 0
+---
+
+import { LinkButton } from '@astrojs/starlight/components';
+import CatchUp from '@components/CatchUp.astro';
+
+I dag lærer dit rumskib at flyve som i det rigtige rum. Det glider videre, når du slipper gassen, og der kommer en orange flamme ud bagved, når du giver gas.
+
+<LinkButton href="/python-asteroids/slides/lektion-6/" icon="right-arrow">Se dagens præsentation</LinkButton>
+
+Var du her ikke sidst, eller virker din kode ikke? Brug boksen herunder til at hente koden, som den så ud efter niveau 17. Kodeordet får du af din underviser.
+
+<CatchUp lesson={6} />
+
+## Plan for i dag
+
+- **ca. 30 min:** præsentation og niveau 18
+- **Pause**
+- **ca. 45 min:** niveau 19 og ekstra-opgaverne
+
+## Det lærer du i dag
+
+- Forskellen på hvor rumskibet **peger** (heading) og hvor det **flyver** (track).
+- At dele farten op i to dele, `speedx` og `speedy`, og bruge `math.cos` og `math.sin` til at give et skub i den rigtige retning.
+- At sætte en maksimal fart med Pythagoras.
+- At tegne dine egne former ud fra punkter og sætte flere former sammen til én.
+
+## Niveauer
+
+- [ ] [Niveau 18 – Flyv som i rummet](/python-asteroids/lektion-6-rumfysik/niveau-18-flyv-som-i-rummet/)
+- [ ] [Niveau 19 – Raketflamme](/python-asteroids/lektion-6-rumfysik/niveau-19-raketflamme/)
+- [ ] [Ekstra: gør det til dit eget](/python-asteroids/lektion-6-rumfysik/99-ekstra/)
+
+:::tip[Blev du færdig før tid?]
+Prøv [ekstra-opgaverne](/python-asteroids/lektion-6-rumfysik/99-ekstra/). Der kan du lave en bremse og skud, der arver rumskibets fart. Og tænk allerede nu over, hvad du vil ændre i dit spil næste gang, hvor vi skal **gøre det til dit eget**.
+:::

@@ -1,0 +1,210 @@
+---
+title: "Former"
+description: Lav dit eget rumskib, laserskud og asteroider, der ligner rigtige sten.
+sidebar:
+  order: 5
+---
+
+Formen på tingene betyder meget for, hvordan et spil føles. Her kan du give rumskibet en ny form, lave laserskud og asteroider, der ligner rigtige klippestykker. Vælg én ting ad gangen.
+
+## Sådan er en form lavet
+
+En form er bare en **liste af punkter**. Turtle tegner en streg fra punkt til punkt. Hvert punkt er et `(x, y)`, ligesom i koordinatsystemet.
+
+Sådan ser rumskibet ud nu. Den blå trekant er selve rumskibet, og den røde er raketflammen:
+
+<img src={import.meta.env.BASE_URL + "images/spaceship_grid_shape.png"} alt="Rumskibets form tegnet i et koordinatsystem: en blå trekant med spidsen i (0, 5) og hjørnerne (7, -20) og (-7, -20), og en rød flamme-trekant under med spidsen i (0, -30)." />
+
+I koden står det i `# CONSTANTS`:
+
+```python
+SPACESHIP_SHAPE = ( (7,-20), (0,5), (-7,-20) )
+SPACESHIP_THRUST_SHAPE = turtle.Shape('compound')
+SPACESHIP_THRUST_SHAPE.addcomponent(SPACESHIP_SHAPE, BG_COLOR, 'light grey')
+SPACESHIP_THRUST_SHAPE.addcomponent(( (7,-20), (0,-30), (-7,-20) ), BG_COLOR, 'orange')
+```
+
+:::note[Hvad er fremad?]
+I en form peger **opad** (store `y`-tal) altid fremad. Derfor har rumskibet sin spids i `(0,5)`.
+:::
+
+## Lav dit eget rumskib
+
+Tegn dit rumskib på ternet papir, eller brug [GeoGebra](https://www.geogebra.org/geometry), hvor du kan sætte punkter og se koordinaterne. Skriv punkterne ind i `SPACESHIP_SHAPE` i den rækkefølge, du vil tegne dem.
+
+For eksempel et rumskib med vinger:
+
+```python
+SPACESHIP_SHAPE = ( (0,10), (4,-5), (12,-15), (4,-12), (0,-15), (-4,-12), (-12,-15), (-4,-5) )
+```
+
+Flammen bruger også `SPACESHIP_SHAPE`, så den følger automatisk med. Men flammens punkter `(7,-20), (0,-30), (-7,-20)` sidder stadig, hvor det gamle rumskib sluttede. Ret dem, så flammen sidder bag på dit nye rumskib – for eksempel `(4,-12), (0,-25), (-4,-12)`.
+
+- [ ] Lav din egen `SPACESHIP_SHAPE`
+- [ ] Flyt flammens punkter, så den sidder bag på rumskibet
+- [ ] Kør spillet og flyv fremad. Ser flammen rigtig ud?
+
+### Eller brug en indbygget form
+
+Turtle har nogle former indbygget: `"arrow"`, `"turtle"`, `"circle"`, `"square"`, `"triangle"` og `"classic"`.
+
+Formen bliver sat to steder: i `Player.__init__` og i `animate_spaceship()`, som skifter mellem formen med og uden flamme. Ret begge steder:
+
+```python
+# Player.__init__
+        self.shape("turtle")
+
+
+# animate_spaceship
+    if keys_pressed["Up"]:
+        player.shape("turtle")
+    else:
+        player.shape("turtle")
+```
+
+- [ ] Ret formen i `Player.__init__`
+- [ ] Ret begge former i `animate_spaceship()`
+
+:::tip[Hvorfor to steder?]
+Hvis du kun retter `Player.__init__`, skifter `animate_spaceship()` formen tilbage til `"spaceship"` allerede i første tick. Prøv det, så kan du se det!
+:::
+
+## Skyd med laser
+
+Gør skuddene til lange laserstråler! I `Bullet.__init__` står:
+
+```python
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+```
+
+Skift den ud med:
+
+```python
+        self.shapesize(0.1, 10)
+```
+
+Det første tal er **bredden** og det andet er **længden** i den retning, skuddet flyver. Så skuddet bliver meget tyndt og meget langt.
+
+- [ ] Lav skuddene om til laser
+- [ ] Prøv andre tal. Hvad med `0.5, 3`?
+
+## Asteroider der ligner sten
+
+En rund cirkel ligner ikke rigtig en asteroide. Her er en mere klumpet form:
+
+<img src={import.meta.env.BASE_URL + "images/asteroid_grid_shape.png"} alt="En klumpet asteroideform tegnet i et koordinatsystem, med punkter fra cirka -5 til 4 på x-aksen og fra -4 til 4 på y-aksen." />
+
+Formen er lille (fra cirka -5 til 5), så vi gør den 5 gange større med `shapesize`.
+
+Tilføj formen nederst i `# CONSTANTS`:
+
+```python
+ASTEROID_SHAPE = ( (-5,-1), (-4,0), (-3,0), (-2,1), (-2,2), (-1,3), (0,3.8), (1,3.2), (2.2,2.3), (2.4,1.5), (4.2,0.7), (4.1,-1), (3,-2.8), (1,-3), (-0.6,-3.8), (-2.5,-3.8), (-4,-2.5), (-5,-1) )
+```
+
+Registrer formen i `# GAME SETUP`, lige under de to andre `screen.register_shape(...)`:
+
+```python
+screen.register_shape("asteroid", ASTEROID_SHAPE)
+```
+
+Og brug den i `Asteroid.__init__`. Ret de to linjer `self.shape("circle")` og `self.shapesize(3, 3)` til:
+
+```python
+        self.shape("asteroid")
+        self.shapesize(5, 5)
+```
+
+- [ ] Tilføj `ASTEROID_SHAPE` i `# CONSTANTS`
+- [ ] Registrer formen i `# GAME SETUP`
+- [ ] Brug formen i `Asteroid.__init__`
+- [ ] Kør spillet. Ligner asteroiderne sten nu?
+
+Du kan selvfølgelig også tegne din helt egen asteroide i [GeoGebra](https://www.geogebra.org/geometry).
+
+## Drej asteroiderne rundt
+
+Nu hvor asteroiderne ikke er runde, kan man se, hvis de drejer. Find `move_asteroids()`, og tilføj en linje lige under `move_if_out_of_bounds(asteroid)` (med samme indrykning):
+
+```python
+            asteroid.tilt(asteroid.speed)
+```
+
+`tilt` drejer kun **formen**, ikke den retning, asteroiden flyver i. Hurtige asteroider drejer hurtigere, fordi vi bruger `asteroid.speed`.
+
+- [ ] Tilføj `tilt` i `move_asteroids()`
+- [ ] Kør spillet. Snurrer asteroiderne?
+
+## Skildpadde der skyder bier?
+
+Hvad med at lave rumskibet om til en skildpadde og asteroiderne om til bier? 🐢🐝
+
+Brug den indbyggede `"turtle"`-form til spilleren (se [Eller brug en indbygget form](#eller-brug-en-indbygget-form) ovenfor). Til bierne er der en færdig form.
+
+Sæt den i `# CONSTANTS`:
+
+```python
+BEE_SHAPE = ((0, -22), (-4, -20), (-7, -13), (7, -13), (-7, -13), (-7.6, -5.6), (7.6, -5.6), (-7.6, -5.6), (-2.6, 7.4),
+             (-13.1, -10.5), (-18, -13), (-23, -11), (-25, -6), (-23, -1), (-2.6, 7.5), (-7, 9), (-6, 15), (-4, 17),
+             (-7, 20), (-11, 22), (-7, 20), (-4, 17), (0, 18), (4, 17), (7, 20), (11, 22), (7, 20), (4, 17), (6, 15),
+             (7, 9), (2.6, 7.5), (23, -1), (25, -6), (23, -11), (18, -13), (13.1, -10.5), (2.6, 7.4), (7.6, -5.6),
+             (7, -13), (4, -20))
+```
+
+Registrer den i `# GAME SETUP`:
+
+```python
+screen.register_shape("bee", BEE_SHAPE)
+```
+
+Og brug den i `Asteroid.__init__` i stedet for `"circle"` (eller `"asteroid"`):
+
+```python
+        self.shape("bee")
+        self.shapesize(1, 1)
+```
+
+- [ ] Gør spilleren til en skildpadde
+- [ ] Gør asteroiderne til bier
+
+Kan du lide idéen? Så se [bonusspillet, hvor skildpadden spiser bierne](/python-asteroids/lektion-7-goer-det-til-dit-eget/7-bonus-skildpadde-spiser-bier/).
+
+## Typiske fejl
+
+:::caution[Virker det ikke?]
+- `bad shape` eller lignende fejl: Har du husket `screen.register_shape(...)`? Og staver du navnet ens begge steder, fx `"asteroid"`?
+- `register_shape` skal stå **efter** `screen = turtle.Screen()` og **før** `Asteroid()`-objekterne bliver lavet.
+- Hver parentes skal lukkes. Tæl efter, især i de lange former.
+:::
+
+<Solution title="Asteroideform og drejning – de ændrede steder">
+
+```python.run norun="true"
+# CONSTANTS (nederst)
+ASTEROID_SHAPE = ( (-5,-1), (-4,0), (-3,0), (-2,1), (-2,2), (-1,3), (0,3.8), (1,3.2), (2.2,2.3), (2.4,1.5), (4.2,0.7), (4.1,-1), (3,-2.8), (1,-3), (-0.6,-3.8), (-2.5,-3.8), (-4,-2.5), (-5,-1) )
+
+# Asteroid.__init__
+        self.shape("asteroid")
+        self.shapesize(5, 5)
+
+# GAME SETUP
+screen.register_shape("spaceship", SPACESHIP_SHAPE)
+screen.register_shape("spaceship_thrust", SPACESHIP_THRUST_SHAPE)
+screen.register_shape("asteroid", ASTEROID_SHAPE)
+
+# BEHAVIOURS
+def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid)
+            asteroid.tilt(asteroid.speed)
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.hit()
+        else:
+            asteroid.respawn_in -= 1
+            if asteroid.respawn_in == 0:
+                asteroid.reset()
+```
+
+</Solution>

@@ -1,0 +1,180 @@
+---
+title: "Ekstra: gør det til dit eget"
+description: Hjerter i stedet for tal, ekstra liv for point, et skjold rundt om rumskibet og regnbue-blink.
+sidebar:
+  order: 99
+---
+
+Færdig med niveau 17? Så er det tid til at gøre spillet til dit eget. Vælg en eller flere af opgaverne herunder – i den rækkefølge, du har lyst til. Og find gerne på dine egne variationer!
+
+Alle opgaverne bygger videre på koden fra [niveau 17](/python-asteroids/lektion-5-liv-og-skjold/niveau-17-blink/).
+
+## Hjerter i stedet for et tal
+
+"HEALTH: 3" er lidt kedeligt. Hvad med **♥ ♥ ♥** i stedet? Og som bonus: få et ekstra liv, hver gang du har skudt 10 asteroider.
+
+**Del 1: hjerter.** Det er funktionen `draw_health` i `# BEHAVIOURS`, der skriver antal liv. Lige nu skriver den tallet `player.health`.
+
+:::tip[Hint]
+I Python kan du gange en tekst med et tal: `"♥" * 3` giver `"♥♥♥"`. Prøv det i en `print`, hvis du er i tvivl.
+:::
+
+:::tip[Hint]
+Vil du have røde hjerter? Så skal du ændre farven på `health_pen` i `# GAME SETUP`.
+:::
+
+**Del 2: et ekstra liv for hver 10 point.** Point gives i `move_bullets`, lige der hvor der står `player.score += 1`.
+
+:::tip[Hint]
+Kan du huske `%` fra niveau 17? `player.score % 10 == 0` er sandt, når scoren er 10, 20, 30 ... Lav en konstant `EXTRA_LIFE_EVERY = 10` i `# CONSTANTS`, så er det nemt at ændre.
+:::
+
+Idéer til dine egne variationer:
+- Et maksimalt antal liv, så man ikke kan samle uendeligt mange.
+- Skriv "+1 LIV!" et sted på skærmen, når man får et ekstra liv.
+
+<Solution title="Løsning: hjerter og ekstra liv">
+
+I `# CONSTANTS`:
+
+```python
+EXTRA_LIFE_EVERY = 10  # points per extra life
+```
+
+I `# GAME SETUP` (røde hjerter):
+
+```python
+health_pen = turtle.Turtle(visible=False)
+health_pen.color("red")
+health_pen.penup()
+health_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 60)
+```
+
+I `# BEHAVIOURS`:
+
+```python
+def draw_health():
+    health_pen.clear()
+    health_pen.write("♥" * player.health, font=SCORE_FONT)
+```
+
+I `move_bullets`, lige efter `draw_score()`:
+
+```python
+            if hit_asteroid:
+                hit_asteroid.hit()
+                bullet.hideturtle()
+                bullet.active = False
+                player.score += 1
+                draw_score()
+                if player.score % EXTRA_LIFE_EVERY == 0:
+                    player.health += 1
+                    draw_health()
+```
+
+</Solution>
+
+## Et rigtigt skjold
+
+Lige nu blinker rumskibet, når det er beskyttet. Men hvad med et lysende **skjold** – en cirkel rundt om skibet – så længe du ikke kan blive ramt?
+
+Du skal bruge en ny pen (en `turtle.Turtle`), som kun tegner skjoldet. Den laves i `# GAME SETUP`, og den tegner i `animate_spaceship`, som jo allerede bliver kaldt i hvert game tick.
+
+:::tip[Hint]
+Skjoldet skal tegnes på ny i hvert game tick, fordi skibet flytter sig. Start derfor med at viske det gamle skjold ud med `clear()` – præcis som `draw_health` gør.
+:::
+
+:::tip[Hint]
+`circle(25)` tegner en cirkel med radius 25, men den starter i **bunden** af cirklen, ikke i midten. Flyt derfor pennen 25 pixels **under** skibet, før du tegner: `goto(player.xcor(), player.ycor() - 25)`. Husk `pendown()` før og `penup()` efter.
+:::
+
+Idéer til dine egne variationer:
+- En anden farve eller en tykkere streg med `pensize(3)`.
+- Et skjold der bliver mindre, jo tættere skjoldet er på at slukke. Brug `player.last_hit + PLAYER_GRACE_PERIOD - time.time()` til at regne ud, hvor mange sekunder der er tilbage.
+
+<Solution title="Løsning: skjold rundt om rumskibet">
+
+I `# CONSTANTS`:
+
+```python
+SHIELD_RADIUS = 25
+```
+
+I `# GAME SETUP`, f.eks. efter `health_pen`:
+
+```python
+shield_pen = turtle.Turtle(visible=False)
+shield_pen.color("cyan")
+shield_pen.penup()
+```
+
+Erstat `animate_spaceship` i `# BEHAVIOURS`:
+
+```python
+def animate_spaceship():
+    shield_pen.clear()
+    if player.is_invincible():
+        shield_pen.goto(player.xcor(), player.ycor() - SHIELD_RADIUS)
+        shield_pen.pendown()
+        shield_pen.circle(SHIELD_RADIUS)
+        shield_pen.penup()
+
+        scaled = int(time.time() * 10)
+        is_invisible = scaled % 2
+        if is_invisible:
+            player.hideturtle()
+        else:
+            player.showturtle()
+    else:
+        player.showturtle()
+```
+
+Vil du ikke have, at skibet blinker, når det har skjold? Så erstat linjerne fra `scaled = ...` og ned til (men ikke med) det sidste `else:` med én linje: `player.showturtle()`.
+
+</Solution>
+
+## Regnbue-blink
+
+Blink er fint – men hvad med et skib, der skifter mellem **alle regnbuens farver**, mens det er udødeligt? Ligesom når man har fået en stjerne i Mario Kart!
+
+Du skal ændre `animate_spaceship` i `# BEHAVIOURS`.
+
+:::tip[Hint]
+Lav en liste med farver i `# CONSTANTS`, f.eks. `RAINBOW_COLORS = ["red", "orange", "yellow", "green", "cyan", "magenta"]`.
+:::
+
+:::tip[Hint]
+I niveau 17 gav `scaled % 2` altid 0 eller 1. På samme måde giver `scaled % len(RAINBOW_COLORS)` altid et tal fra 0 op til antal farver minus 1. Det kan du bruge som plads i listen: `RAINBOW_COLORS[...]`.
+:::
+
+:::tip[Hint]
+Husk at sætte farven tilbage til `"light grey"`, når skjoldet slukker – ellers bliver skibet hængende i den sidste regnbuefarve.
+:::
+
+Idéer til dine egne variationer:
+- Dine helt egne farver i listen.
+- Hurtigere eller langsommere farveskift: prøv at gange med 5 eller 20 i stedet for 10.
+- Kombinér med skjoldet fra opgaven ovenover, så skjoldet også skifter farve.
+
+<Solution title="Løsning: regnbue-blink">
+
+I `# CONSTANTS`:
+
+```python
+RAINBOW_COLORS = ["red", "orange", "yellow", "green", "cyan", "magenta"]
+```
+
+Erstat `animate_spaceship` i `# BEHAVIOURS`:
+
+```python
+def animate_spaceship():
+    player.showturtle()
+    if player.is_invincible():
+        scaled = int(time.time() * 10)
+        color_index = scaled % len(RAINBOW_COLORS)
+        player.color(RAINBOW_COLORS[color_index], BG_COLOR)
+    else:
+        player.color("light grey", BG_COLOR)
+```
+
+</Solution>

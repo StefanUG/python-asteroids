@@ -1,0 +1,80 @@
+---
+title: "Skrifttype"
+description: Skift skrifttypen på point, liv og GAME OVER.
+sidebar:
+  order: 3
+---
+
+Teksten i spillet – `SCORE`, `HEALTH` og den store `GAME OVER` – bruger alle den samme skrifttype. Den kan du skifte, så spillet får sin helt egen stil.
+
+## Hvor står skrifttypen?
+
+Øverst i `# CONSTANTS` står:
+
+```python
+FONT_FAMILY = "Courier New"
+SCORE_FONT = (FONT_FAMILY, 16, "normal")
+```
+
+- `FONT_FAMILY` er navnet på skrifttypen.
+- `SCORE_FONT` er en lille samling af tre ting: skrifttype, størrelse (`16`) og stil (`"normal"`).
+
+`GAME OVER`-teksten i `update()` bruger også `FONT_FAMILY`, men med størrelse `68`. Så når du ændrer `FONT_FAMILY`, ændrer du al teksten på én gang. Det er smart ved konstanter!
+
+Prøv forskellige skrifttyper her i browseren:
+
+```python.run
+import turtle
+
+t = turtle.Turtle()
+t.hideturtle()
+t.penup()
+t.goto(-200, 100)
+
+skrifttyper = ["Courier New", "Arial", "Comic Sans MS", "Impact"]
+for navn in skrifttyper:
+    t.write("SCORE: 42", font=(navn, 24, "normal"))
+    t.goto(-200, t.ycor() - 60)
+```
+
+Prøv at ændre `"normal"` til `"bold"` (fed) eller `"italic"` (skrå), og ret størrelsen `24`.
+
+## Skift skrifttypen i spillet
+
+Skrifttyper, som næsten alle computere har: `"Courier New"`, `"Arial"`, `"Comic Sans MS"`, `"Impact"`, `"Times New Roman"` og `"Verdana"`.
+
+```python
+FONT_FAMILY = "Impact"
+```
+
+- [ ] Skift `FONT_FAMILY` til en anden skrifttype, og kør spillet
+- [ ] Prøv at gøre teksten større eller fed i `SCORE_FONT`
+- [ ] Find `"GAME OVER"` i `update()`, og skriv din egen tekst i stedet
+
+:::note[Ingen fejl, men samme skrift?]
+Hvis computeren ikke kender skrifttypen, giver Python **ikke** en fejl. Den bruger bare en anden skrift i stedet. Tjek stavningen, også store og små bogstaver.
+:::
+
+## Sej gammeldags skrifttype
+
+Der findes en gammel computerskrifttype, der hedder **Fixedsys**. Den ligner skriften på de første computerspil og passer perfekt til Asteroids!
+
+Den følger ikke med computeren, så den skal hentes og installeres først:
+
+1. Hent skrifttypen her: [Fixedsys-skrifttyper på GitHub](https://github.com/foxoman/fixedsys).
+2. Installer den. Spørg en voksen, hvis du ikke må installere ting på computeren.
+   - **Windows:** højreklik på filen og vælg **Installer**.
+   - **Mac:** dobbeltklik på filen og klik **Installer skrift**.
+3. Luk VS Code eller PyCharm, og åbn det igen, så skrifttypen bliver fundet.
+4. Skift koden i `# CONSTANTS`:
+
+```python
+FONT_FAMILY = "fixedsys"
+```
+
+- [ ] Hent og installer Fixedsys
+- [ ] Skift `FONT_FAMILY` til `"fixedsys"`, og kør spillet
+
+:::tip[Hvis den ikke dukker op]
+Skrifttypen kan hedde lidt andet på din computer, for eksempel med et ekstra ord bagefter. Når du åbner skrifttypefilen, kan du se det præcise navn øverst. Skriv det navn i `FONT_FAMILY`.
+:::

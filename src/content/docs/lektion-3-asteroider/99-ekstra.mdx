@@ -1,0 +1,142 @@
+---
+title: "Ekstra: gør det til dit eget"
+description: Ekstra-opgaver til lektion 3 – farverige asteroider i forskellige størrelser og en turbo-kanon.
+sidebar:
+  order: 99
+---
+
+Blev du færdig med niveau 10? Godt gået! Her er to ekstra-opgaver. Du må gerne lave dem på din helt egen måde – det er dit spil.
+
+:::caution[Gem en kopi først]
+Lav en kopi af din fil, før du går i gang. Så kan du altid gå tilbage, hvis noget går i stykker.
+:::
+
+## Farverige asteroider i alle størrelser
+
+Rigtige asteroider er ikke alle sammen lige store og hvide. Giv hver asteroide en **tilfældig farve** og en **tilfældig størrelse**, så rummet ser mere vildt ud.
+
+Det skal du ændre:
+
+- I `# CONSTANTS`: Lav en liste med farver, fx `ASTEROID_COLORS = ["white", "orange", "yellow"]`.
+- I `__init__` i `Asteroid`: Vælg en tilfældig størrelse og brug den i `self.shapesize(...)`, og vælg en tilfældig farve fra listen i `self.color(...)`.
+- Og så det vigtige: **radius skal passe til størrelsen!** Ellers kan du ramme luft ved siden af en lille asteroide, eller skyde lige igennem kanten af en stor.
+
+:::tip[Hint 1]
+`random.choice(liste)` vælger en tilfældig ting fra en liste. Den kender du fra intro-holdet.
+:::
+
+:::tip[Hint 2]
+Gem størrelsen i en variabel, så du kan bruge **det samme** tal to steder: `size = random.randint(2, 4)` og så `self.shapesize(size, size)`.
+:::
+
+:::tip[Hint 3]
+En cirkel med `shapesize(1, 1)` er 20 pixels bred, så radius er 10. Med `shapesize(3, 3)` er radius 30. Kan du se mønstret? Radius er `size * 10`.
+:::
+
+Prøv også selv: Hvad med asteroider, der ikke er runde, men aflange? Eller farvet fyld i stedet for sort?
+
+<Solution title="Løsning: farverige asteroider">
+
+I `# CONSTANTS`:
+
+```python.run norun="true"
+ASTEROID_COLORS = ["white", "orange", "yellow", "light green", "light blue", "pink"]
+```
+
+Hele `Asteroid`-klassen:
+
+```python.run norun="true"
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        size = random.randint(2, 4)
+        self.shapesize(size, size)
+        self.color(random.choice(ASTEROID_COLORS), BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = size * 10
+```
+
+</Solution>
+
+## Turbo-kanon
+
+Nogle gange har man brug for **rigtig mange** skud på én gang! Lav en turbo-knap: Når du holder **F** nede sammen med mellemrum, skyder kanonen meget hurtigere end normalt.
+
+Det skal du ændre:
+
+- I `# CONSTANTS`: Lav en ny konstant til den hurtige genladetid, fx `RAPID_RELOAD_TIME = 1`.
+- I `# EVENTS`: Tilføj tasten `"f"` til `keys_pressed`, og lav to nye funktioner, der sætter den til `True` og `False` – ligesom `press_fire` og `release_fire`. Husk også `screen.onkeypress` og `screen.onkeyrelease` for dem.
+- I `shoot` i `Player`: Når der bliver skudt, skal `self.fire_cooldown` sættes til `RAPID_RELOAD_TIME`, hvis F er nede, og ellers til `RELOAD_TIME`.
+
+:::tip[Hint 1]
+Husk komma efter `"space": False`, når du tilføjer en ny linje i `keys_pressed`.
+:::
+
+:::tip[Hint 2]
+I `shoot` kan du bruge `if keys_pressed["f"]:` og `else:` til at vælge den rigtige genladetid.
+:::
+
+:::tip[Hint 3]
+Turbo-kanonen bruger alle 10 kugler meget hurtigt. Så må du vente, til de forsvinder igen. Det kan være en fed "overophedning" – eller du kan sætte `MAX_BULLETS` op.
+:::
+
+Prøv også selv: Kan du gøre, så turbo kun virker i et par sekunder ad gangen? Eller så kuglerne får en anden farve i turbo?
+
+<Solution title="Løsning: turbo-kanon">
+
+I `# CONSTANTS`:
+
+```python.run norun="true"
+RAPID_RELOAD_TIME = 1  # ticks between reload when turbo is on
+```
+
+`shoot` i `Player`-klassen:
+
+```python.run norun="true"
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            if keys_pressed["f"]:
+                self.fire_cooldown = RAPID_RELOAD_TIME
+            else:
+                self.fire_cooldown = RELOAD_TIME
+```
+
+`keys_pressed` bliver først lavet længere nede i filen, men det gør ikke noget: `shoot` bliver først kaldt, når spillet kører, og så findes den.
+
+I `# EVENTS`:
+
+```python.run norun="true"
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False,
+    "f": False
+}
+```
+
+Sammen med de andre `press_`- og `release_`-funktioner:
+
+```python.run norun="true"
+def press_turbo():
+    keys_pressed["f"] = True
+
+def release_turbo():
+    keys_pressed["f"] = False
+```
+
+Sammen med de andre `screen.onkeypress` og `screen.onkeyrelease`:
+
+```python.run norun="true"
+screen.onkeypress(press_turbo, "f")
+screen.onkeyrelease(release_turbo, "f")
+```
+
+</Solution>

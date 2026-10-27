@@ -1,0 +1,642 @@
+---
+title: "Niveau 19 – Raketflamme"
+description: Tegn dit eget rumskib ud fra punkter og vis en flamme, når du giver gas.
+sidebar:
+  order: 29
+---
+
+Når du trykker pil-op og giver gas, ville det være sejt, hvis man kunne se ild komme ud bag rumskibet! 🔥
+
+Efter dette niveau:
+
+- har rumskibet en ny, spids form, som du selv har tegnet med punkter
+- kommer der en orange flamme ud bagved, når du holder pil-op nede
+- forsvinder flammen igen, når du slipper
+
+## Det nye i dag: dine egne former
+
+Indtil nu har rumskibet brugt turtles indbyggede form `"triangle"`, som vi strakte, så den blev spids. Nu tegner vi vores **egen** form.
+
+En form er bare en liste af **punkter** (koordinater), som turtle forbinder med streger, ligesom en tegn-prik-til-prik opgave. Formen tegnes, som om rumskibet peger **lige op**, og turtlens position er i punktet `(0, 0)`. Turtle drejer selv formen, så næsen følger rumskibets retning.
+
+<img src={import.meta.env.BASE_URL + "images/spaceship_grid_shape.png"} alt="Rumskibets form tegnet på et koordinatsystem: en blå spids trekant med punkterne (7, -20), (0, 5) og (-7, -20), og en rød flamme-trekant under den med punkterne (7, -20), (0, -30) og (-7, -20)." />
+
+- Rumskibet (blå): `(7,-20)` er højre hjørne, `(0,5)` er næsen, `(-7,-20)` er venstre hjørne.
+- Flammen (rød): Den bruger de **samme** to hjørner, men midterpunktet `(0,-30)` ligger længere nede. Så flammen er en trekant, der peger bagud.
+
+Prøv selv at tegne formerne med turtle. Her bruger vi `goto` til at gå fra punkt til punkt. Vi gør formerne 6 gange større, så de er nemme at se:
+
+```python.run
+import turtle
+
+SCALE = 6
+spaceship = ((7, -20), (0, 5), (-7, -20))
+flame = ((7, -20), (0, -30), (-7, -20))
+
+t = turtle.Turtle()
+
+def draw_shape(points, color):
+    t.penup()
+    last_x, last_y = points[-1]
+    t.goto(last_x * SCALE, last_y * SCALE)
+    t.pendown()
+    t.color(color)
+    for x, y in points:
+        t.goto(x * SCALE, y * SCALE)
+
+draw_shape(spaceship, "grey")
+draw_shape(flame, "orange")
+```
+
+`points[-1]` er det **sidste** punkt i listen. Vi starter der, så formen bliver lukket, når vi tegner til det første punkt.
+
+:::tip[Prøv at ændre]
+- Lav flammen længere ved at ændre `(0, -30)` til `(0, -45)`.
+- Gør rumskibet bredere ved at ændre `7` og `-7` til `12` og `-12` (husk det i både rumskib og flamme).
+- Tegn dit helt eget rumskib med flere punkter, for eksempel med vinger: `((7,-20), (0,5), (-7,-20), (-15,-25), (0,-15), (15,-25))`.
+:::
+
+### Sammensatte former
+
+En almindelig form har kun **én farve** til fyld og én til kanten. Men flammen skal være orange, og rumskibet skal være gråt. Derfor laver vi en **sammensat form** (på engelsk *compound*). Det er en form, der består af flere dele, som hver har deres egne farver.
+
+Så har vi to former:
+
+- `"spaceship"`: bare rumskibet
+- `"spaceship_thrust"`: rumskibet **og** flammen
+
+Når du trykker pil-op, skifter vi rumskibets form til den med flamme. Når du slipper, skifter vi tilbage. Det sker i game loop, så det tjekkes 50 gange i sekundet.
+
+## Byg det ind i spillet
+
+Fortsæt i din egen fil fra niveau 18.
+
+Kommer du i problemer, kan du finde hjælp i [bunden af siden](#hjælp) ⬇
+
+### Lav en bedre rumskib-form
+
+I stedet for at bruge den indbyggede `"triangle"` form laver vi vores egen:
+
+```python
+SPACESHIP_SHAPE = ( (7,-20), (0,5), (-7,-20) )
+```
+
+Det er tre punkter, der tegner en trekant: højre hjørne, næsen og venstre hjørne. Hvert punkt er skrevet som `(x,y)` i parentes, og hele formen er også omgivet af parenteser.
+
+- [ ] Sæt koden ind i `# CONSTANTS` sektionen, lige efter linjen med `HALF_HEIGHT`
+
+### Lav en form med ild!
+
+Nu laver vi den sammensatte form med både rumskib **og** ild:
+
+```python
+SPACESHIP_THRUST_SHAPE = turtle.Shape('compound')
+SPACESHIP_THRUST_SHAPE.addcomponent(SPACESHIP_SHAPE, BG_COLOR, 'light grey')
+SPACESHIP_THRUST_SHAPE.addcomponent(( (7,-20), (0,-30), (-7,-20) ), BG_COLOR, 'orange')
+```
+
+- `turtle.Shape('compound')` laver en ny, tom sammensat form.
+- `addcomponent(punkter, fyld, kant)` tilføjer en del til formen. Første farve er **fyldet** inden i, anden farve er **kanten**.
+- Første del er rumskibet: sort fyld (samme farve som baggrunden, `BG_COLOR`) og lysegrå kant.
+- Anden del er ilden: sort fyld og orange kant. Den har punktet `(0,-30)`, så ilden rækker længere ned bag rumskibet.
+
+- [ ] Sæt koden ind lige efter `SPACESHIP_SHAPE`
+
+### Registrer formerne
+
+Turtle kender kun sine indbyggede former, så vi skal fortælle skærmen om vores nye former og give dem et navn. Det kaldes at **registrere** dem:
+
+```python
+screen.register_shape("spaceship", SPACESHIP_SHAPE)
+screen.register_shape("spaceship_thrust", SPACESHIP_THRUST_SHAPE)
+```
+
+Bagefter kan vi bruge `"spaceship"` og `"spaceship_thrust"` som former, på samme måde som `"triangle"` og `"circle"`.
+
+Formerne skal være registreret, **før** vi laver spilleren med `player = Player()`. Ellers kender turtle ikke formen endnu, når spilleren skal bruge den.
+
+- [ ] Sæt koden ind i `# GAME SETUP` sektionen, lige efter linjen `screen.tracer(0)`
+
+### Opdater Player.__init__
+
+Spilleren skal nu bruge den nye form i stedet for `"triangle"`.
+
+Før:
+
+```python
+self.shape("triangle")
+self.color("light grey", BG_COLOR)
+self.shapesize(stretch_wid=0.75, stretch_len=1.5)
+self.penup()
+```
+
+Efter:
+
+```python
+self.shape("spaceship")
+self.color("light grey", BG_COLOR)
+self.penup()
+```
+
+Vi behøver ikke `shapesize` mere, for vores egen form har allerede den rigtige størrelse og er spids i forvejen.
+
+- [ ] Find linjerne i `Player.__init__` funktionen
+- [ ] Ret `self.shape("triangle")` til `self.shape("spaceship")`
+- [ ] **Slet** linjen med `self.shapesize`
+
+### Skift form i animate_spaceship()
+
+Nu skal rumskibet skifte form, når du trykker pil-op! Vi tjekker tasten på samme måde som i `move_spaceship`:
+
+```python
+    if keys_pressed["Up"]:
+        player.shape("spaceship_thrust")
+    else:
+        player.shape("spaceship")
+```
+
+`if keys_pressed["Up"]:` er sand, så længe du holder pil-op nede. Så viser vi formen med flamme. Ellers (`else`) viser vi formen uden flamme.
+
+- [ ] Find `animate_spaceship` funktionen i `# BEHAVIOURS` sektionen
+- [ ] Sæt koden ind til sidst i funktionen, efter `else:` og `player.showturtle()`
+
+:::caution[Pas på indrykningen]
+De nye linjer skal stå på **samme niveau** som `if player.is_invincible():`, altså 4 mellemrum inde. Hvis du rykker dem længere ind, kommer de ind under `else:`, og så virker flammen kun, når du ikke blinker.
+:::
+
+Hele funktionen skal nu se sådan ud:
+
+```python
+def animate_spaceship():
+    if player.is_invincible():
+        scaled = int(time.time() * 10)
+        is_invisible = scaled % 2
+        if is_invisible:
+            player.hideturtle()
+        else:
+            player.showturtle()
+    else:
+        player.showturtle()
+
+    if keys_pressed["Up"]:
+        player.shape("spaceship_thrust")
+    else:
+        player.shape("spaceship")
+```
+
+## Prøv spillet
+
+- [ ] Start spillet. Rumskibet har nu sin nye, spidse form.
+- [ ] Tryk pil-op. Der kommer orange ild ud bagved! 🔥
+- [ ] Slip tasten. Ilden forsvinder, og rumskibet glider videre.
+- [ ] Bliv ramt af en asteroide. Blinker rumskibet stadig, også mens du giver gas?
+
+:::tip[Typiske fejl]
+- `TurtleGraphicsError: There is no shape named spaceship` (eller lignende): Formerne er ikke registreret, eller de bliver registreret **efter** `player = Player()`. Ryk `register_shape` linjerne op lige efter `screen.tracer(0)`. Tjek også, at navnet er stavet ens alle steder.
+- Rumskibet er mærkeligt strakt: Du har glemt at slette `self.shapesize` linjen.
+- `SyntaxError` ved formerne: Tjek, at der er komma mellem alle punkter, og at alle parenteser er lukket.
+- `NameError: name 'BG_COLOR' is not defined`: Formerne står over `BG_COLOR`. De skal stå efter `HALF_HEIGHT`, længere nede i `# CONSTANTS`.
+:::
+
+## Prøv selv
+
+Nu er det dit rumskib, så pynt det, som du vil:
+
+- [ ] Skift farven på ilden. Ret `'orange'` i linjen med `SPACESHIP_THRUST_SHAPE.addcomponent` til for eksempel `'red'`, `'yellow'`, `'cyan'` (blå sci-fi-ild!) eller `'white'`.
+- [ ] Lav ilden længere med `(0,-40)` eller kortere med `(0,-25)`.
+- [ ] Lav en fyldt flamme ved at bruge `'orange'` både som fyld og kant: `addcomponent(..., 'orange', 'orange')`.
+
+Eksperimenter og se, hvad der ser bedst ud! Flere idéer finder du på siden med [ekstra-opgaver](/python-asteroids/lektion-6-rumfysik/99-ekstra/).
+
+## Hjælp
+
+Sådan ser slutningen af `# CONSTANTS` ud nu:
+
+```python.run norun="true"
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+SPACESHIP_SHAPE = ( (7,-20), (0,5), (-7,-20) )
+SPACESHIP_THRUST_SHAPE = turtle.Shape('compound')
+SPACESHIP_THRUST_SHAPE.addcomponent(SPACESHIP_SHAPE, BG_COLOR, 'light grey')
+SPACESHIP_THRUST_SHAPE.addcomponent(( (7,-20), (0,-30), (-7,-20) ), BG_COLOR, 'orange')
+```
+
+Sådan ser starten af `# GAME SETUP` ud:
+
+```python.run norun="true"
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+screen.register_shape("spaceship", SPACESHIP_SHAPE)
+screen.register_shape("spaceship_thrust", SPACESHIP_THRUST_SHAPE)
+
+
+# Make a turtle for the player
+player = Player()
+```
+
+Sådan starter `Player` klassen:
+
+```python.run norun="true"
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("spaceship")
+        self.color("light grey", BG_COLOR)
+        self.penup()  # to not draw lines
+```
+
+<Solution title="Hele koden efter niveau 19">
+
+```python.run norun="true"
+import turtle
+import random
+import time
+import math
+
+"""
+Add thrust animation when pressing up
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_MAX_SPEED = 10  # Pixels to move player each tick
+PLAYER_THRUST = 0.1  # increase in speed per tick
+PLAYER_START_HEALTH = 3
+PLAYER_GRACE_PERIOD = 3 # seconds
+BULLET_SPEED = PLAYER_MAX_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+MAX_ASTEROIDS = 10
+ASTEROID_SPEED_MIN = 1
+ASTEROID_SPEED_MAX = 5
+ASTEROID_RESPAWN_AFTER = 150  # respawn after number of game ticks
+
+FONT_FAMILY = "Courier New"
+SCORE_FONT = (FONT_FAMILY, 16, "normal")
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+SPACESHIP_SHAPE = ( (7,-20), (0,5), (-7,-20) )
+SPACESHIP_THRUST_SHAPE = turtle.Shape('compound')
+SPACESHIP_THRUST_SHAPE.addcomponent(SPACESHIP_SHAPE, BG_COLOR, 'light grey')
+SPACESHIP_THRUST_SHAPE.addcomponent(( (7,-20), (0,-30), (-7,-20) ), BG_COLOR, 'orange')
+
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("spaceship")
+        self.color("light grey", BG_COLOR)
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+        self.alive = True
+        self.score = 0
+        self.health = PLAYER_START_HEALTH
+        self.last_hit = 0.0
+
+        self.speedx = 0
+        self.speedy = 0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+    def is_invincible(self):
+        # a chance to talk about return values
+        return self.last_hit + PLAYER_GRACE_PERIOD > time.time()
+
+    def hit(self):
+        if not self.is_invincible():
+            self.health -= 1
+            self.last_hit = time.time()
+            draw_health()
+
+        if self.health == 0:
+            self.alive = False
+
+    def thrust(self):
+        track = math.radians(self.heading())
+        self.speedx += PLAYER_THRUST * math.cos(track)
+        self.speedy += PLAYER_THRUST * math.sin(track)
+        speed = (self.speedx ** 2 + self.speedy ** 2) ** 0.5
+        if speed > PLAYER_MAX_SPEED:
+            self.speedx = (self.speedx * PLAYER_MAX_SPEED) / speed
+            self.speedy = (self.speedy * PLAYER_MAX_SPEED) / speed
+
+    def move(self):
+        x, y = self.pos()
+        x += self.speedx
+        y += self.speedy
+        self.goto(x, y)
+
+
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+        self.speed = 0
+        self.respawn_in = 0
+        self.reset()
+
+    def reset(self):
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+        self.showturtle()
+
+    def hit(self):
+        self.hideturtle()
+        self.respawn_in = ASTEROID_RESPAWN_AFTER
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+screen.register_shape("spaceship", SPACESHIP_SHAPE)
+screen.register_shape("spaceship_thrust", SPACESHIP_THRUST_SHAPE)
+
+
+# Make a turtle for the player
+player = Player()
+
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 60)
+pen.write("HEALTH: ", font=SCORE_FONT)
+
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+
+health_pen = turtle.Turtle(visible=False)
+health_pen.color("white")
+health_pen.penup()
+health_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 60)
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+# Create asteroids
+asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroids.append(Asteroid())
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def check_collision(with_turtle):
+    # Check for collisions between the player and asteroids
+    for asteroid in asteroids:
+        if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+
+
+def animate_spaceship():
+    if player.is_invincible():
+        scaled = int(time.time() * 10)
+        is_invisible = scaled % 2
+        if is_invisible:
+            player.hideturtle()
+        else:
+            player.showturtle()
+    else:
+        player.showturtle()
+
+    if keys_pressed["Up"]:
+        player.shape("spaceship_thrust")
+    else:
+        player.shape("spaceship")
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.thrust()
+
+    player.move()
+    move_if_out_of_bounds(player)
+    if check_collision(player):
+        player.hit()
+
+
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hit()
+                bullet.hideturtle()
+                bullet.active = False
+                player.score += 1
+                draw_score()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid) # let the kids figure this one out for a while
+            # also this one:
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.hit()
+        else:
+            asteroid.respawn_in -= 1
+            if asteroid.respawn_in == 0:
+                asteroid.reset()
+
+
+def draw_score():
+    score_pen.clear()
+    score_pen.write(player.score, font=SCORE_FONT)
+
+
+def draw_health():
+    health_pen.clear()
+    health_pen.write(player.health, font=SCORE_FONT)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    animate_spaceship()
+    move_bullets()
+    move_asteroids()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.goto(0, 0)
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+
+
+#
+#  START THE GAME
+#
+
+draw_score()
+draw_health()
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

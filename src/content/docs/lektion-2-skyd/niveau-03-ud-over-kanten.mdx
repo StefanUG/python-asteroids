@@ -1,0 +1,333 @@
+---
+title: "Niveau 3 – Ud over kanten"
+description: Lav en funktion med en parameter, så rumskibet kommer ind på den anden side af skærmen.
+sidebar:
+  order: 13
+---
+
+Har du prøvet at flyve lidt rundt? Så har du nok opdaget, at rumskibet kan flyve helt ud af skærmen og forsvinde. Det er ikke så smart i et spil!
+
+Efter dette niveau kommer rumskibet ind på **den anden side** af skærmen, når det flyver ud over kanten. Flyver du ud til højre, kommer du ind til venstre. Flyver du ud foroven, kommer du ind forneden. Det kalder man at "wrappe".
+
+**Det nye i dag:** en funktion med en **parameter**. Du kender allerede funktioner fra intro-holdet – en samling kodelinjer med et navn. En parameter er en værdi, man giver med til funktionen, når man kalder den. Du har brugt det masser af gange uden at tænke over det:
+
+```python
+player.shape("triangle")
+player.forward(100)
+player.right(90)
+```
+
+Her er `"triangle"`, `100` og `90` det, vi giver med til funktionen.
+
+## Husk: koordinatsystemet
+
+Skærmen er et koordinatsystem. Midten er `(0, 0)`. `x` bliver større, når man går til højre, og `y` bliver større, når man går op.
+
+<img src={import.meta.env.BASE_URL + "images/coordinate-system.svg"} alt="Koordinatsystemet: x vokser mod højre, y vokser opad, og midten er (0, 0)" />
+
+Vores skærm er 1200 bred og 800 høj. Midten er i `(0, 0)`, så højre kant er halvdelen af bredden ude til højre, altså `x = 600`. Venstre kant er `x = -600`. Toppen er `y = 400`, og bunden er `y = -400`.
+
+## Lav din egen funktion med en parameter
+
+Her er en lille funktion, som får et `x` med som parameter. Hvis `x` er ude over kanten, giver den `x` på den anden side tilbage. Ellers giver den bare `x` tilbage, som det var. Tryk på kør:
+
+```python.run
+HALF_WIDTH = 600
+
+def wrap_x(x):
+    if x > HALF_WIDTH:  # for langt til højre
+        return -HALF_WIDTH
+    elif x < -HALF_WIDTH:  # for langt til venstre
+        return HALF_WIDTH
+    return x
+
+print(wrap_x(100))
+print(wrap_x(650))
+print(wrap_x(-700))
+```
+
+Prøv at ændre tallene i `print(wrap_x(...))`. Hvad sker der med `600` og `601`? Kan du lave en `wrap_y(y)`, der gør det samme op og ned med `HALF_HEIGHT = 400`?
+
+Parameteren behøver ikke være et tal. Den kan også være en tekst – eller en hel turtle! Her er en sang, hvor parameteren `person` er en tekst:
+
+```python.run
+def chorus():
+    print("doo doo, doo doo doo doo")
+
+def verse(person):
+    for i in range(2):
+        print(person + " Shark")
+        chorus()
+
+verse("Baby")
+verse("Mommy")
+```
+
+Prøv at tilføje et vers mere med en anden haj.
+
+## Regn halvdelen af bredde og højde ud
+
+For at vide, hvor kanterne er, skal vi bruge halvdelen af skærmens bredde og højde. Python er god til matematik: `+` (plus), `-` (minus), `*` (gange) og `/` (divider).
+
+```python
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = ???
+```
+
+`SCREEN_WIDTH / 2` giver et decimaltal, `600.0`. Funktionen `int` laver det om til et heltal, `600`. Det skal vi bruge senere i turtle.
+
+- [ ] Sæt koden ind nederst i `CONSTANTS`-sektionen, under `PLAYER_SPEED`.
+- [ ] Erstat `???`, så `HALF_HEIGHT` bliver halvdelen af højden (`SCREEN_HEIGHT`).
+
+## Lav en ny funktion til at flytte en turtle
+
+Nu laver vi en funktion, der kan flytte en turtle om på den anden side, hvis den er ude over kanten. Vi laver den, så den virker for **alle** turtles – ikke kun rumskibet. Senere skal vi nemlig også bruge den til kugler og asteroider.
+
+```python
+def move_if_out_of_bounds(t: turtle.Turtle):
+```
+
+- `t` er navnet på parameteren. Det er den turtle, der skal flyttes. Inde i funktionen hedder den bare `t`, uanset hvad den hedder udenfor.
+- `: turtle.Turtle` efter `t` er et **type-hint**. Det fortæller VS Code eller PyCharm, at `t` er en turtle. Så kan editoren bedre hjælpe dig med forslag, når du skriver `t.`. Python er ligeglad med det – det er kun en hjælp til dig.
+
+- [ ] Lav funktionen i `BEHAVIOURS`-sektionen, **før** `def move_spaceship():`. En funktion skal være lavet, før den bliver brugt.
+
+## Lav logikken til at flytte turtlen
+
+Inde i den nye funktion starter vi med at gemme turtlens `x` og `y` i hver sin variabel:
+
+```python
+    x = t.xcor()
+    y = t.ycor()
+```
+
+`t.xcor()` giver turtlens x-koordinat, og `t.ycor()` giver dens y-koordinat. Husk, at linjerne skal rykkes ind med 4 mellemrum, så de hører til funktionen.
+
+Nu skal vi tjekke, om turtlen er ude af syne. Her er idéen skrevet med almindelige ord i stedet for rigtig Python. Det kalder man **pseudokode** – det kan ikke køre, men det hjælper med at tænke:
+
+```text
+    if x is too far right:
+        t should goto left side of screen
+    elif x is too far left:
+        t should goto right side of screen
+```
+
+Og det samme for op og ned.
+
+Hvordan ved vi, om `x` er for langt til højre? Så er `x` **større end** `HALF_WIDTH`. Og for langt til venstre? Så er `x` **mindre end** `-HALF_WIDTH`. Python bruger `>` for "større end" og `<` for "mindre end".
+
+Her er den første del:
+
+```python
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+```
+
+Læs det som: "Hvis `x` er længere til højre end højre kant, så flyt turtlen til venstre kant – i samme højde `y`".
+
+- [ ] Gem `x` og `y` i hver sin variabel inde i `move_if_out_of_bounds`, som vist ovenfor.
+- [ ] Tilføj `if x > HALF_WIDTH:` og linjen under.
+- [ ] Gør resten færdig med `if` og `elif`. Du skal bruge to af hver: én `if` og én `elif` for venstre/højre, og én `if` og én `elif` for op/ned.
+
+:::tip[Hint]
+Op og ned virker på samme måde som højre og venstre, men med `y` og `HALF_HEIGHT`. Er turtlen for højt oppe, skal den til bunden: `t.goto(x, -HALF_HEIGHT)`. Læg mærke til, at `x` nu bliver det samme, og `y` ændres.
+:::
+
+Hvis du har problemer, kan du finde hjælp i bunden ⬇
+
+## Kald funktionen
+
+En funktion gør ingenting, før nogen **kalder** den. Vi kalder den lige efter, at rumskibet har flyttet sig – altså inde i `move_spaceship`, lige under `player.forward(PLAYER_SPEED)`:
+
+```python
+        move_if_out_of_bounds(player)
+```
+
+Her sender vi `player` med som parameter. Det er rumskibet, vi gerne vil flytte, hvis det er ude af syne. Inde i funktionen bliver det til `t`.
+
+Læg mærke til, at linjen er rykket ind med **8 mellemrum**. Den skal nemlig stå inde i `if keys_pressed["Up"]:`, under `player.forward(PLAYER_SPEED)`. Rumskibet kan kun komme ud over kanten, når det flyver fremad.
+
+- [ ] Indsæt kaldet til `move_if_out_of_bounds` i `move_spaceship`-funktionen, under `player.forward(PLAYER_SPEED)`.
+
+Så skulle din `move_spaceship` gerne se sådan her ud:
+
+```python
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+```
+
+## Prøv spillet
+
+- [ ] Start spillet og flyv ud over højre kant. Kommer du ind til venstre?
+- [ ] Prøv alle fire kanter: højre, venstre, top og bund.
+
+:::tip[Typiske fejl]
+- **`NameError: name 'HALF_HEIGHT' is not defined`**: Har du stavet navnet ens alle steder? Store og små bogstaver tæller.
+- **`IndentationError`**: Tjek, at alle linjer inde i funktionen er rykket ind med 4 mellemrum, og linjerne inde i hver `if` med 8.
+- **Rumskibet forsvinder stadig**: Har du husket at kalde `move_if_out_of_bounds(player)` inde i `move_spaceship`?
+- **Rumskibet hopper til den forkerte side**: Tjek dine `-` foran `HALF_WIDTH` og `HALF_HEIGHT`.
+:::
+
+## Hjælp
+
+Sådan kan hele `move_if_out_of_bounds`-funktionen se ud:
+
+```python.run norun="true"
+def move_if_out_of_bounds(t: turtle.Turtle):
+    x = t.xcor()
+    y = t.ycor()
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+```
+
+<Solution title="Hele koden efter niveau 3">
+
+```python.run norun="true"
+import turtle
+
+"""
+Prevent spaceship from exiting the screen
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.shapesize(stretch_wid=0.75, stretch_len=1.5) # Stretch the triangle to be pointy
+player.penup() # to not draw lines
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+
+    screen.update()
+    screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+
+
+#
+#  START THE GAME
+#
+
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

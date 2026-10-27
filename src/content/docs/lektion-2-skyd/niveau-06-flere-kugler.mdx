@@ -1,0 +1,421 @@
+---
+title: "Niveau 6 – Flere kugler"
+description: Lav en liste med kugler, så rumskibet kan skyde mange kugler på én gang.
+sidebar:
+  order: 16
+---
+
+Det er da for kedeligt kun at kunne skyde én kugle ad gangen! **Er det ikke?**
+
+Efter dette niveau kan rumskibet skyde en hel byge af kugler. Hold space nede, og se dem flyve!
+
+**Det nye i dag:** en **liste** med objekter, som vi går igennem med en `for`-løkke.
+
+## En turtle forsvinder aldrig
+
+Når man først har lavet en turtle, forsvinder den aldrig helt. Man kan skjule den, men ikke slette den. Hvis vi lavede en ny kugle, hver gang vi skød, ville der til sidst være tusindvis af skjulte kugler, og spillet ville blive langsomt.
+
+Derfor **genbruger** vi kuglerne:
+
+- Vi bestemmer et maksimalt antal kugler.
+- Vi laver alle kuglerne fra start og gemmer dem i en **liste**.
+- Når vi skyder, finder vi en kugle, der ikke flyver lige nu, og skyder den af.
+
+## Hvad er en liste?
+
+En liste er en slags variabel, der kan gemme **mere end én** værdi. Man laver den med firkantede parenteser `[]`, og man tilføjer ting med `append`. Prøv det:
+
+```python.run
+# En tom liste
+my_list = []
+# Tilføj noget til listen
+my_list.append("bird")
+my_list.append("monkey")
+# Print det første element fra listen
+print(my_list[0])
+# Print hele listen
+print(my_list)
+
+for animal in my_list:
+    print("Jeg ser en", animal)
+```
+
+Læg mærke til, at det første element har nummer `0`, ikke `1`.
+
+Prøv at tilføje flere dyr til listen. Hvad sker der, hvis du printer `my_list[1]`?
+
+## En liste med objekter
+
+En liste kan også gemme objekter, som vi har lavet med en klasse. Her laver vi tre raketter, skyder én af og går så hele listen igennem:
+
+```python.run
+class Rocket:
+
+    def __init__(self, name):
+        self.name = name
+        self.active = False
+
+    def launch(self):
+        self.active = True
+        print(self.name, "letter!")
+
+
+rockets = []
+for i in range(3):
+    rockets.append(Rocket("Raket " + str(i)))
+
+rockets[1].launch()
+
+for rocket in rockets:
+    if rocket.active:
+        print(rocket.name, "er i luften")
+    else:
+        print(rocket.name, "venter på jorden")
+```
+
+Prøv at lave 5 raketter i stedet for 3, og skyd to af dem af.
+
+Det er præcis det, vi skal gøre med kuglerne i spillet!
+
+## Maksimalt antal kugler
+
+Vi sætter det maksimale antal kugler til 20:
+
+```python
+MAX_BULLETS = 20
+```
+
+- [ ] Indsæt koden i `CONSTANTS`-sektionen, under `BULLET_LIFETIME`.
+
+## En liste til alle kuglerne
+
+Nu skal vi have en liste med alle kuglerne i stedet for kun én kugle. Kan du huske, hvad `for i in range(???)` gør? Den gentager koden indeni et bestemt antal gange.
+
+```python
+# Create bullets
+bullets = []
+for i in range(???):
+    bullets.append(Bullet())
+```
+
+Læg mærke til, at listen hedder `bullets` med et **s** til sidst, fordi der er mange kugler i den.
+
+- [ ] Find de to linjer `# Create a turtle for the bullet` og `bullet = Bullet()` i `GAME SETUP`-sektionen, og slet dem.
+- [ ] Indsæt den nye kode samme sted i `GAME SETUP`-sektionen.
+- [ ] Ret `???`, så den kun laver det maksimale antal kugler. Hint: Du har lige lavet det som en konstant.
+
+## En ny `move_bullets`
+
+Nu skal `move_bullets` arbejde med hele listen. I hvert game loop skal vi:
+
+- gå listen igennem,
+- flytte alle de aktive kugler,
+- huske en kugle, der **ikke** er aktiv, hvis der er en,
+- og hvis man trykker space, skyde den ikke-aktive kugle af.
+
+Den gamle kode i `move_bullets` bruger `bullet`, som ikke findes længere. Derfor starter vi forfra.
+
+- [ ] Slet alle linjerne **inde i** `move_bullets` (behold `def move_bullets():`).
+
+## Flyt alle de aktive kugler
+
+Gå listen igennem, og flyt de kugler, der er aktive:
+
+```python
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+```
+
+Læs det som: "For hver kugle i listen med kugler: hvis kuglen er aktiv, så flyt den". `bullet` er nu en variabel i `for`-løkken. Den er én kugle ad gangen.
+
+- [ ] Indsæt koden inde i `move_bullets`.
+
+## Husk en kugle, der ikke er aktiv
+
+Mens vi går listen igennem, skal vi også huske en kugle, der ikke flyver. Den kan vi skyde af bagefter.
+
+Først skal vi have en variabel til at gemme den i. Den skal stå som det første i `move_bullets`, før `for`-løkken:
+
+```python
+    inactive_bullet = None
+```
+
+`None` betyder "ingenting". Vi har ikke fundet nogen kugle endnu.
+
+- [ ] Indsæt koden som det første i `move_bullets`, før `for`-løkken.
+
+Inde i `for`-løkken gemmer vi kuglen i variablen, hvis den ikke er aktiv:
+
+```python
+        else:
+            inactive_bullet = bullet
+```
+
+- [ ] Indsæt koden som `else` til den `if`, der allerede står i `for`-løkken. `else` skal stå lige under `if` (rykket 8 mellemrum ind).
+
+Så skulle din funktion gerne se nogenlunde sådan her ud:
+
+```python
+def move_bullets():
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+        else:
+            inactive_bullet = bullet
+```
+
+## Affyr den ikke-aktive kugle
+
+Vi skyder en kugle af, **hvis**
+
+1. space er trykket ned, **og**
+2. vi fandt en kugle, der ikke er aktiv. Alle 20 kugler kunne jo være i luften!
+
+```python
+    if keys_pressed["space"] and inactive_bullet:
+        inactive_bullet.fire(player)
+```
+
+Hvorfor kan vi bare skrive `and inactive_bullet`? Fordi Python regner `None` som `False`, og en rigtig kugle som `True`. Så det er det samme som at skrive `and inactive_bullet is not None`.
+
+Læg mærke til, at `if` står med 4 mellemrum – altså **efter** `for`-løkken, ikke inde i den. Vi skal kun skyde én kugle pr. game loop.
+
+- [ ] Indsæt koden som det sidste i `move_bullets`, efter hele `for`-løkken.
+
+## Prøv spillet
+
+- [ ] Start spillet, og tryk kort på space. Kommer der en kugle?
+- [ ] Hold space nede. Kommer der en hel byge af kugler?
+- [ ] Hvad sker der, når alle 20 kugler er i luften? Hvornår kan du skyde igen?
+- [ ] Prøv at ændre `MAX_BULLETS` til 5 eller 100.
+
+Kuglerne kommer meget tæt, når du holder space nede – én i hvert game loop. Næste gang laver vi en **genladetid**, så det bliver mere fair.
+
+:::tip[Typiske fejl]
+- **`NameError: name 'bullet' is not defined`**: Der står stadig noget gammel kode, der bruger `bullet` uden for `for`-løkken. Tjek `move_bullets` og `GAME SETUP`.
+- **Kun én kugle ad gangen**: Står `if keys_pressed["space"] and inactive_bullet:` inde i `for`-løkken? Den skal rykkes ud til 4 mellemrum.
+- **`AttributeError: 'list' object has no attribute 'active'`**: Du har skrevet `bullets` (hele listen) et sted, hvor der skal stå `bullet` (én kugle).
+:::
+
+## Hjælp
+
+Sådan kan listen med kugler i `GAME SETUP` se ud:
+
+```python.run norun="true"
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+```
+
+Og sådan kan hele `move_bullets` se ud:
+
+```python.run norun="true"
+def move_bullets():
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        inactive_bullet.fire(player)
+```
+
+<Solution title="Hele koden efter niveau 6">
+
+```python.run norun="true"
+import turtle
+
+"""
+One bullet is boring, let's add more
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 20
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.shapesize(stretch_wid=0.75, stretch_len=1.5) # Stretch the triangle to be pointy
+player.penup() # to not draw lines
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+
+    
+def move_bullets():
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        inactive_bullet.fire(player)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    move_bullets()
+
+    screen.update()
+    screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+
+
+#
+#  START THE GAME
+#
+
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

@@ -1,0 +1,496 @@
+---
+title: "Niveau 13 – Asteroiderne flytter sig"
+description: Giv hver asteroide sin egen tilfældige retning og fart, og få dem til at flyve rundt.
+sidebar:
+  order: 23
+---
+
+Asteroider, der bare står stille, er ikke særlig farlige. Efter dette niveau flyver de rundt på skærmen, hver med sin egen retning og fart, og de kan ramme dit rumskib.
+
+**Det nye i dag:** Hvert objekt kan have sine **egne værdier**. Alle asteroider er lavet ud fra den samme `Asteroid`-klasse, men hver asteroide får sin egen tilfældige retning og fart med `random.randint`, ligesom de fik deres egen tilfældige plads i niveau 8.
+
+## Prøv det først: hver sin retning og fart
+
+Her er en lille klasse `Rock`. Hver gang vi laver en ny `Rock`, trækker den sin egen retning (i grader) og sin egen fart. Bagefter tegner vi en streg for hver sten: Retningen bestemmer, hvor stregen peger, og farten bestemmer, hvor lang den er.
+
+```python.run
+import random
+import turtle
+
+class Rock:
+    def __init__(self, name):
+        self.name = name
+        self.heading = random.randint(0, 360)
+        self.speed = random.randint(1, 5)
+
+rocks = [Rock("A"), Rock("B"), Rock("C"), Rock("D")]
+
+t = turtle.Turtle()
+for rock in rocks:
+    print(rock.name, "flyver i retning", rock.heading, "med fart", rock.speed)
+    t.penup()
+    t.goto(0, 0)
+    t.pendown()
+    t.left(rock.heading)
+    t.forward(rock.speed * 30)
+    t.write(rock.name)
+    t.right(rock.heading)
+```
+
+Kør koden et par gange. Får stenene nye retninger hver gang?
+
+Prøv at ændre:
+- Lav flere sten i listen.
+- Lav farten mellem 1 og 10 i stedet for 1 og 5.
+
+## Asteroidernes fart
+
+Asteroiderne skal flyve med forskellig fart. Vi bestemmer en mindste og en største fart. Farten er det antal pixels, en asteroide flytter sig i hvert *tick* (hver gang game loopet kører).
+
+```python
+ASTEROID_SPEED_MIN = 1
+ASTEROID_SPEED_MAX = 5
+```
+
+- [ ] Sæt koden ind i `# CONSTANTS` sektionen, f.eks. lige efter `MAX_ASTEROIDS = 10`
+
+## Tilfældig retning
+
+Hver gang en ny asteroide bliver lavet, skal den have en tilfældig retning og fart. Hvor i koden sker det, når en asteroide bliver lavet? I `Asteroid.__init__`!
+
+*Heading* er den retning i grader (0 til 360), som asteroiden "peger". Kan du huske, hvad `random.randint` gør? Den giver et tilfældigt helt tal mellem de to tal, du giver den.
+
+```python
+        self.setheading(random.randint(0, 360))
+```
+
+- [ ] Sæt koden ind i `Asteroid.__init__` funktionen, til sidst, lige efter `self.radius = 30`
+
+## Tilfældig fart
+
+Asteroiden skal også have en tilfældig fart. Den laver vi som vores egen variabel på asteroiden og kalder den `speed`. Den bliver et tal mellem vores mindste og største fart:
+
+```python
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+```
+
+- [ ] Sæt koden ind i `Asteroid.__init__` funktionen, lige efter `self.setheading(...)`-linjen
+
+## En ny opførsel: flyt asteroiderne
+
+I hvert game loop skal asteroiderne flytte sig. Det bliver en ny *behaviour*-funktion, `move_asteroids`. Den skal:
+- løbe alle asteroiderne igennem, og for hver af dem
+- hvis asteroiden er synlig (ikke skudt)
+- flytte den fremad med dens egen fart
+
+```python
+def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+```
+
+Læg mærke til `asteroid.speed`: Hver asteroide flytter sig med **sin egen** fart.
+
+- [ ] Sæt koden ind i `# BEHAVIOURS` sektionen, f.eks. efter hele `def move_bullets():`-blokken og før `def draw_score():`
+
+## Kald den nye opførsel
+
+Funktionen gør ingenting, før vi kalder den. Den skal kaldes i hvert game loop:
+
+```python
+    move_asteroids()
+```
+
+- [ ] Sæt koden ind i `update` funktionen, lige efter `move_bullets()` (med samme indrykning)
+
+## Prøv spillet
+
+- [ ] Start spillet. Flyver asteroiderne rundt i hver sin retning og med hver sin fart?
+- [ ] Hvad sker der, når en asteroide flyver ud over kanten af skærmen?
+- [ ] Hvad sker der, hvis rumskibet holder stille, og en asteroide flyver ind i det?
+
+Mangler der noget? Tænk over det, før du læser videre.
+
+## Asteroiderne skal også flyve rundt om kanten
+
+Asteroiderne forsvinder ud af skærmen og kommer aldrig tilbage. Men vi har jo allerede en funktion, der flytter en Turtle over til den anden side: `move_if_out_of_bounds`. Den virker med alle Turtles, også asteroider!
+
+```python
+            move_if_out_of_bounds(asteroid)
+```
+
+- [ ] Sæt koden ind i `move_asteroids` funktionen, lige efter `asteroid.forward(asteroid.speed)` (med samme indrykning)
+
+### Prøv igen
+
+- [ ] Start spillet. Kommer asteroiderne ind på den anden side nu?
+- [ ] Hvad sker der stadig, når rumskibet holder stille?
+
+## Asteroiderne kan ramme rumskibet
+
+Lige nu tjekker vi kun for sammenstød, når **rumskibet** flytter sig. Men nu kan en asteroide jo flyve ind i et rumskib, der holder stille. Så vi skal også tjekke, hver gang vi flytter en asteroide.
+
+Hvis afstanden fra rumskibet til asteroiden er mindre end asteroidens radius, så er rumskibet ramt:
+
+```python
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.alive = False
+```
+
+- [ ] Sæt koden ind i `move_asteroids` funktionen, lige efter `move_if_out_of_bounds(asteroid)` (`if` med samme indrykning)
+
+### Prøv igen nu
+
+- [ ] Start spillet, hold rumskibet stille, og lad en asteroide flyve ind i det. Bliver det GAME OVER?
+- [ ] Virker skud og point stadig?
+
+:::tip[Typiske fejl]
+- Asteroiderne står stadig stille: Har du husket at kalde `move_asteroids()` i `update`?
+- `AttributeError: ... has no attribute 'speed'` eller lignende: Står `self.speed = ...` inde i `Asteroid.__init__`, med samme indrykning som `self.radius = 30`?
+- `NameError: name 'ASTEROID_SPEED_MIN' is not defined`: Står konstanterne under `# CONSTANTS`? Er de stavet ens?
+- Alle linjerne i `move_asteroids` efter `if asteroid.isvisible():` skal være rykket ind under den `if`.
+:::
+
+## Hjælp
+
+Sådan kan `Asteroid` se ud:
+
+```python.run norun="true"
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+```
+
+Og sådan kan `move_asteroids` og `update` se ud:
+
+```python.run norun="true"
+def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid)
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.alive = False
+
+
+def update():
+    move_spaceship()
+    move_bullets()
+    move_asteroids()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.goto(0, 0)
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+```
+
+<Solution title="Hele koden efter niveau 13">
+
+```python.run norun="true"
+import turtle
+import random
+
+"""
+Make the asteroids move
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+MAX_ASTEROIDS = 10
+ASTEROID_SPEED_MIN = 1
+ASTEROID_SPEED_MAX = 5
+
+FONT_FAMILY = "Courier New"
+SCORE_FONT = (FONT_FAMILY, 16, "normal")
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+        self.alive = True
+        self.score = 0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = Player()
+
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+# Create asteroids
+asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroids.append(Asteroid())
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def check_collision(with_turtle):
+    # Check for collisions between the player and asteroids
+    for asteroid in asteroids:
+        if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.alive = False
+
+    
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hideturtle()
+                bullet.hideturtle()
+                bullet.active = False
+                player.score += 1
+                draw_score()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid) # let the kids figure this one out for a while
+            # also this one:
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.alive = False
+
+
+def draw_score():
+    score_pen.clear()
+    score_pen.write(player.score, font=SCORE_FONT)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    move_bullets()
+    move_asteroids()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.goto(0, 0)
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+
+
+#
+#  START THE GAME
+#
+
+draw_score()
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

@@ -1,0 +1,443 @@
+---
+title: "Niveau 7 – Player-klasse og genladetid"
+description: Flyt rumskibet ind i en Player-klasse og giv kanonen genladetid.
+sidebar:
+  order: 17
+---
+
+Prøv at holde mellemrumstasten nede i dit spil. Kuglerne kommer som en lang pølse. Det er lidt for nemt! Efter dette niveau skal kanonen **lade op** et øjeblik mellem hvert skud, ligesom en rigtig rumkanon.
+
+**Det nye i dag:** Vi laver en `Player`-**klasse** til rumskibet. Du kender allerede klasser fra `Bullet`: en klasse er en opskrift på en ting, som både har sine egne **variabler** (fx `self.active`) og sine egne **funktioner** (fx `fire` og `move`). Nu skal rumskibet have det samme, så det selv kan huske, hvornår det sidst skød.
+
+## Hvordan holder vi styr på tiden?
+
+Vi bruger en **tæller**. Hver gang rumskibet skyder, sætter vi tælleren op til fx 5. I hvert game loop (hvert "tick") tæller vi én ned. Først når tælleren er nede på 0, må man skyde igen. Det kalder man en **cooldown** – kanonen skal "køle af".
+
+Hvor skal tælleren bo? Den hører til rumskibet, så den skal ligge **på** rumskibet: `self.fire_cooldown`. Og det kan vi kun, hvis rumskibet har sin egen klasse.
+
+Prøv tælleren her. Den lader som om, man holder mellemrumstasten nede i 12 ticks:
+
+```python.run
+RELOAD_TIME = 5
+
+class Player:
+    def __init__(self):
+        self.fire_cooldown = 0
+
+    def shoot(self, tick):
+        if self.fire_cooldown == 0:
+            print(f"Tick {tick}: PANG!")
+            self.fire_cooldown = RELOAD_TIME
+        else:
+            print(f"Tick {tick}: lader op... {self.fire_cooldown}")
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+player = Player()
+for tick in range(12):
+    player.cooldown()
+    player.shoot(tick)
+```
+
+Prøv at ændre `RELOAD_TIME` til `2` eller `10`. Hvor tit kommer der så et `PANG!`? Hvad sker der, hvis du sætter den til `0`?
+
+:::note[Ikke en Turtle her]
+I eksemplet er `Player` bare en almindelig klasse, så den kan køre her i browseren. I dit spil skal `Player` være en `turtle.Turtle`, så den kan vises på skærmen.
+:::
+
+Fortsæt i din egen fil. Har du problemer, kan du finde hjælp i bunden ⬇
+
+## En ny af sig selv
+
+Nu flytter vi koden, der laver rumskibet, fra `# GAME SETUP` op i en ny klasse under `# CLASSES`. Det kaldes at **refaktorere**: koden gør det samme som før, men den er sat bedre i system.
+
+**Før** ser det sådan her ud i `# GAME SETUP`:
+
+```python
+# Make a turtle for the player
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.shapesize(stretch_wid=0.75, stretch_len=1.5) # Stretch the triangle to be pointy
+player.penup() # to not draw lines
+```
+
+- [ ] Find og fjern de linjer i `# GAME SETUP`, der starter med `player` (kun dem med `player` og **ikke** dem med `screen`)
+
+**Efter:** Nu bliver de samme linjer til en klasse. Læg mærke til, at `player.` er blevet til `self.`. Inde i klassen hedder rumskibet nemlig `self` – "mig selv".
+
+```python
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+```
+
+`class Player(turtle.Turtle):` betyder, at en `Player` **er en slags** Turtle. Den kan alt det, en Turtle kan (dreje, gå frem, skifte form), plus det, vi selv giver den. `super().__init__()` sørger for, at Turtle-delen bliver sat ordentligt op først.
+
+- [ ] Indsæt `Player`-klassen i `# CLASSES`-sektionen, lige efter hele `Bullet`-klassen (efter den sidste indrykkede linje i `def move(self):`)
+
+Nu skal vi stadig lave selve rumskibet i `# GAME SETUP`. Det er nu kun én linje:
+
+```python
+player = Player()
+```
+
+- [ ] Indsæt `player = Player()` i `# GAME SETUP`, der hvor du fjernede de gamle `player`-linjer (lige under `# Make a turtle for the player`)
+
+## Hver ny spiller (`__init__`)
+
+Rumskibet skal have sin tæller. Når spillet starter, må man skyde med det samme, så den starter på 0:
+
+```python
+        self.fire_cooldown = 0
+```
+
+- [ ] Indsæt linjen som den sidste linje i `__init__`-funktionen i `Player`, efter `self.penup()`. Den skal rykkes ind lige så meget som `self.penup()`.
+
+## Når spilleren skyder (`shoot`)
+
+Nu giver vi rumskibet en funktion til at skyde. Vi går ud fra, at der allerede er fundet en kugle, som ikke er i brug (`inactive_bullet`) – det gør `move_bullets` jo allerede.
+
+Når spilleren skyder, skal vi:
+
+- Tjekke, om kanonen er klar: `if self.fire_cooldown == 0:`
+- Skyde kuglen: `inactive_bullet.fire(self)` (kuglen skal starte ved `self`, altså rumskibet)
+- Sætte tælleren op igen: `self.fire_cooldown = RELOAD_TIME`
+
+```python
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+```
+
+- [ ] Indsæt hele `shoot`-funktionen i `Player`-klassen, efter hele `__init__`-funktionen. `def` skal rykkes ind lige så meget som `def __init__`.
+
+## Cooldown
+
+I hvert game loop skal rumskibet "køle lidt af". Men kun hvis tælleren ikke allerede er 0 – ellers ville den blive negativ, og så ville `== 0` aldrig blive sandt igen!
+
+```python
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+```
+
+`self.fire_cooldown -= 1` betyder "træk 1 fra" – det samme som `self.fire_cooldown = self.fire_cooldown - 1`.
+
+- [ ] Indsæt hele `cooldown`-funktionen i `Player`-klassen, efter hele `shoot`-funktionen
+
+## Reload time
+
+Lagde du mærke til `RELOAD_TIME` i `shoot`? Den findes ikke endnu. Det er et tal, der aldrig ændrer sig, mens spillet kører – så det er en **konstant**, og den skal stå i `# CONSTANTS`:
+
+```python
+RELOAD_TIME = 5  # ticks between reload
+```
+
+- [ ] Indsæt koden i `# CONSTANTS`-sektionen, fx under `MAX_BULLETS`
+
+## Færre kugler
+
+Lad os gøre spillet en smule sværere og sænke det største antal kugler:
+
+```python
+MAX_BULLETS = 10
+```
+
+- [ ] Ændr `MAX_BULLETS` fra `20` til `10` i `# CONSTANTS`
+
+## Ret game loop til
+
+Nu skal vi bruge de nye funktioner. Det sker i `move_bullets`, som bliver kaldt i hvert game loop:
+
+- Rumskibet skal køle af én gang hvert tick: `player.cooldown()`
+- Og i stedet for at kuglen bliver skudt direkte, skal **rumskibet** skyde den. Så er det rumskibet, der bestemmer, om kanonen er klar.
+
+```python
+    player.cooldown()
+```
+
+- [ ] Indsæt `player.cooldown()` som den første linje inde i `move_bullets`-funktionen (lige under `def move_bullets():`)
+- [ ] Nederst i `move_bullets`, erstat `inactive_bullet.fire(player)` med `player.shoot(inactive_bullet)`
+
+## Prøv spillet
+
+- [ ] Start spillet. Kan rumskibet stadig dreje og flyve?
+- [ ] Hold mellemrumstasten nede. Kommer kuglerne nu med små mellemrum?
+- [ ] Prøv at ændre `RELOAD_TIME` og se forskellen
+
+:::tip[Typiske fejl]
+- `NameError: name 'Player' is not defined`: Har du sat klassen ind under `# CLASSES`, og staver du `Player` med stort P begge steder?
+- `NameError: name 'RELOAD_TIME' is not defined`: Du mangler konstanten i `# CONSTANTS`.
+- `AttributeError: 'Player' object has no attribute 'fire_cooldown'`: `self.fire_cooldown = 0` mangler i `__init__`, eller den er ikke rykket ind.
+- Funktionerne `shoot` og `cooldown` skal være rykket ind under `class Player`, ellers hører de ikke til klassen.
+- Der må ikke være nogen linjer tilbage, der starter med `player.shape` eller `player.color` i `# GAME SETUP`.
+:::
+
+## Hjælp
+
+Sådan skal hele `Player`-klassen se ud:
+
+```python.run norun="true"
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+```
+
+Og sådan skal `move_bullets` se ud:
+
+```python.run norun="true"
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+```
+
+Næste niveau: [Niveau 8 – Asteroider](/python-asteroids/lektion-3-asteroider/niveau-08-asteroider/)
+
+<Solution title="Hele koden efter niveau 7">
+
+```python.run norun="true"
+import turtle
+
+"""
+Too rapid, let's add some reload time
+But we need a Player class to keep track of time
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = Player()
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+
+    
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    move_bullets()
+
+    screen.update()
+    screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+
+
+#
+#  START THE GAME
+#
+
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

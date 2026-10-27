@@ -1,0 +1,198 @@
+---
+title: "Ekstra: gør det til dit eget"
+description: Ekstra udfordringer til lektion 2 – kugler der hopper, regnbuekugler og et haglgevær.
+sidebar:
+  order: 99
+---
+
+Er du færdig med niveau 6? Så er det tid til at gøre spillet til **dit eget**! Her er tre udfordringer. Tag dem i den rækkefølge, du har lyst til – og find gerne på dine egne idéer undervejs.
+
+:::caution[Gem en kopi først]
+Lav en kopi af din fil, før du går i gang (for eksempel `asteroids_backup.py`). Så kan du altid gå tilbage, hvis noget går i stykker.
+:::
+
+## Hop på kanten
+
+Hvad nu, hvis kanten var en væg? I stedet for at flyve om på den anden side, skal rumskibet og kuglerne **hoppe tilbage** fra kanten – ligesom en bold i et flipperspil.
+
+**Hvad skal du ændre?** Lav en ny funktion `bounce_if_out_of_bounds(t)` i `BEHAVIOURS`, lige under `move_if_out_of_bounds`. Brug den i stedet for `move_if_out_of_bounds` i `move_spaceship` og i `Bullet`-klassens `move`.
+
+Når turtlen hopper, skal to ting ske:
+
+1. Den skal flyttes tilbage, så den står **lige på** kanten (ellers sidder den fast udenfor).
+2. Den skal skifte retning.
+
+:::tip[Hint: retningen]
+En turtles retning (`heading`) er en vinkel: `0` er mod højre, `90` er op, `180` er mod venstre, `270` er ned.
+
+- Rammer den **højre eller venstre** væg, bliver den nye retning `180 - t.heading()`.
+- Rammer den **toppen eller bunden**, bliver den nye retning `-t.heading()`.
+
+Tegn det på et stykke papir med en pil, hvis det er svært at se hvorfor!
+:::
+
+:::tip[Hint: flyt tilbage på kanten]
+`t.setx(HALF_WIDTH)` flytter turtlen hen til højre kant uden at ændre dens `y`. Der findes også `t.sety(...)`.
+:::
+
+Prøv bagefter: Skal kuglerne hoppe, men rumskibet stadig flyve rundt? Eller omvendt? Du bestemmer!
+
+<Solution title="Løsning: hop på kanten">
+
+Ny funktion i `BEHAVIOURS`, under `move_if_out_of_bounds`:
+
+```python.run norun="true"
+def bounce_if_out_of_bounds(t: turtle.Turtle):
+    x = t.xcor()
+    y = t.ycor()
+    if x > HALF_WIDTH:  # hit the right wall
+        t.setx(HALF_WIDTH)
+        t.setheading(180 - t.heading())
+    elif x < -HALF_WIDTH:  # hit the left wall
+        t.setx(-HALF_WIDTH)
+        t.setheading(180 - t.heading())
+    if y > HALF_HEIGHT:  # hit the top
+        t.sety(HALF_HEIGHT)
+        t.setheading(-t.heading())
+    elif y < -HALF_HEIGHT:  # hit the bottom
+        t.sety(-HALF_HEIGHT)
+        t.setheading(-t.heading())
+```
+
+I `move_spaceship`:
+
+```python.run norun="true"
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        bounce_if_out_of_bounds(player)
+```
+
+I `Bullet`-klassens `move`:
+
+```python.run norun="true"
+    def move(self):
+        self.forward(BULLET_SPEED)
+        bounce_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+```
+
+</Solution>
+
+## Regnbuekugler
+
+Grå kugler er lidt kedelige. Hvad med kugler i alle regnbuens farver? Hver gang du skyder, får kuglen en farve fra en liste.
+
+**Hvad skal du ændre?**
+
+- Lav en liste med farver som en konstant i `CONSTANTS`, for eksempel `BULLET_COLORS`.
+- Giv kuglen en farve fra listen i `Bullet`-klassens `fire`-metode.
+
+:::tip[Hint]
+Kan du huske `random` fra intro-holdet? `random.choice(min_liste)` vælger et tilfældigt element fra en liste. Husk at skrive `import random` øverst i filen, under `import turtle`.
+:::
+
+:::tip[Hint: farvenavne]
+Turtle kender mange farvenavne på engelsk, for eksempel `"red"`, `"orange"`, `"yellow"`, `"green"`, `"cyan"`, `"magenta"`, `"hot pink"` og `"gold"`.
+:::
+
+Prøv bagefter: Kan du give hver kugle sin **egen faste** farve, når den bliver lavet i `GAME SETUP`, så de kommer i regnbuens rækkefølge? (Hint: `i % len(BULLET_COLORS)` giver tallene 0, 1, 2, ... og starter forfra, når listen er brugt op.)
+
+<Solution title="Løsning: regnbuekugler">
+
+Øverst i filen:
+
+```python.run norun="true"
+import turtle
+import random
+```
+
+I `CONSTANTS`, under `MAX_BULLETS`:
+
+```python.run norun="true"
+BULLET_COLORS = ["red", "orange", "yellow", "green", "cyan", "magenta"]
+```
+
+I `Bullet`-klassens `fire`:
+
+```python.run norun="true"
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.color(random.choice(BULLET_COLORS))
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+```
+
+Variant med faste farver i rækkefølge (i `GAME SETUP`, i stedet for den gamle løkke – så skal `random` ikke bruges):
+
+```python.run norun="true"
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    new_bullet = Bullet()
+    new_bullet.color(BULLET_COLORS[i % len(BULLET_COLORS)])
+    bullets.append(new_bullet)
+```
+
+</Solution>
+
+## Haglgevær
+
+Én kugle ad gangen? Nej tak! Lav et haglgevær, der skyder **tre kugler på én gang**: én lige frem, én lidt til venstre og én lidt til højre.
+
+**Hvad skal du ændre?** Det hele sker i `move_bullets`.
+
+- I stedet for at huske **én** ikke-aktiv kugle, skal du huske **alle** de ikke-aktive kugler i en liste.
+- Når man trykker space, og der er mindst 3 ikke-aktive kugler, skyder du tre af.
+- Efter `fire` peger kuglen samme vej som rumskibet. Drej den så lidt med `left` eller `right`.
+
+:::tip[Hint: en liste med ikke-aktive kugler]
+Start med en tom liste: `inactive_bullets = []`. I `else` skriver du `inactive_bullets.append(bullet)`. `len(inactive_bullets)` fortæller, hvor mange der er i listen.
+:::
+
+:::tip[Hint: vinkler]
+Lav en konstant `SHOTGUN_SPREAD = 10`. Så kan de tre kugler drejes `-SHOTGUN_SPREAD`, `0` og `SHOTGUN_SPREAD` grader med `left`. At dreje et negativt antal grader til venstre er det samme som at dreje til højre.
+:::
+
+Når du holder space nede, bliver alle kuglerne brugt meget hurtigt. Prøv at gøre `MAX_BULLETS` større. Eller prøv med 5 kugler og en større spredning!
+
+<Solution title="Løsning: haglgevær">
+
+I `CONSTANTS`, under `MAX_BULLETS`:
+
+```python.run norun="true"
+SHOTGUN_SPREAD = 10  # degrees between the bullets
+```
+
+Hele `move_bullets`:
+
+```python.run norun="true"
+def move_bullets():
+    inactive_bullets = []
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+        else:
+            inactive_bullets.append(bullet)
+
+    if keys_pressed["space"] and len(inactive_bullets) >= 3:
+        angles = [-SHOTGUN_SPREAD, 0, SHOTGUN_SPREAD]
+        for i in range(3):
+            inactive_bullets[i].fire(player)
+            inactive_bullets[i].left(angles[i])
+```
+
+</Solution>
+
+## Dine egne idéer
+
+Har du selv en idé? Prøv den! Her er et par stykker mere at lege med:
+
+- Gør kuglerne større, mindre eller til en anden form (`"circle"`, `"triangle"`).
+- Gør kuglerne hurtigere eller langsommere med `BULLET_SPEED`.
+- Lad kuglen skifte farve, når den har mindre end halvdelen af sin `ttl` tilbage.

@@ -1,0 +1,349 @@
+---
+title: "Niveau 5 – Kuglen flyver rundt"
+description: Genbrug funktionen fra niveau 3, så kuglen også flyver rundt om skærmen, og giv den en levetid.
+sidebar:
+  order: 15
+---
+
+Lige nu forsvinder kuglen, når den rammer kanten. I rigtige Asteroids flyver kuglen ud på den ene side og ind på den anden – ligesom rumskibet. Efter dette niveau gør din kugle det samme. Og så forsvinder den af sig selv efter et stykke tid.
+
+**Det nye i dag:** at **genbruge** en funktion, og at give en ting en **levetid** med en tæller, der tæller ned.
+
+## Kan du huske?
+
+- Vores `move_if_out_of_bounds`-funktion fra niveau 3?
+- ... og at den tager en turtle som parameter?
+- Og at en `Bullet` faktisk **er** en turtle?
+
+Så kan vi bruge præcis den samme funktion til kuglen! Det er det smarte ved funktioner med parametre.
+
+Men hvad sker der, hvis kuglen bare flyver rundt og rundt? **Stopper den nogensinde?** Nej! Den ville flyve for evigt, og så kunne vi aldrig skyde igen. Derfor skal kuglen have en **levetid**.
+
+## Levetid: en tæller, der tæller ned
+
+Vi giver kuglen et antal game ticks, den må leve. I hvert game loop trækker vi én fra. Når tallet bliver mindre end 0, er kuglen "død". Prøv det her:
+
+```python.run
+ttl = 5
+while ttl >= 0:
+    print("Kuglen flyver! ttl =", ttl)
+    ttl -= 1
+print("Puf! Kuglen er væk.")
+```
+
+`ttl -= 1` er det samme som `ttl = ttl - 1`. Det er bare en kortere måde at skrive det på.
+
+Prøv at ændre start-tallet. Hvor mange gange flyver kuglen, hvis `ttl` starter på `10`?
+
+## Kuglens levetid
+
+Vi sætter levetiden til 75 game ticks. Et game tick er 20 millisekunder, så 75 ticks er 1,5 sekund.
+
+```python
+BULLET_LIFETIME = 75  # game ticks
+```
+
+- [ ] Indsæt koden i `CONSTANTS`-sektionen, under `BULLET_SPEED`.
+
+## Sæt levetiden, når kuglen affyres
+
+Vi kalder kuglens levetid for `ttl`. Det er en forkortelse for "time to live" – tid tilbage at leve i.
+
+```python
+    def __init__(self):
+        # ... SNIP ...
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.ttl = BULLET_LIFETIME
+```
+
+`# ... SNIP ...` betyder bare "her står den kode, du allerede har". Du skal ikke skrive det.
+
+- Det er god skik at lave alle en klasses variabler i `__init__`. Så kan man se dem alle samlet ét sted.
+- Det vigtigste er dog linjen i `fire`. Hver gang kuglen skydes af, skal den have fuld levetid igen.
+
+- [ ] Indsæt `self.ttl = BULLET_LIFETIME` som det sidste i `__init__`, under `self.active = False`.
+- [ ] Indsæt `self.ttl = BULLET_LIFETIME` i `fire`, under `self.active = True`.
+
+## Wrap kuglen
+
+Nu skal kuglen flyve rundt om skærmen i stedet for at forsvinde ved kanten. Så skal den gamle kant-kontrol med `abs` ud, og i stedet kalder vi `move_if_out_of_bounds`:
+
+```python
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+```
+
+Hvad sker der, når vi sender `self` med som parameter? `self` er kuglen selv. Inde i `move_if_out_of_bounds` hedder den `t`, og så bliver den flyttet om på den anden side – præcis som rumskibet.
+
+- [ ] Slet hele den gamle kant-kontrol i `move` (de to kommentarer, linjen `if abs(self.xcor()) > HALF_WIDTH or ...` og de to linjer under den).
+- [ ] Indsæt `move_if_out_of_bounds(self)` i `move`, lige under `self.forward(BULLET_SPEED)`.
+
+:::note[Men funktionen står jo længere nede?]
+På niveau 3 lærte vi, at en funktion skal laves, før den bliver brugt. `move_if_out_of_bounds` står i `BEHAVIOURS`, som er **under** `Classes`. Virker det så?
+
+Ja! Python kører først koden inde i `move`, når spillet er i gang. På det tidspunkt har Python allerede læst hele filen og kender funktionen. Det vigtige er, at funktionen findes, når linjen **køres** – ikke når den bliver læst.
+:::
+
+## Nu skal vi tælle ned
+
+Hver gang kuglen flytter sig, trækker vi én fra `ttl`. Hvis `ttl` bliver mindre end 0, skjuler vi kuglen og sætter den til ikke aktiv:
+
+```python
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+```
+
+- [ ] Indsæt koden som det sidste i `move`, under `move_if_out_of_bounds(self)`.
+
+Så skulle din `move` gerne se sådan her ud:
+
+```python
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+```
+
+## Prøv spillet
+
+- [ ] Start spillet og skyd en kugle. Flyver den ud på den ene side og ind på den anden?
+- [ ] Forsvinder kuglen af sig selv efter lidt tid?
+- [ ] Kan du skyde igen, når den er forsvundet?
+- [ ] Prøv at ændre `BULLET_LIFETIME`. Hvad sker der med 20? Og med 200?
+
+:::tip[Typiske fejl]
+- **Kuglen flyver for evigt**: Har du husket `self.ttl = BULLET_LIFETIME` i `fire`? Og står `self.ttl -= 1` inde i `move` (rykket 8 mellemrum ind)?
+- **`AttributeError: ... has no attribute 'ttl'`**: Tjek, at du har skrevet `self.ttl` ens alle steder.
+- **Kuglen forsvinder stadig ved kanten**: Har du slettet den gamle `abs`-kontrol?
+:::
+
+## Hjælp
+
+Sådan kan hele `Bullet`-klassen se ud nu:
+
+```python.run norun="true"
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+```
+
+<Solution title="Hele koden efter niveau 5">
+
+```python.run norun="true"
+import turtle
+
+"""
+Prevent bullets from exiting the screen
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.shapesize(stretch_wid=0.75, stretch_len=1.5) # Stretch the triangle to be pointy
+player.penup() # to not draw lines
+
+# Create a turtle for the bullet
+bullet = Bullet()
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+
+    
+def move_bullets():
+    if keys_pressed["space"] and not bullet.active:
+        bullet.fire(player)
+
+    if bullet.active:
+        bullet.move()
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    move_bullets()
+
+    screen.update()
+    screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+
+
+#
+#  START THE GAME
+#
+
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

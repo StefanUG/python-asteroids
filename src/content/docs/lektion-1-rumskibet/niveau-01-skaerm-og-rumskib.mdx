@@ -1,0 +1,252 @@
+---
+title: "Niveau 1 – Skærm og rumskib"
+description: Lav spillets vindue og et lille rumskib midt på skærmen.
+sidebar:
+  order: 11
+---
+
+Efter dette niveau har dit spil et stort sort vindue med et lille, spidst, gråt rumskib i midten. Det er starten på det hele!
+
+**Det nye i dag:** Turtles koordinatsystem, og hvordan vi selv bestemmer, hvornår skærmen bliver tegnet. Du kender allerede turtle fra intro-forløbet – nu bruger vi en turtle som rumskib.
+
+## Turtles koordinatsystem
+
+Alle ting på skærmen har en plads, som vi skriver med to tal: `(x, y)`.
+
+- `x` er, hvor langt til **højre** (plus) eller **venstre** (minus) noget er.
+- `y` er, hvor langt **op** (plus) eller **ned** (minus) noget er.
+- Midten af skærmen er `(0, 0)`. Det er der, rumskibet starter.
+
+<img src={import.meta.env.BASE_URL + "images/coordinate-system.svg"} alt="Turtles koordinatsystem med (0, 0) i midten, x-aksen vandret og y-aksen lodret" />
+
+Vores skærm bliver 1200 pixels bred. Så går `x` fra -600 i venstre kant til 600 i højre kant.
+
+Prøv det her i browseren. Turtlen hopper rundt og skriver, hvor den er:
+
+```python.run
+import turtle
+
+t = turtle.Turtle()
+t.shape("triangle")
+t.penup()
+
+t.write("(0, 0)")
+t.goto(150, 0)
+t.write("(150, 0)")
+t.goto(0, 100)
+t.write("(0, 100)")
+t.goto(-150, -100)
+t.write("(-150, -100)")
+t.goto(0, 0)
+```
+
+Prøv at ændre koden: Hvor tror du, `(100, -50)` er? Gæt først, og tilføj så `t.goto(100, -50)` og `t.write("(100, -50)")` og se, om du havde ret.
+
+## Nu bygger vi spillet
+
+Fra nu af skriver du i din egen fil `asteroids.py`. Du kopierer små stykker kode ind og finder ud af, **hvor** de skal stå. Tjek kasserne af, efterhånden som du bliver færdig.
+
+:::note[Kommentarer]
+Alt efter et `#` er en **kommentar**. Python springer det over. Du behøver ikke skrive kommentarerne af, men de hjælper dig med at forstå koden, når du læser den senere.
+:::
+
+### 1. Importér turtle
+
+Vi skal bruge turtle til at tegne spillet:
+
+```python
+import turtle
+```
+
+- [ ] Sæt koden ind som den allerførste linje i din tomme fil
+
+### 2. Konstanter
+
+En **konstant** er en slags variabel, som ikke ændrer sig, mens programmet kører. Vi samler dem øverst, så det er nemt at justere spillet senere. Vil du have en større skærm, retter du bare ét tal.
+
+```python
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200 # Bredden på skærmbilledet
+SCREEN_HEIGHT = 800 # Højden
+BG_COLOR = "black" # Baggrundsfarven
+```
+
+`BG_COLOR` betyder "background color", altså baggrundsfarve.
+
+- [ ] Sæt koden ind efter `import`-linjen
+
+### 3. Sæt skærmen op
+
+Nu laver vi vinduet, som spillet kører i:
+
+```python
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+```
+
+- `turtle.Screen()` laver vinduet. Vi gemmer det i variablen `screen`.
+- `setup` sætter størrelsen, og `bgcolor` sætter baggrundsfarven. Se, hvordan vi bruger konstanterne fra før.
+- `screen.tracer(0)` slår turtles langsomme animation fra. Normalt tegner turtle hvert skridt, mens du ser på. I et spil vil vi selv bestemme, hvornår skærmen bliver tegnet – ellers bliver det alt for langsomt.
+
+- [ ] Sæt koden ind efter `# CONSTANTS`-sektionen, altså efter alle konstanterne
+
+### 4. Lav et rumskib
+
+Rumskibet er en turtle med en trekant-form:
+
+```python
+# Make a turtle for the player
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.penup() # to not draw lines
+```
+
+- `player` er rumskibet. "Player" betyder spiller.
+- `shape("triangle")` gør den til en trekant.
+- `color("light grey", BG_COLOR)` giver den en lysegrå kant og sort fyld (samme farve som baggrunden).
+- `penup()` løfter pennen, så rumskibet ikke tegner streger efter sig, når det flyver.
+
+- [ ] Sæt koden ind i `# GAME SETUP`-sektionen, efter `screen`-linjerne
+
+### 5. Gør rumskibet spidst
+
+En trekant ligner ikke helt et rumskib. Lad os strække den, så den bliver lang og spids:
+
+```python
+player.shapesize(stretch_wid=0.75, stretch_len=1.5) # Stretch the triangle to be pointy
+```
+
+- `stretch_len` er længden i den retning, rumskibet peger. 1.5 betyder halvanden gang så lang.
+- `stretch_wid` er bredden på tværs. 0.75 betyder lidt smallere.
+
+- [ ] Sæt koden ind lige efter linjen `player.color(...)`, sammen med de andre `player`-linjer
+
+### 6. Start spillet
+
+Til sidst skal vi vise skærmen og sørge for, at vinduet ikke lukker:
+
+```python
+#
+#  START THE GAME
+#
+
+screen.update() # Since we disabled the tracer, we manually have to update the screen
+screen.mainloop() # don't close the window
+```
+
+- Fordi vi slog `tracer` fra, skal vi selv sige "tegn skærmen nu!". Det gør `screen.update()`.
+- `screen.mainloop()` holder vinduet åbent. Uden den lukker programmet med det samme.
+
+- [ ] Sæt koden ind helt nederst i filen, efter `# GAME SETUP`-sektionen
+- [ ] Tjek, at `screen.mainloop()` er den allersidste linje
+
+## Prøv spillet
+
+- [ ] Kør spillet med ▶
+- [ ] Der kommer et stort sort vindue med et lille gråt rumskib i midten, der peger mod højre
+
+Ser det sådan ud?
+
+<img src={import.meta.env.BASE_URL + "images/asteroids-01-screenshot.png"} alt="Sort spilvindue med et lille gråt trekantet rumskib i midten" />
+
+:::tip[Typiske fejl]
+- **Vinduet lukker med det samme:** Mangler du `screen.mainloop()` nederst?
+- **Vinduet er tomt, eller rumskibet mangler:** Mangler du `screen.update()`?
+- **`NameError: name 'BG_COLOR' is not defined`:** Konstanterne skal stå *over* den kode, der bruger dem. Tjek også stavningen – store og små bogstaver betyder noget.
+- **`IndentationError`:** Der må ikke være mellemrum foran linjerne i dette niveau.
+:::
+
+## Hjælp
+
+Sådan kan hele din fil se ud, før du gør rumskibet spidst (trin 5):
+
+```python.run norun="true"
+import turtle
+
+#
+#  CONSTANTS
+#
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+#
+#  GAME SETUP
+#
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+screen.bgcolor(BG_COLOR)
+screen.tracer(0)  # disable animation
+
+# Make a turtle for the player
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.penup()  # to not draw lines
+
+
+#
+#  START THE GAME
+#
+
+screen.update()
+screen.mainloop()
+```
+
+<Solution title="Hele koden efter niveau 1">
+
+```python.run norun="true"
+import turtle
+
+"""
+Make the screen and the spaceship
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.shapesize(stretch_wid=0.75, stretch_len=1.5) # Stretch the triangle to be pointy
+player.penup() # to not draw lines
+
+
+#
+#  START THE GAME
+#
+
+screen.update() # Since we disabled the tracer, we manually have to update the screen
+screen.mainloop() # don't close the window
+```
+
+</Solution>

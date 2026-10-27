@@ -1,0 +1,424 @@
+---
+title: "Niveau 9 – Skyd asteroiderne"
+description: Tjek om en kugle rammer en asteroide ved at måle afstanden imellem dem.
+sidebar:
+  order: 19
+---
+
+Asteroiderne er der nu, men kuglerne flyver bare igennem dem. Kedeligt! Efter dette niveau **forsvinder** en asteroide, når du rammer den – og kuglen forsvinder også.
+
+**Det nye i dag:** **Kollision** – at finde ud af, om to ting rammer hinanden. Det gør vi ved at måle **afstanden** mellem dem.
+
+## Hvordan ved vi, om kuglen har ramt?
+
+Har en kugle og en asteroide noget til fælles? Ja! De er begge en `Turtle`. Så de har begge en **position** på skærmen. Og så kan vi finde afstanden mellem dem.
+
+Asteroiden er en cirkel. Afstanden fra midten af cirklen ud til kanten hedder **radius**. Hvis kuglen er tættere på asteroidens midte end radius, så er kuglen **inde i** cirklen – og så har vi ramt!
+
+- afstand **mindre end** radius → **RAMT!**
+- afstand **større end** radius → forbi
+
+## Afstand med Pythagoras
+
+Hvordan måler man afstanden mellem to punkter? Man går først et stykke vandret (`dx`) og så et stykke lodret (`dy`). Den skrå afstand imellem dem kan man regne ud med **Pythagoras**: `afstand = kvadratroden af (dx² + dy²)`. Har du ikke lært det i skolen endnu, så gør det ikke noget – du kan bare prøve koden:
+
+```python.run
+import math
+
+asteroid_x = 100
+asteroid_y = 50
+radius = 30
+
+bullet_x = 120
+bullet_y = 65
+
+dx = bullet_x - asteroid_x
+dy = bullet_y - asteroid_y
+distance = math.sqrt(dx ** 2 + dy ** 2)
+print(f"Afstanden er {distance}")
+
+if distance < radius:
+    print("RAMT!")
+else:
+    print("Forbi...")
+```
+
+Prøv at ændre `bullet_x` og `bullet_y`. Kan du finde et sted, hvor den lige præcis rammer? Og et sted, hvor den lige præcis rammer forbi?
+
+Den gode nyhed: I spillet behøver vi ikke selv regne. En Turtle har en indbygget funktion, der gør det for os: `asteroid.distance(bullet)` giver afstanden mellem asteroiden og kuglen.
+
+Fortsæt i din egen fil. Har du problemer, kan du finde hjælp i bunden ⬇
+
+## Asteroidens radius
+
+Asteroiden skal huske, hvor stor den er. En normal Turtle-cirkel er 20 pixels bred, og vi har gjort den 3 gange større med `shapesize(3, 3)`. Så den er 60 pixels bred, og radius er det halve: **30**.
+
+```python
+        self.radius = 30
+```
+
+- [ ] Indsæt koden som den sidste linje i `__init__`-funktionen i `Asteroid`, efter `self.goto(x, y)`
+
+## Check collision
+
+Nu laver vi en funktion, der tjekker, om noget har ramt en asteroide. "Collision" betyder sammenstød.
+
+- Funktionen hedder `check_collision` og får en parameter, `with_turtle`. Det er den ting, vi vil tjekke – fx en kugle.
+- Vi går hele listen af asteroider igennem: `for asteroid in asteroids:`
+- For hver asteroide tjekker vi, om afstanden er mindre end radius.
+- Hvis ja, giver funktionen den ramte asteroide tilbage med `return asteroid`. Så stopper funktionen med det samme.
+- Hvis løkken bliver færdig uden at ramme noget, giver vi `None` tilbage. `None` betyder "ingenting".
+
+```python
+def check_collision(with_turtle):
+    # Check for collisions between a turtle and the asteroids
+    for asteroid in asteroids:
+        if abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+```
+
+`abs()` gør et tal positivt. En afstand er altid positiv i forvejen, så den gør ikke noget her – men den skader heller ikke.
+
+- [ ] Indsæt hele funktionen i `# BEHAVIOURS`-sektionen, efter hele `move_if_out_of_bounds`-funktionen og før `def move_spaceship():`
+
+Læg mærke til at `return None` er rykket **mindre** ind end `return asteroid`. Den står efter løkken, ikke inde i den.
+
+## Når vi flytter en kugle
+
+Hver gang en kugle flytter sig, skal vi tjekke, om den har ramt noget:
+
+- Tjek om en asteroide er ramt: `hit_asteroid = check_collision(bullet)`
+- Hvis vi ramte en: `if hit_asteroid:` (det er sandt, hvis vi fik en asteroide tilbage, og falsk hvis vi fik `None`)
+  - Skjul asteroiden: `hit_asteroid.hideturtle()`
+  - Skjul kuglen: `bullet.hideturtle()`
+  - Gør kuglen inaktiv, så den kan bruges igen: `bullet.active = False`
+
+```python
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hideturtle()
+                bullet.hideturtle()
+                bullet.active = False
+```
+
+- [ ] Indsæt koden i `move_bullets`-funktionen, lige efter linjen `bullet.move()`. Den skal rykkes ind lige så meget som `bullet.move()`.
+
+Hele din `move_bullets`-funktion skal nu se sådan ud:
+
+```python
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hideturtle()
+                bullet.hideturtle()
+                bullet.active = False
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+```
+
+## Prøv spillet
+
+- [ ] Start spillet og skyd efter en asteroide. Forsvinder den?
+- [ ] Forsvinder kuglen også, når den rammer?
+- [ ] Skyd alle 10 asteroider væk!
+- [ ] Skyd en gang til der, hvor en asteroide **var**. Hvad sker der med kuglen? Det kigger vi på i næste niveau.
+
+:::tip[Typiske fejl]
+- `AttributeError: 'Asteroid' object has no attribute 'radius'`: `self.radius = 30` mangler i `__init__` i `Asteroid`, eller den er ikke rykket ind.
+- `NameError: name 'check_collision' is not defined`: Har du stavet funktionsnavnet ens begge steder?
+- Kun den første asteroide kan rammes: `return None` er rykket for langt ind, så den står inde i `for`-løkken.
+- Asteroiderne forsvinder ikke: Står `hit_asteroid = check_collision(bullet)` inde under `if bullet.active:`?
+:::
+
+## Hjælp
+
+Sådan skal `Asteroid`-klassen se ud nu:
+
+```python.run norun="true"
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+```
+
+Og sådan skal `check_collision` se ud. Den skal stå i `# BEHAVIOURS`, efter hele `move_if_out_of_bounds`-funktionen og lige før `def move_spaceship():`. `def` står helt ude til venstre, og `return None` er rykket lige så meget ind som `for`:
+
+```python.run norun="true"
+def check_collision(with_turtle):
+    # Check for collisions between a turtle and the asteroids
+    for asteroid in asteroids:
+        if abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+```
+
+Næste niveau: [Niveau 10 – Ikke de usynlige](/python-asteroids/lektion-3-asteroider/niveau-10-ikke-de-usynlige/)
+
+<Solution title="Hele koden efter niveau 9">
+
+```python.run norun="true"
+import turtle
+import random
+
+"""
+Let's shoot some Asteroids
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+MAX_ASTEROIDS = 10
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = Player()
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+# Create asteroids
+asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroids.append(Asteroid())
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def check_collision(with_turtle):
+    # Check for collisions between a turtle and the asteroids
+    for asteroid in asteroids:
+        if abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+
+    
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hideturtle()
+                bullet.hideturtle()
+                bullet.active = False
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    move_bullets()
+
+    screen.update()
+    screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+
+
+#
+#  START THE GAME
+#
+
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

@@ -1,0 +1,703 @@
+---
+title: "Del asteroiderne"
+description: Når en asteroide bliver skudt, deler den sig i mindre asteroider.
+sidebar:
+  order: 6
+---
+
+Når en asteroide bliver ramt, ville det være sejt, hvis den delte sig i mindre stykker – ligesom i det rigtige Asteroids! 💥
+
+Store asteroider bliver til to mellemstore, og mellemstore bliver til to små. Det bliver meget sværere at overleve!
+
+:::caution[Den største opgave]
+Det her er den mest avancerede ændring i dag. Der er mange trin, og de hænger sammen. Tag ét trin ad gangen, sæt kryds, og kør spillet ind imellem. Kører du fast, så spørg om hjælp.
+:::
+
+## Det nye i dag: en asteroide, der laver asteroider
+
+Hver asteroide får to **børn** – mindre asteroider, der er gemt væk, indtil forælderen bliver skudt. Og børnene kan selv have børn! Når en klasse laver nye objekter af sin egen klasse, kalder man det **rekursion**.
+
+Prøv det her i lille skala. En `Klump` med størrelse 3 laver to klumper med størrelse 2, som hver laver to klumper med størrelse 1:
+
+```python.run
+class Klump:
+    def __init__(self, size=3):
+        self.size = size
+        self.children = []
+        if size > 1:
+            for i in range(2):
+                self.children.append(Klump(size - 1))
+
+    def alle_klumper(self):
+        alle = list(self.children)
+        for child in self.children:
+            alle = alle + child.alle_klumper()
+        return alle
+
+stor = Klump()
+print("Den store har", len(stor.children), "børn")
+print("I alt under den store:", len(stor.alle_klumper()))
+for k in stor.alle_klumper():
+    print("Klump med størrelse", k.size)
+```
+
+Prøv at ændre `Klump()` til `Klump(4)`, eller `range(2)` til `range(3)`. Hvor mange klumper bliver der så?
+
+## Hvad skal vi ændre?
+
+- `Asteroid`-klassen skal kunne have forskellige størrelser.
+- Hver asteroide skal lave "børne-asteroider", når den bliver lavet.
+- Børnene skal vises, når asteroiden bliver skudt.
+- Vi skal holde styr på **alle** asteroider, også børnene.
+
+## 1. Størrelse som parameter
+
+Vi skal kunne lave asteroider i forskellige størrelser. Ændr starten af `Asteroid.__init__`, så den tager en `size`-parameter:
+
+```python
+    def __init__(self, size = 3):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(size, size)
+        self.color("white", BG_COLOR)
+        self.penup()
+```
+
+`size = 3` betyder, at hvis man ikke skriver en størrelse, får man 3 (en stor asteroide). Vi kan lave mindre med `Asteroid(2)` eller `Asteroid(1)`.
+
+- [ ] Tilføj `size = 3` som parameter til `__init__`
+- [ ] Ændr `self.shapesize(3, 3)` til `self.shapesize(size, size)`
+- [ ] **Slet** de tre linjer, der sætter positionen: `x = ...`, `y = ...` og `self.goto(x, y)` (vi flytter dem til `reset` i trin 3)
+
+## 2. Lav børne-asteroider
+
+Nu skal hver asteroide lave to mindre børne-asteroider. Tilføj koden i `Asteroid.__init__`, lige efter `self.penup()`:
+
+```python
+        self.children = []
+        if size > 1:
+            for i in range(2):
+                a = Asteroid(size - 1)
+                a.hideturtle()
+                self.children.append(a)
+
+        self.radius = size * 10
+```
+
+Hvis størrelsen er større end 1, laver vi to asteroider, der er én mindre (`size - 1`). De bliver gemt med `hideturtle()`, så man ikke kan se dem til at starte med.
+
+Radius bestemmer, hvor tæt man skal være for at ramme. Mindre asteroider skal have mindre radius, så den afhænger nu af størrelsen.
+
+- [ ] Tilføj koden i `Asteroid.__init__`
+- [ ] Ret den gamle linje `self.radius = 30`, så der kun står `self.radius = size * 10` (ikke to linjer med `self.radius`)
+
+## 3. Opdater reset
+
+Nu skal `reset` også sætte positionen, fordi vi fjernede den fra `__init__`:
+
+```python
+    def reset(self):
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+        self.showturtle()
+```
+
+- [ ] Tilføj de tre nye linjer (`x`, `y` og `self.goto`) i starten af `reset`
+
+Nu sætter `reset` både position, retning og hastighed. Bonus: når en asteroide kommer tilbage, dukker den op et nyt sted!
+
+- [ ] Kør spillet. Det skal virke som før (børnene er stadig gemt)
+
+## 4. Vis børnene, når asteroiden rammes
+
+Når en asteroide bliver ramt, skal børnene dukke op præcis der, hvor den var:
+
+```python
+    def hit(self):
+        self.hideturtle()
+        self.respawn_in = ASTEROID_RESPAWN_AFTER
+        for child in self.children:
+            child.goto(self.pos())
+            child.showturtle()
+```
+
+`self.pos()` er asteroidens position. Hvert barn flytter dertil og bliver vist.
+
+- [ ] Tilføj `for child in self.children:`-løkken nederst i `hit`
+
+## 5. Børnene skal også flytte sig
+
+Børnene er ikke med i listen `asteroids`, så ingen flytter dem endnu. Vi lader forælderen flytte sine børn. Lav en ny funktion `move` i `Asteroid`-klassen, efter hele `hit`-funktionen:
+
+```python
+    def move(self):
+        self.forward(self.speed)
+        move_if_out_of_bounds(self)
+        for child in self.children:
+            child.move()
+```
+
+Bemærk: `move` kalder `child.move()`, som kalder sine egne børns `move()`. Sådan bliver børnebørnene også flyttet.
+
+- [ ] Tilføj `move` i `Asteroid`-klassen
+
+## 6. Find alle asteroider
+
+For at tjekke om noget rammer, skal vi kende **alle** asteroider – også børn og børnebørn. Tilføj denne funktion i `Asteroid`-klassen, efter hele `move`-funktionen:
+
+```python
+    def all_asteroids(self):
+        all = [*self.children]
+        for child in self.children:
+            all = all + child.all_asteroids()
+        return all
+```
+
+`[*self.children]` laver en ny liste med de samme ting som `self.children`. Så lægger vi hvert barns egne børn til. Det er præcis det samme som `alle_klumper` i eksemplet øverst.
+
+- [ ] Tilføj `all_asteroids` i `Asteroid`-klassen
+
+## 7. Lav en liste over alle asteroider
+
+Find stedet i `# GAME SETUP`, hvor asteroiderne bliver lavet, og ret det til:
+
+```python
+# Create asteroids
+asteroids = []
+all_asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroid = Asteroid()
+    asteroids.append(asteroid)
+    all_asteroids.append(asteroid)
+    all_asteroids.extend(asteroid.all_asteroids())
+```
+
+`extend` lægger **alle** tingene fra en anden liste ind i listen på én gang.
+
+- [ ] Tilføj `all_asteroids = []` før løkken
+- [ ] Ret løkken, så den også tilføjer til `all_asteroids` og kalder `extend` med alle børnene
+
+Nu har vi to lister: `asteroids` (kun de store) og `all_asteroids` (alle størrelser).
+
+## 8. Kollision med alle asteroider
+
+Ret `check_collision`, så den tjekker alle asteroider:
+
+```python
+def check_collision(with_turtle):
+    # Check for collisions between the player and asteroids
+    for asteroid in all_asteroids:
+        if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+```
+
+- [ ] Ændr `for asteroid in asteroids:` til `for asteroid in all_asteroids:`
+
+Nu kan skuddene også ramme de små asteroider.
+
+## 9. Opdater move_asteroids
+
+Til sidst skal `move_asteroids()` bruge den nye `move`, og tjekke om rumskibet rammer en af **alle** asteroiderne:
+
+```python
+def move_asteroids():
+    for asteroid in asteroids:
+        asteroid.move()
+        if not asteroid.isvisible():
+            asteroid.respawn_in -= 1
+            if asteroid.respawn_in == 0:
+                asteroid.reset()
+
+    for asteroid in all_asteroids:
+        if asteroid.isvisible():
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.hit()
+```
+
+Den første løkke flytter de store asteroider (og dermed deres børn) og sørger for, at de store kommer igen. Den anden løkke tjekker, om rumskibet støder ind i en af dem.
+
+- [ ] Ret den første løkke, så den kalder `asteroid.move()` i stedet for `asteroid.forward(asteroid.speed)` og `move_if_out_of_bounds(asteroid)`
+- [ ] Lav `if not asteroid.isvisible():` om, så den står for sig selv (ikke som `else` til `if asteroid.isvisible():`)
+- [ ] Tilføj den nye løkke over `all_asteroids`, der tjekker om spilleren bliver ramt
+
+## Prøv det!
+
+- [ ] Start spillet, og skyd en stor asteroide. Deler den sig i to mellemstore?
+- [ ] Skyd en mellemstor. Deler den sig i to små?
+- [ ] Skyd en lille. Forsvinder den bare?
+- [ ] Flyv ind i en lille asteroide. Mister du liv?
+
+:::tip[Typiske fejl]
+- `NameError: name 'all_asteroids' is not defined`: Har du lavet `all_asteroids = []` i `# GAME SETUP`?
+- `AttributeError: 'Asteroid' object has no attribute 'move'`: Tjek, at `move` er rykket ind, så den hører til `Asteroid`-klassen.
+- Børnene står stille: Har du ændret `move_asteroids()`, så den kalder `asteroid.move()`?
+- Små asteroider kan ikke skydes: Bruger `check_collision` stadig `asteroids` i stedet for `all_asteroids`?
+:::
+
+:::tip[Bruger du den klumpede asteroideform?]
+Hvis du har lavet [asteroider der ligner sten](/python-asteroids/lektion-7-goer-det-til-dit-eget/5-former/#asteroider-der-ligner-sten), så skriv `self.shapesize(size * 2, size * 2)`. Så passer formen til `self.radius = size * 10`.
+:::
+
+## Bonus: flere børn
+
+Prøv at ændre, hvor mange børn en asteroide får:
+
+```python
+        if size > 1:
+            for i in range(3):  # Lav 3 børn i stedet for 2!
+                a = Asteroid(size - 1)
+                a.hideturtle()
+                self.children.append(a)
+```
+
+Prøv 3 eller 4 børn, og se hvor kaotisk det bliver! 😄
+
+## Bonus: andre størrelser
+
+Du kan også starte med større asteroider. I `# GAME SETUP`:
+
+```python
+    asteroid = Asteroid(4)  # Størrelse 4 i stedet for 3!
+```
+
+Eller mindre:
+
+```python
+    asteroid = Asteroid(2)  # Start med mellemstore
+```
+
+## Bonus: børnene flyver i hver sin retning
+
+Lige nu flyver børnene i samme retning, som da de blev lavet. Giv dem en ny, tilfældig retning, når de dukker op:
+
+```python
+    def hit(self):
+        self.hideturtle()
+        self.respawn_in = ASTEROID_RESPAWN_AFTER
+        for child in self.children:
+            child.goto(self.pos())
+            child.setheading(random.randint(0, 360))
+            child.showturtle()
+```
+
+Nu flyver stumperne ud til alle sider! 🌟
+
+<Solution title="Hele koden med asteroider, der deler sig">
+
+```python.run norun="true"
+import turtle
+import random
+import time
+import math
+
+"""
+Let us split the asteroids into smaller ones, when shot
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_MAX_SPEED = 10  # Pixels to move player each tick
+PLAYER_THRUST = 0.1  # increase in speed per tick
+PLAYER_START_HEALTH = 3
+PLAYER_GRACE_PERIOD = 3 # seconds
+BULLET_SPEED = PLAYER_MAX_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+MAX_ASTEROIDS = 10
+ASTEROID_SPEED_MIN = 1
+ASTEROID_SPEED_MAX = 5
+ASTEROID_RESPAWN_AFTER = 150  # respawn after number of game ticks
+
+FONT_FAMILY = "Courier New"
+SCORE_FONT = (FONT_FAMILY, 16, "normal")
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+SPACESHIP_SHAPE = ( (7,-20), (0,5), (-7,-20) )
+SPACESHIP_THRUST_SHAPE = turtle.Shape('compound')
+SPACESHIP_THRUST_SHAPE.addcomponent(SPACESHIP_SHAPE, BG_COLOR, 'light grey')
+SPACESHIP_THRUST_SHAPE.addcomponent(( (7,-20), (0,-30), (-7,-20) ), BG_COLOR, 'orange')
+
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("spaceship")
+        self.color("light grey", BG_COLOR)
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+        self.alive = True
+        self.score = 0
+        self.health = PLAYER_START_HEALTH
+        self.last_hit = 0.0
+
+        self.speedx = 0
+        self.speedy = 0
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(player)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+    def is_invincible(self):
+        # a chance to talk about return values
+        return self.last_hit + PLAYER_GRACE_PERIOD > time.time()
+
+    def hit(self):
+        if not self.is_invincible():
+            self.health -= 1
+            self.last_hit = time.time()
+            draw_health()
+
+        if self.health == 0:
+            self.alive = False
+
+    def thrust(self):
+        track = math.radians(self.heading())
+        self.speedx += PLAYER_THRUST * math.cos(track)
+        self.speedy += PLAYER_THRUST * math.sin(track)
+        speed = (self.speedx ** 2 + self.speedy ** 2) ** 0.5
+        if speed > PLAYER_MAX_SPEED:
+            self.speedx = (self.speedx * PLAYER_MAX_SPEED) / speed
+            self.speedy = (self.speedy * PLAYER_MAX_SPEED) / speed
+
+    def move(self):
+        x, y = self.pos()
+        x += self.speedx
+        y += self.speedy
+        self.goto(x, y)
+
+
+class Asteroid(turtle.Turtle):
+
+    def __init__(self, size = 3):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(size, size)
+        self.color("white", BG_COLOR)
+        self.penup()
+
+        self.children = []
+        if size > 1:
+            for i in range(2):
+                a = Asteroid(size - 1)
+                a.hideturtle()
+                self.children.append(a)
+
+        self.radius = size * 10
+        self.speed = 0
+        self.respawn_in = 0
+        self.reset()
+
+    def reset(self):
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+        self.showturtle()
+
+    def hit(self):
+        self.hideturtle()
+        self.respawn_in = ASTEROID_RESPAWN_AFTER
+        for child in self.children:
+            child.goto(self.pos())
+            child.showturtle()
+
+    def move(self):
+        self.forward(self.speed)
+        move_if_out_of_bounds(self)
+        for child in self.children:
+            child.move()
+
+    def all_asteroids(self):
+        all = [*self.children]
+        for child in self.children:
+            all = all + child.all_asteroids()
+        return all
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+screen.register_shape("spaceship", SPACESHIP_SHAPE)
+screen.register_shape("spaceship_thrust", SPACESHIP_THRUST_SHAPE)
+
+
+# Make a turtle for the player
+player = Player()
+
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 60)
+pen.write("HEALTH: ", font=SCORE_FONT)
+
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+
+health_pen = turtle.Turtle(visible=False)
+health_pen.color("white")
+health_pen.penup()
+health_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 60)
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+# Create asteroids
+asteroids = []
+all_asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroid = Asteroid()
+    asteroids.append(asteroid)
+    all_asteroids.append(asteroid)
+    all_asteroids.extend(asteroid.all_asteroids())
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def check_collision(with_turtle):
+    # Check for collisions between the player and asteroids
+    for asteroid in all_asteroids:
+        if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+
+
+def animate_spaceship():
+    if player.is_invincible():
+        scaled = int(time.time() * 10)
+        is_invisible = scaled % 2
+        if is_invisible:
+            player.hideturtle()
+        else:
+            player.showturtle()
+    else:
+        player.showturtle()
+
+    if keys_pressed["Up"]:
+        player.shape("spaceship_thrust")
+    else:
+        player.shape("spaceship")
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.thrust()
+
+    player.move()
+    move_if_out_of_bounds(player)
+    if check_collision(player):
+        player.hit()
+
+
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hit()
+                bullet.hideturtle()
+                bullet.active = False
+                player.score += 1
+                draw_score()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+def move_asteroids():
+    for asteroid in asteroids:
+        asteroid.move()
+        if not asteroid.isvisible():
+            asteroid.respawn_in -= 1
+            if asteroid.respawn_in == 0:
+                asteroid.reset()
+
+    for asteroid in all_asteroids:
+        if asteroid.isvisible():
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.hit()
+
+
+def draw_score():
+    score_pen.clear()
+    score_pen.write(player.score, font=SCORE_FONT)
+
+
+def draw_health():
+    health_pen.clear()
+    health_pen.write(player.health, font=SCORE_FONT)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    animate_spaceship()
+    move_bullets()
+    move_asteroids()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.goto(0, 0)
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+
+
+#
+#  START THE GAME
+#
+
+draw_score()
+draw_health()
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

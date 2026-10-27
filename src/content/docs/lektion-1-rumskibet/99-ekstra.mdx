@@ -1,0 +1,122 @@
+---
+title: "Ekstra: gør det til dit eget"
+description: Dit eget rumskib, en stjernehimmel og WASD-styring.
+sidebar:
+  order: 99
+---
+
+Er du færdig med niveau 2? Så er det tid til at gøre spillet til **dit**. Vælg den udfordring, du synes er sjovest. Du må også gerne finde på dine egne idéer!
+
+## Dit eget rumskib
+
+Skal dit rumskib være lyserødt? En skildpadde? Kæmpestort? Du bestemmer! Og hvorfor skal rummet være sort – det kunne jo også være mørkeblåt.
+
+Det hele sker i `# GAME SETUP`-sektionen, i linjerne der starter med `player.`. Baggrundsfarven ændrer du i konstanten `BG_COLOR` i `# CONSTANTS`.
+
+:::tip[Hint]
+- `player.color("kant", "fyld")` tager to farver: én til kanten og én til fyldet. Prøv fx `"yellow"`, `"hot pink"`, `"cyan"` eller `"orange"`.
+- `player.shape(...)` kan være `"triangle"`, `"arrow"`, `"turtle"`, `"circle"`, `"square"` eller `"classic"`.
+- `player.shapesize(stretch_wid=..., stretch_len=...)` gør rumskibet bredere eller længere. Prøv store og små tal.
+:::
+
+Prøv dig frem, og kør spillet efter hver ændring.
+
+<Solution title="Et eksempel på et eget rumskib">
+
+```python.run norun="true"
+# I CONSTANTS:
+BG_COLOR = "midnight blue"
+
+# I GAME SETUP, i stedet for de gamle player-linjer:
+player = turtle.Turtle()
+player.shape("turtle")
+player.color("lime green", "dark green")
+player.shapesize(stretch_wid=1.5, stretch_len=1.5)
+player.penup() # to not draw lines
+```
+
+</Solution>
+
+## En stjernehimmel
+
+Rigtigt rum har stjerner! Vi kan lave en usynlig "tegne-turtle", der sætter små hvide prikker tilfældige steder på skærmen, før spillet starter.
+
+Det skal du ændre:
+
+- Øverst, under `import turtle`: tilføj `import random`. Du kender `random` fra intro-forløbet.
+- I `# CONSTANTS`: en konstant til, hvor mange stjerner der skal være.
+- I `# GAME SETUP`: en ny turtle, som tegner stjernerne. Sæt den ind efter `screen`-linjerne og før rumskibet.
+
+Her er en start:
+
+```python
+# Draw stars in the background
+star_pen = turtle.Turtle()
+star_pen.hideturtle()
+star_pen.penup()
+star_pen.color("white")
+```
+
+:::tip[Hint]
+- `star_pen.goto(x, y)` flytter pennen, og `star_pen.dot(3)` laver en prik, der er 3 pixels stor.
+- Brug en `for`-løkke til at lave mange stjerner.
+- `random.randint(-600, 600)` giver et tilfældigt tal mellem -600 og 600 – det passer til skærmens bredde. Kan du bruge `SCREEN_WIDTH` i stedet for at skrive 600? (`SCREEN_WIDTH // 2` er 1200 delt med 2, uden decimaler.)
+:::
+
+Vil du have endnu flere idéer? Giv stjernerne tilfældige størrelser, eller lad nogle af dem være gule eller blå.
+
+<Solution title="Stjernehimmel">
+
+```python.run norun="true"
+import turtle
+import random
+
+# I CONSTANTS:
+STAR_COUNT = 150
+
+# I GAME SETUP, efter screen-linjerne og før rumskibet:
+# Draw stars in the background
+star_pen = turtle.Turtle()
+star_pen.hideturtle()
+star_pen.penup()
+star_pen.color("white")
+for i in range(STAR_COUNT):
+    x = random.randint(-SCREEN_WIDTH // 2, SCREEN_WIDTH // 2)
+    y = random.randint(-SCREEN_HEIGHT // 2, SCREEN_HEIGHT // 2)
+    star_pen.goto(x, y)
+    star_pen.dot(random.randint(1, 3))
+```
+
+</Solution>
+
+## Styr med WASD
+
+Mange computerspil styres med W, A, S og D i stedet for piletasterne. Kan du få dit spil til at virke med **begge dele**? Så kan to spillere også skiftes uden at flytte hænderne.
+
+Det sker i `# EVENTS`-sektionen. Du behøver **ikke** lave nye funktioner. Du kan bare lytte efter flere taster og bruge de funktioner, du allerede har.
+
+:::tip[Hint]
+- `screen.onkeypress(press_left, "a")` kalder `press_left`, når du trykker på A. Så drejer rumskibet til venstre, præcis som med ←.
+- Husk både `onkeypress` og `onkeyrelease` for hver tast.
+- Turtle skelner mellem store og små bogstaver: `"a"` er ikke det samme som `"A"`. Brug små bogstaver (og sluk for Caps Lock).
+:::
+
+Bonus: Juster farten! Prøv at ændre `PLAYER_SPEED` og `ROTATE_SPEED` i `# CONSTANTS`. Hvad føles bedst? Hvad sker der, hvis du ændrer `GAME_TICK`?
+
+<Solution title="WASD-styring">
+
+```python.run norun="true"
+# I EVENTS, efter de andre onkeypress/onkeyrelease-linjer:
+screen.onkeypress(press_left, "a")
+screen.onkeypress(press_right, "d")
+screen.onkeypress(press_forward, "w")
+screen.onkeyrelease(release_left, "a")
+screen.onkeyrelease(release_right, "d")
+screen.onkeyrelease(release_forward, "w")
+
+# I CONSTANTS, fx et hurtigere rumskib:
+ROTATE_SPEED = 8  # turn 8 degrees each tick
+PLAYER_SPEED = 14  # Pixels to move player each tick
+```
+
+</Solution>

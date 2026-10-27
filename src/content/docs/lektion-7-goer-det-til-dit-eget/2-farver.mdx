@@ -1,0 +1,156 @@
+---
+title: "Farver"
+description: Giv baggrund, rumskib, skud, asteroider og tekst dine egne farver.
+sidebar:
+  order: 2
+---
+
+Sort og hvid er klassisk, men det er **dit** spil! Måske skal rummet være lyseblåt, rumskibet rødt og asteroiderne lyserøde?
+
+## Farvenavne
+
+Python kender rigtig mange farver ved navn. Her er nogle, du kan prøve:
+
+`red`, `orange`, `gold`, `yellow`, `green`, `lime green`, `cyan`, `light sky blue`, `blue`, `indigo`, `purple`, `violet`, `deep pink`, `hot pink`, `firebrick`, `cadet blue`, `dark slate blue`, `white`, `light grey`, `gray`, `black`.
+
+I spillet må farvenavne gerne have mellemrum, som `"light sky blue"`.
+
+Prøv farverne her. Kør koden, og skift så nogle af farverne ud:
+
+```python.run
+import turtle
+
+t = turtle.Turtle()
+t.penup()
+t.goto(-170, 0)
+
+farver = ["red", "orange", "gold", "green", "cyan", "deeppink"]
+for farve in farver:
+    t.color(farve)
+    t.pendown()
+    t.circle(25)
+    t.penup()
+    t.forward(60)
+```
+
+:::note
+Her i browseren skal farvenavne skrives **uden** mellemrum, for eksempel `deeppink` og `lightskyblue`. I dit spil på computeren virker begge dele.
+:::
+
+## Find farverne i koden
+
+Søg efter `color` med `Ctrl+F` (på Mac `Cmd+F`). Her er de vigtigste steder:
+
+| Hvad | Hvor | Koden nu |
+|---|---|---|
+| Baggrund | `# CONSTANTS` | `BG_COLOR = "black"` |
+| Skud | `Bullet.__init__` | `self.color("light grey")` |
+| Rumskib | `Player.__init__` | `self.color("light grey", BG_COLOR)` |
+| Asteroider | `Asteroid.__init__` | `self.color("white", BG_COLOR)` |
+| Tekst | `# GAME SETUP` | `pen.color("white")`, `score_pen.color("white")`, `health_pen.color("white")` |
+
+### To farver på én gang
+
+Når der står to farver, som i `self.color("white", BG_COLOR)`, er den første farven på **kanten** og den anden farven **indeni**. Asteroiderne er altså hvide i kanten og har samme farve som baggrunden indeni – derfor ser de hule ud.
+
+Prøv for eksempel:
+
+```python
+        self.color("gray", "deep pink")
+```
+
+Så får asteroiderne en grå kant og er lyserøde indeni.
+
+- [ ] Skift baggrundsfarven `BG_COLOR`
+- [ ] Skift farven på asteroiderne
+- [ ] Skift farven på skuddene
+- [ ] Skift farven på teksten (`pen`, `score_pen` og `health_pen`)
+
+## Rumskibet har to farver-steder
+
+Rumskibet er lidt specielt. Når du flyver fremad, skifter det til formen med raketflammen, og den form har sine **egne** farver. De står i `# CONSTANTS`:
+
+```python
+SPACESHIP_THRUST_SHAPE.addcomponent(SPACESHIP_SHAPE, BG_COLOR, 'light grey')
+SPACESHIP_THRUST_SHAPE.addcomponent(( (7,-20), (0,-30), (-7,-20) ), BG_COLOR, 'orange')
+```
+
+Her er rækkefølgen omvendt: først farven **indeni**, så farven på **kanten**. Den første linje er selve rumskibet, den anden er flammen.
+
+Hvis du ændrer rumskibet i `Player.__init__`, så husk også at ændre det her. Ellers skifter rumskibet farve, hver gang du flyver fremad! Et eksempel, der passer sammen:
+
+```python
+# Player.__init__
+        self.color("cadet blue", "firebrick")
+
+# CONSTANTS
+SPACESHIP_THRUST_SHAPE.addcomponent(SPACESHIP_SHAPE, "firebrick", 'cadet blue')
+SPACESHIP_THRUST_SHAPE.addcomponent(( (7,-20), (0,-30), (-7,-20) ), "red", 'red')
+```
+
+- [ ] Skift farven på rumskibet i `Player.__init__`
+- [ ] Skift de samme farver i `SPACESHIP_THRUST_SHAPE`, og prøv også en ny farve til flammen
+- [ ] Kør spillet og flyv fremad. Har rumskibet de samme farver, når flammen er tændt?
+
+## Tilfældig farve
+
+Du kan også give hver asteroide en tilfældig farve. Det gør vi med `random`, som vi allerede bruger til at finde tilfældige steder til asteroiderne.
+
+Først laver vi en liste med farver at vælge imellem. Sæt den i `# CONSTANTS`:
+
+```python
+# liste med farver at vælge imellem
+asteroid_colors = ["blue", "cyan", "red", "orange", "green"]
+```
+
+Så vælger vi en tilfældig farve fra listen med `random.choice`. Sæt linjen ind nederst i `reset` i `Asteroid`-klassen (efter `self.showturtle()`):
+
+```python
+        self.color(random.choice(asteroid_colors))
+```
+
+Fordi `reset` bliver kaldt, hver gang en asteroide kommer tilbage, får den en ny farve hver gang!
+
+- [ ] Lav listen `asteroid_colors` i `# CONSTANTS`
+- [ ] Tilføj `self.color(random.choice(asteroid_colors))` i `Asteroid.reset`
+- [ ] Kør spillet. Har asteroiderne forskellige farver?
+
+:::tip[Hule eller fyldte?]
+Med kun én farve bliver både kant og indre farvet, så asteroiderne bliver fyldte. Vil du have dem hule igen, så skriv `self.color(random.choice(asteroid_colors), BG_COLOR)`.
+:::
+
+## Typiske fejl
+
+:::caution[Virker det ikke?]
+- Har du stavet farven forkert, får du en fejl som `bad color string`. Tjek stavningen.
+- Husk anførselstegn om farvenavnet: `"red"`, ikke `red`.
+- `BG_COLOR` skal stå **uden** anførselstegn, fordi det er navnet på en konstant – ikke en farve.
+:::
+
+<Solution title="Eksempel med mange farver">
+
+Her er ændringerne fra et eksempel med lyseblå baggrund:
+
+```python.run norun="true"
+# CONSTANTS
+BG_COLOR = "light sky blue"
+
+SPACESHIP_THRUST_SHAPE.addcomponent(SPACESHIP_SHAPE, "firebrick", 'cadet blue')
+SPACESHIP_THRUST_SHAPE.addcomponent(( (7,-20), (0,-30), (-7,-20) ), "red", 'red')
+
+# Bullet.__init__
+        self.color("indigo")
+
+# Player.__init__
+        self.color("cadet blue", "firebrick")
+
+# Asteroid.__init__
+        self.color("gray", "deep pink")
+
+# GAME SETUP
+pen.color("dark slate blue")
+score_pen.color("violet")
+health_pen.color("violet")
+```
+
+</Solution>

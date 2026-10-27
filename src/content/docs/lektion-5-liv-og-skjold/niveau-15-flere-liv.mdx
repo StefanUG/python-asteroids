@@ -1,0 +1,591 @@
+---
+title: "Niveau 15 – Flere liv"
+description: Giv rumskibet 3 liv, skriv dem på skærmen og tæl ned, når du bliver ramt.
+sidebar:
+  order: 25
+---
+
+Lige nu får du kun én chance. Én lille berøring af en asteroide, og så er det GAME OVER. Det er lidt hårdt! Efter dette niveau har rumskibet **3 liv**, og du kan se dem øverst på skærmen under din score.
+
+**Det nye i dag:** en tæller for liv. Det minder meget om din score fra sidst: en variabel på spilleren, som vi ændrer, og en pen, som skriver tallet på skærmen. Forskellen er, at liv tælles **ned** i stedet for op – og når de rammer 0, er spillet slut.
+
+## Prøv idéen først
+
+Her er et lille rumskib uden grafik. Det har 3 liv og en funktion `hit`, som trækker ét liv fra. Tryk på kør og se, hvad der sker:
+
+```python.run
+class Rumskib:
+    def __init__(self):
+        self.health = 3
+        self.alive = True
+
+    def hit(self):
+        self.health -= 1
+        print("Av! Liv tilbage:", self.health)
+        if self.health == 0:
+            self.alive = False
+
+skib = Rumskib()
+while skib.alive:
+    skib.hit()
+print("GAME OVER")
+```
+
+`self.health -= 1` betyder "tag det, `health` er nu, og træk 1 fra". Løkken bliver ved, så længe skibet er i live.
+
+Prøv at ændre:
+- Start med 5 liv i stedet for 3.
+- Skriv hjerter i stedet for et tal: `print("Av!", "♥" * self.health)`
+
+## Skriv "HEALTH" på skærmen
+
+Vi har stadig vores `pen`, som skrev "SCORE: " på skærmen. Nu flytter vi den 30 pixels længere ned og skriver "HEALTH: " der. Teksten ændrer sig aldrig, så den skal kun skrives én gang.
+
+```python
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 60)
+pen.write("HEALTH: ", font=SCORE_FONT)
+```
+
+`-HALF_WIDTH + 20` er 20 pixels fra venstre kant. `HALF_HEIGHT - 60` er 60 pixels fra toppen (SCORE står på 30).
+
+- [ ] Sæt koden ind i `# GAME SETUP`-sektionen, lige efter linjen `pen.write("SCORE: ", font=SCORE_FONT)`.
+
+## En `health_pen` til at skrive antal liv
+
+Antallet af liv ændrer sig, når du bliver ramt. Derfor laver vi en ekstra pen kun til tallet – præcis som `score_pen`. Så kan vi viske tallet ud uden at viske "HEALTH: " ud.
+
+```python
+health_pen = turtle.Turtle(visible=False)
+health_pen.color("white")
+health_pen.penup()
+health_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 60)
+```
+
+- `visible=False`: selve pennen (pilen) skal ikke ses.
+- `penup()`: den må ikke tegne streger, når den flytter sig.
+- `goto(...)`: lige efter teksten "HEALTH: ".
+
+- [ ] Sæt koden ind i `# GAME SETUP`-sektionen, lige efter de linjer, der sætter `score_pen` op.
+
+## Hvor mange liv skal vi have?
+
+Vi laver en konstant, så det er nemt at ændre senere. Lad os starte med 3 liv.
+
+```python
+PLAYER_START_HEALTH = 3
+```
+
+- [ ] Sæt koden ind i `# CONSTANTS`-sektionen, f.eks. lige efter `PLAYER_SPEED`.
+
+## `Player.health`
+
+Spilleren skal have en variabel, der husker, hvor mange liv der er tilbage. Vi kalder den `health` og giver den startværdien `PLAYER_START_HEALTH`.
+
+```python
+        self.health = PLAYER_START_HEALTH
+```
+
+Linjen skal rykkes 8 mellemrum ind, fordi den står inde i `__init__`, som står inde i klassen `Player`.
+
+- [ ] Sæt koden ind i `Player`-klassens `__init__`-funktion, lige efter `self.score = 0`.
+
+## Ny funktion til at skrive `player.health`
+
+Vi skal skrive antal liv på skærmen, hver gang det ændrer sig. Så vi laver en funktion til det. Den visker det gamle tal ud og skriver det nye.
+
+```python
+def draw_health():
+    health_pen.clear()
+    health_pen.write(player.health, font=SCORE_FONT)
+```
+
+Kan du se, at den ligner `draw_score` næsten helt?
+
+- [ ] Sæt koden ind i `# BEHAVIOURS`-sektionen, efter hele `def draw_score():`-blokken (efter dens to indrykkede linjer).
+
+## Når rumskibet bliver ramt
+
+Hvad skal der ske, når rumskibet bliver ramt? Vi giver `Player` en ny funktion `hit`, som:
+
+1. trækker 1 fra `health`
+2. skriver det nye antal liv på skærmen
+3. sætter `alive` til `False`, hvis der er 0 liv tilbage
+
+```python
+    def hit(self):
+        self.health -= 1
+        draw_health()
+
+        if self.health == 0:
+            self.alive = False
+```
+
+`def hit(self):` rykkes 4 mellemrum ind, ligesom de andre funktioner i klassen. Linjerne inde i den rykkes 8 ind.
+
+- [ ] Sæt koden ind i `Player`-klassen, efter hele `def cooldown(self):`-blokken.
+
+## Hvor i koden bliver man ramt?
+
+Før stod der `player.alive = False` de steder, hvor rumskibet rammer en asteroide. Det betød game over med det samme. Nu skal vi i stedet kalde vores nye funktion, som tæller et liv ned.
+
+Før:
+
+```python
+                player.alive = False
+```
+
+Efter:
+
+```python
+                player.hit()
+```
+
+Der er **to** steder: når en asteroide flyver ind i dig (`move_asteroids`), og når du flyver ind i en asteroide (`move_spaceship`). Behold indrykningen, som den var.
+
+- [ ] I funktionen `move_asteroids`: find `player.alive = False` og erstat det med `player.hit()`.
+- [ ] I funktionen `move_spaceship`: find `player.alive = False` og erstat det med `player.hit()`.
+
+## Skriv liv ved start
+
+Til sidst skal antal liv stå på skærmen allerede, når spillet starter – ikke først når du bliver ramt.
+
+```python
+draw_health()
+```
+
+- [ ] Sæt koden ind i `# START THE GAME`-sektionen, lige efter `draw_score()`.
+
+## Prøv spillet
+
+- [ ] Står der "HEALTH: 3" under din score, når spillet starter?
+- [ ] Flyv ind i en asteroide. Tæller dine liv ned?
+- [ ] Bliver det GAME OVER, når du når 0?
+
+:::note[Hov, de forsvandt meget hurtigt?]
+Du opdager nok, at alle 3 liv forsvinder næsten på én gang. Det er fordi spillet tjekker for sammenstød hvert game tick (50 gange i sekundet). Så længe asteroiden rører dig, mister du et liv hver gang. Det løser vi i næste niveau!
+:::
+
+:::tip[Typiske fejl]
+- `hit` står ikke inde i klassen `Player`: tjek at `def hit(self):` er rykket 4 mellemrum ind.
+- `NameError: name 'health_pen' is not defined`: tjek at du har lavet `health_pen` i `# GAME SETUP`, og at navnet er stavet ens alle steder.
+- Der står ingen tal efter "HEALTH: ": har du husket `draw_health()` i `# START THE GAME`?
+- Det er stadig game over ved første hit: du har glemt at erstatte `player.alive = False` et af de to steder.
+:::
+
+## Hjælp
+
+Sådan ser `Player`-klassens `__init__`, `cooldown` og `hit` ud, når du er færdig:
+
+```python.run norun="true"
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+        self.alive = True
+        self.score = 0
+        self.health = PLAYER_START_HEALTH
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+    def hit(self):
+        self.health -= 1
+        draw_health()
+
+        if self.health == 0:
+            self.alive = False
+```
+
+Sådan ser pennene ud i `# GAME SETUP`:
+
+```python.run norun="true"
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 60)
+pen.write("HEALTH: ", font=SCORE_FONT)
+
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+
+health_pen = turtle.Turtle(visible=False)
+health_pen.color("white")
+health_pen.penup()
+health_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 60)
+```
+
+Sådan ser `move_spaceship` og `move_asteroids` ud med `player.hit()`:
+
+```python.run norun="true"
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.hit()
+
+
+def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid)
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.hit()
+        else:
+            asteroid.respawn_in -= 1
+            if asteroid.respawn_in == 0:
+                asteroid.reset()
+```
+
+<Solution title="Hele koden efter niveau 15">
+
+```python.run norun="true"
+import turtle
+import random
+
+"""
+Let's get some health
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+PLAYER_START_HEALTH = 3
+BULLET_SPEED = PLAYER_SPEED * 2  # Double of player speed
+BULLET_LIFETIME = 75  # game ticks
+MAX_BULLETS = 10
+RELOAD_TIME = 5  # ticks between reload
+MAX_ASTEROIDS = 10
+ASTEROID_SPEED_MIN = 1
+ASTEROID_SPEED_MAX = 5
+ASTEROID_RESPAWN_AFTER = 150  # respawn after number of game ticks
+
+FONT_FAMILY = "Courier New"
+SCORE_FONT = (FONT_FAMILY, 16, "normal")
+
+HALF_WIDTH = int(SCREEN_WIDTH / 2)
+HALF_HEIGHT = int(SCREEN_HEIGHT / 2)
+
+#
+#  Classes
+#
+
+
+class Bullet(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.color("light grey")
+        self.shapesize(stretch_wid=0.2, stretch_len=0.2)
+        self.penup()
+        self.hideturtle()
+        self.active = False
+        self.ttl = BULLET_LIFETIME
+
+    def fire(self, start):
+        self.active = True
+        self.ttl = BULLET_LIFETIME
+        self.setposition(start.xcor(), start.ycor())  # Move the bullet to the player
+        self.setheading(start.heading())  # set the same heading as the player
+        self.showturtle()  # show the bullet
+
+    def move(self):
+        self.forward(BULLET_SPEED)
+        move_if_out_of_bounds(self)
+
+        self.ttl -= 1
+        if self.ttl < 0:
+            self.hideturtle()
+            self.active = False
+
+
+class Player(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("triangle")
+        self.color("light grey", BG_COLOR)
+        self.shapesize(stretch_wid=0.75, stretch_len=1.5)  # Stretch the triangle to be pointy
+        self.penup()  # to not draw lines
+
+        self.fire_cooldown = 0
+        self.alive = True
+        self.score = 0
+        self.health = PLAYER_START_HEALTH
+
+    def shoot(self, inactive_bullet):
+        if self.fire_cooldown == 0:
+            inactive_bullet.fire(self)
+            self.fire_cooldown = RELOAD_TIME
+
+    def cooldown(self):
+        if self.fire_cooldown > 0:
+            self.fire_cooldown -= 1
+
+    def hit(self):
+        self.health -= 1
+        draw_health()
+
+        if self.health == 0:
+            self.alive = False
+
+
+class Asteroid(turtle.Turtle):
+
+    def __init__(self):
+        super().__init__()
+        self.shape("circle")
+        self.shapesize(3, 3)
+        self.color("white", BG_COLOR)
+        self.penup()
+        x = random.randint(-HALF_WIDTH, HALF_WIDTH)
+        y = random.randint(-HALF_HEIGHT, HALF_HEIGHT)
+        self.goto(x, y)
+
+        self.radius = 30
+        self.speed = 0
+        self.respawn_in = 0
+        self.reset()
+
+    def reset(self):
+        self.setheading(random.randint(0, 360))
+        self.speed = random.randint(ASTEROID_SPEED_MIN, ASTEROID_SPEED_MAX)
+        self.showturtle()
+
+    def hit(self):
+        self.hideturtle()
+        self.respawn_in = ASTEROID_RESPAWN_AFTER
+
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = Player()
+
+# A pen to write stuff to the screen
+pen = turtle.Turtle(visible=False)
+pen.color("white")
+pen.penup()
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 30)
+pen.write("SCORE: ", font=SCORE_FONT)
+pen.goto(-HALF_WIDTH + 20, HALF_HEIGHT - 60)
+pen.write("HEALTH: ", font=SCORE_FONT)
+
+score_pen = turtle.Turtle(visible=False)
+score_pen.color("white")
+score_pen.penup()
+score_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 30)
+
+health_pen = turtle.Turtle(visible=False)
+health_pen.color("white")
+health_pen.penup()
+health_pen.goto(-HALF_WIDTH + 90, HALF_HEIGHT - 60)
+
+# Create bullets
+bullets = []
+for i in range(MAX_BULLETS):
+    bullets.append(Bullet())
+
+# Create asteroids
+asteroids = []
+for i in range(MAX_ASTEROIDS):
+    asteroids.append(Asteroid())
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+
+def move_if_out_of_bounds(t: turtle.Turtle):
+    # Border checking for bullet
+    x = t.xcor()
+    y = t.ycor()
+    # abs turns any number to a positive number
+    if x > HALF_WIDTH:  # too far right
+        t.goto(-HALF_WIDTH, y)
+    elif x < -HALF_WIDTH:  # too far left
+        t.goto(HALF_WIDTH, y)
+    if y > HALF_HEIGHT:  # too far up
+        t.goto(x, -HALF_HEIGHT)
+    elif y < -HALF_HEIGHT:  # too far down
+        t.goto(x, HALF_HEIGHT)
+
+
+def check_collision(with_turtle):
+    # Check for collisions between the player and asteroids
+    for asteroid in asteroids:
+        if asteroid.isvisible() and abs(with_turtle.distance(asteroid)) < asteroid.radius:
+            return asteroid
+    return None
+
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+        move_if_out_of_bounds(player)
+        if check_collision(player):
+            player.hit()
+
+
+def move_bullets():
+    player.cooldown()
+    inactive_bullet = None
+    for bullet in bullets:
+        if bullet.active:
+            bullet.move()
+            hit_asteroid = check_collision(bullet)
+            if hit_asteroid:
+                hit_asteroid.hit()
+                bullet.hideturtle()
+                bullet.active = False
+                player.score += 1
+                draw_score()
+        else:
+            inactive_bullet = bullet
+
+    if keys_pressed["space"] and inactive_bullet:
+        player.shoot(inactive_bullet)
+
+
+def move_asteroids():
+    for asteroid in asteroids:
+        if asteroid.isvisible():
+            asteroid.forward(asteroid.speed)
+            move_if_out_of_bounds(asteroid) # let the kids figure this one out for a while
+            # also this one:
+            if abs(player.distance(asteroid)) < asteroid.radius:
+                player.hit()
+        else:
+            asteroid.respawn_in -= 1
+            if asteroid.respawn_in == 0:
+                asteroid.reset()
+
+
+def draw_score():
+    score_pen.clear()
+    score_pen.write(player.score, font=SCORE_FONT)
+
+
+def draw_health():
+    health_pen.clear()
+    health_pen.write(player.health, font=SCORE_FONT)
+
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+    move_bullets()
+    move_asteroids()
+
+    screen.update()
+    if player.alive:
+        screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+    else:
+        pen.goto(0, 0)
+        pen.write("GAME OVER", align="center", font=(FONT_FAMILY, 68, "normal"))
+
+
+#
+#  START THE GAME
+#
+
+draw_score()
+draw_health()
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>

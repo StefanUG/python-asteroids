@@ -1,0 +1,505 @@
+---
+title: "Niveau 2 – Styr rumskibet"
+description: Lyt efter tastetryk, husk hvilke taster der er nede, og lav en game loop, der flytter rumskibet.
+sidebar:
+  order: 12
+---
+
+Et rumskib er ikke sjovt, hvis det bare står stille. Efter dette niveau kan du **dreje** rumskibet med ← og → og **flyve fremad** med ↑ – også på samme tid.
+
+**Det nye i dag:** Tre vigtige idéer, som alle rigtige spil bruger:
+
+1. **Events** – spillet *lytter* efter, at der sker noget, fx at du trykker på en tast.
+2. **Tilstand i et dictionary** – spillet *husker*, hvilke taster der er nede lige nu.
+3. **En game loop** – en funktion, der kører igen og igen, mange gange i sekundet, og flytter rumskibet.
+
+Vi tager det i små skridt. Undervejs står der, hvad der skal ske, når du kører spillet.
+
+## Trin 1: Hastigheder som konstanter
+
+Vi skal bestemme, hvor hurtigt rumskibet drejer, og hvor hurtigt det flyver:
+
+```python
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+```
+
+- `ROTATE_SPEED` er, hvor mange grader rumskibet drejer ad gangen.
+- `PLAYER_SPEED` er, hvor mange pixels det flytter sig ad gangen.
+
+Fordi de er konstanter, kan du senere nemt gøre rumskibet hurtigere eller langsommere.
+
+- [ ] Sæt koden ind i `# CONSTANTS`-sektionen, efter de andre konstanter
+- [ ] Kør spillet. Det skal se ud præcis som før (og ingen fejl)
+
+## Trin 2: En ny sektion til events
+
+Et **event** (en hændelse) er noget, der sker – fx at et menneske trykker på en tast eller slipper den igen. Spillet kan **lytte** efter events, ligesom du lytter efter, om nogen siger dit navn.
+
+Vi samler alt om events i en ny sektion:
+
+```python
+#
+#  EVENTS
+#
+```
+
+- [ ] Sæt kommentaren ind efter `# GAME SETUP`-sektionen (efter alle `player`-linjerne), lige før `# START THE GAME`
+
+## Trin 3: Husk hvilke taster der er nede
+
+Spillet skal hele tiden vide: *Holder spilleren venstre piletast nede lige nu?* Det er spillets **tilstand** (på engelsk: *state*). Den gemmer vi i et **dictionary**.
+
+Et dictionary er som en ordbog eller en liste med navne-skilte: Hvert **navn** (en *nøgle*) har en **værdi**. Her er nøglen navnet på en tast, og værdien er `True` (nede) eller `False` (ikke nede).
+
+Prøv det her:
+
+```python.run
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+}
+print("Fra start:", keys_pressed)
+
+keys_pressed["Left"] = True
+print("Venstre trykket ned:", keys_pressed)
+
+if keys_pressed["Left"]:
+    print("Drej til venstre!")
+
+keys_pressed["Left"] = False
+print("Venstre sluppet:", keys_pressed)
+```
+
+- `keys_pressed["Left"]` slår op under navnet `"Left"`.
+- `keys_pressed["Left"] = True` ændrer værdien.
+
+Prøv at ændre koden: Sæt `"Right"` til `True` og skriv `"Drej til højre!"` ud.
+
+Nu laver vi det rigtige dictionary til spillet. Vi skal holde øje med fire taster: venstre, højre, op og mellemrum (til at skyde med senere):
+
+```python
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "???": False
+}
+```
+
+Mellemrumstasten hedder `"space"` i turtle.
+
+- [ ] Sæt koden ind i `# EVENTS`-sektionen, lige under overskriften
+- [ ] Skriv `"space"` i stedet for `"???"`
+
+## Trin 4: Funktioner, der ændrer tilstanden
+
+Når du trykker venstre piletast **ned**, skal `"Left"` blive `True`. Når du **slipper** den, skal den blive `False` igen. Det laver vi to små funktioner til:
+
+```python
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+```
+
+"Press" betyder trykke, og "release" betyder slippe.
+
+- [ ] Sæt koden ind i `# EVENTS`-sektionen, under dit `keys_pressed`-dictionary (efter den sidste `}`)
+
+Nu skal du lave de samme to funktioner til højre piletast. Udfyld `???`:
+
+```python
+def press_right():
+    keys_pressed["Right"] = ???
+
+def release_right():
+    keys_pressed["???"] = False
+```
+
+- [ ] Sæt koden ind efter funktionen `release_left` (efter hele blokken, ikke rykket ind)
+- [ ] Udfyld begge `???`
+
+Lav nu selv de sidste fire funktioner på samme måde. Brug præcis disse navne:
+
+| Funktion | Tast i `keys_pressed` | Sætter værdien til |
+|---|---|---|
+| `press_forward` | `"Up"` | `True` |
+| `release_forward` | `"Up"` | `False` |
+| `press_fire` | `"space"` | `True` |
+| `release_fire` | `"space"` | `False` |
+
+- [ ] Lav `press_forward` og `release_forward`
+- [ ] Lav `press_fire` og `release_fire`
+- [ ] Kør spillet. Det skal stadig se ud som før, uden fejl. (Funktionerne bliver ikke brugt endnu.)
+
+Hvis du har problemer, kan du finde hjælp i bunden ⬇
+
+## Trin 5: Lyt efter tasterne
+
+Nu skal vi fortælle turtle, at den skal **kalde** vores funktioner, når der sker noget med tasterne. Først skal en lille idé på plads.
+
+### En funktion kan gives videre
+
+Du kan give en funktion til en anden funktion – ligesom du giver en ven dit telefonnummer og siger: "Ring til mig, når filmen starter." Din ven ringer ikke med det samme. Vennen gemmer nummeret og ringer, **når** det sker.
+
+En funktion, man giver videre på den måde, kaldes en **callback** ("ring tilbage"). Prøv det:
+
+```python.run
+def say_hello():
+    print("Hej! Nu blev jeg kaldt.")
+
+def when_button_pressed(function):
+    print("Nogen trykkede på knappen ...")
+    function()
+
+print("Programmet starter")
+when_button_pressed(say_hello)
+```
+
+Læg mærke til: Vi skriver `say_hello` **uden** parenteser. Så giver vi funktionen *videre*. Med parenteser, `say_hello()`, ville vi *kalde* den med det samme.
+
+Prøv at ændre koden: Skriv `when_button_pressed(say_hello())` med parenteser. Hvad sker der nu, og i hvilken rækkefølge?
+
+### Lyt efter tasterne i spillet
+
+Sådan siger vi til turtle: "Når venstre piletast trykkes ned, så kald `press_left`. Når den slippes, så kald `release_left`":
+
+```python
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeyrelease(release_left, "Left")
+```
+
+- `screen.listen()` får skærmen til at lytte efter taster.
+- `onkeypress(press_left, "Left")` betyder: når tasten `"Left"` trykkes **ned**, så kald `press_left`.
+- `onkeyrelease(release_left, "Left")` betyder: når tasten `"Left"` **slippes**, så kald `release_left`.
+- Igen **uden** parenteser efter `press_left`. Turtle kalder funktionen for os, når tasten trykkes.
+
+- [ ] Sæt koden ind i `# EVENTS`-sektionen, efter **alle** dine `press_`- og `release_`-funktioner (ikke rykket ind)
+- [ ] Lav selv de 6 andre linjer med `onkeypress` og `onkeyrelease` til `"Right"`, `"Up"` og `"space"`
+
+:::note[Funktionen skal laves før den bruges]
+Python læser oppefra og ned. Derfor skal `def press_left():` stå **over** linjen `screen.onkeypress(press_left, "Left")`. Ellers får du en `NameError`.
+:::
+
+- [ ] Kør spillet. Der må ikke komme fejl. Rumskibet flytter sig **ikke** endnu – det er helt i orden!
+
+Spillet ved nu godt, hvilke taster der er nede. Men ingen kigger i `keys_pressed` endnu. Det gør vi nu.
+
+:::tip[Vil du kigge ind i spillets hukommelse?]
+Sæt midlertidigt linjen `print(keys_pressed)` ind i `press_left` (rykket ind, under den anden linje). Kør spillet, klik på spilvinduet og tryk på ←. Nu skriver Python dit dictionary ud i terminalen. Slet linjen igen bagefter.
+:::
+
+Hvis du har problemer, kan du finde hjælp i bunden ⬇
+
+## Trin 6: Adfærd – flyt rumskibet
+
+Nu skal vi lave den kode, der faktisk flytter rumskibet. Det er rumskibets **adfærd** (på engelsk: *behaviour*). Vi laver en ny sektion til det:
+
+```python
+#
+#  BEHAVIOURS
+#
+```
+
+- [ ] Sæt kommentaren ind efter `# EVENTS`-sektionen (efter alle `onkeypress`/`onkeyrelease`-linjerne), lige før `# START THE GAME`
+
+Hvad tror du, denne funktion gør?
+
+```python
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(???)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+```
+
+Den kigger i `keys_pressed`: Hvis `"Left"` er `True` (tasten er nede), drejer rumskibet lidt til venstre. Hvis `"Up"` er `True`, flyver det lidt frem. Vi bruger tre `if` (og ikke `elif`), så du kan dreje og flyve **på samme tid**.
+
+- [ ] Sæt koden ind i den nye `# BEHAVIOURS`-sektion
+- [ ] Erstat `???` med den rigtige konstant
+- [ ] Kør spillet. Rumskibet flytter sig **stadig** ikke. Kan du gætte hvorfor?
+
+Svaret: Ingen *kalder* `move_spaceship()` endnu. Og den skal ikke bare kaldes én gang – den skal kaldes igen og igen, hele tiden. Det er det, en game loop gør.
+
+## Trin 7: Game loop
+
+En **game loop** er en løkke, der kører igen og igen, mens spillet er i gang. Hver gang gør den tre ting:
+
+1. Opdaterer spillet ud fra, hvilke taster der er nede (fx flytter rumskibet lidt).
+2. Tegner skærmen igen.
+3. Holder en bitte lille pause.
+
+Det er ligesom en **flipbog**: Hver side er en tegning, hvor rumskibet er rykket en lille smule. Når du bladrer hurtigt, ser det ud, som om det flyver. Hver gang løkken kører, kalder vi det et **tick**.
+
+Prøv denne lille "flipbog". Hver linje er ét tick. Pilen er "nede" de første 6 ticks:
+
+```python.run
+x = 0
+PLAYER_SPEED = 3
+
+for tick in range(1, 11):
+    up_pressed = tick <= 6
+    if up_pressed:
+        x = x + PLAYER_SPEED
+    print("Tick " + str(tick) + ": " + " " * x + ">")
+```
+
+Prøv at ændre koden: Gør `PLAYER_SPEED` større, eller lad pilen være nede i flere ticks.
+
+### Pausen mellem hvert tick
+
+Vi laver en ny konstant til pausen mellem hvert tick, målt i millisekunder (1000 millisekunder = 1 sekund):
+
+```python
+GAME_TICK = 20  # milliseconds, lower means faster game
+```
+
+20 millisekunder betyder, at løkken kører ca. 50 gange i sekundet.
+
+- [ ] Sæt koden ind i `# CONSTANTS`-sektionen, fx lige over `ROTATE_SPEED`
+
+### En ny sektion til game loopen
+
+```python
+#
+#  GAME LOOP
+#
+```
+
+- [ ] Sæt kommentaren ind efter `# BEHAVIOURS`-sektionen (efter hele `move_spaceship`-funktionen), lige før `# START THE GAME`
+
+### Funktionen `update`
+
+`update` er vores game loop. Den bliver kaldt én gang for hvert tick:
+
+```python
+def update():
+    move_spaceship()
+
+    screen.update()
+    screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+```
+
+- `move_spaceship()` flytter rumskibet (trin 1 i game loopen).
+- `screen.update()` tegner skærmen igen (trin 2).
+- `screen.ontimer(update, GAME_TICK)` siger: "Kald `update` igen om `GAME_TICK` millisekunder" (trin 3). Kan du se det? Det er en callback igen – `update` uden parenteser. Sådan bliver løkken ved og ved.
+
+- [ ] Sæt funktionen ind i den nye `# GAME LOOP`-sektion
+
+### Start game loopen
+
+Nederst i din fil står der stadig `screen.update()` fra niveau 1. Den tegnede skærmen én gang. Nu skal vi i stedet starte vores game loop ved at kalde vores egen `update`-funktion:
+
+Så i stedet for:
+
+```python
+screen.update()
+```
+
+skal der blot stå:
+
+```python
+update() # call the game loop to start the game
+```
+
+- [ ] Find `screen.update()` i `# START THE GAME`-sektionen, og slet `screen.`, så der bare står `update()`
+- [ ] Tjek, at `screen.mainloop()` stadig er den allersidste linje
+
+:::note[To slags update]
+`screen.update()` er turtles funktion, der tegner skærmen. `update()` er **vores egen** funktion – hele game loopen. Det er derfor, der står `screen.` foran den ene.
+:::
+
+## Prøv spillet
+
+- [ ] Kør spillet, og klik én gang på spilvinduet, så det kan "høre" tasterne
+- [ ] ← og → drejer rumskibet
+- [ ] ↑ flyver rumskibet fremad i den retning, det peger
+- [ ] Du kan dreje og flyve på samme tid
+- [ ] Rumskibet stopper, når du slipper tasterne
+
+Flyver rumskibet ud over kanten og forsvinder? Det er helt rigtigt for nu. Det løser vi næste gang!
+
+:::tip[Typiske fejl]
+- **Der sker ikke noget, når du trykker:** Klik på spilvinduet først. Har du `screen.listen()`? Har du kaldt `update()` nederst?
+- **Rumskibet bevæger sig ikke, men der er ingen fejl:** Har du skrevet `press_left()` med parenteser inde i `onkeypress`? Det skal være *uden* parenteser.
+- **`NameError`:** Er der en stavefejl? `"Left"`, `"Right"`, `"Up"` og `"space"` skal staves præcis sådan, med store og små bogstaver. Står funktionen *over* linjen, der bruger den?
+- **`IndentationError`:** Linjerne inde i en funktion skal være rykket ind med 4 mellemrum. `def` og `screen.onkeypress(...)` skal stå helt ude til venstre.
+- **Rumskibet drejer den forkerte vej:** Har du byttet om på `left` og `right`?
+:::
+
+Blev du ikke færdig? Det er helt okay – så gør du niveauet færdigt i starten af næste gang.
+
+## Hjælp
+
+### Alle press- og release-funktionerne
+
+Koden her skal stå i `# EVENTS`-sektionen, under `keys_pressed`-dictionary'et og alle dets værdier.
+
+```python.run norun="true"
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+```
+
+### Alle onkeypress- og onkeyrelease-linjerne
+
+Koden her skal stå i `# EVENTS`-sektionen, efter alle funktionerne. Den starter med `screen.listen()`.
+
+```python.run norun="true"
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+```
+
+<Solution title="Hele koden efter niveau 2">
+
+```python.run norun="true"
+import turtle
+
+"""
+Make the spaceship move better
+"""
+
+#
+#  CONSTANTS
+#
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+BG_COLOR = "black"
+
+GAME_TICK = 20  # milliseconds, lower means faster game
+ROTATE_SPEED = 5  # turn 5 degrees each tick
+PLAYER_SPEED = 10  # Pixels to move player each tick
+
+#
+#  GAME SETUP
+#
+
+# Set up the screen
+screen = turtle.Screen()
+screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT) # width and height
+screen.bgcolor(BG_COLOR) # background color
+screen.tracer(0) # disable the built in movement animation of turtle
+
+
+# Make a turtle for the player
+player = turtle.Turtle()
+player.shape("triangle")
+player.color("light grey", BG_COLOR)
+player.shapesize(stretch_wid=0.75, stretch_len=1.5) # Stretch the triangle to be pointy
+player.penup() # to not draw lines
+
+
+#
+#  EVENTS
+#
+
+keys_pressed = {
+    "Left": False,
+    "Right": False,
+    "Up": False,
+    "space": False
+}
+
+# Make the spaceship move
+def press_left():
+    keys_pressed["Left"] = True
+
+def release_left():
+    keys_pressed["Left"] = False
+
+def press_right():
+    keys_pressed["Right"] = True
+
+def release_right():
+    keys_pressed["Right"] = False
+
+def press_forward():
+    keys_pressed["Up"] = True
+
+def release_forward():
+    keys_pressed["Up"] = False
+
+def press_fire():
+    keys_pressed["space"] = True
+
+def release_fire():
+    keys_pressed["space"] = False
+
+
+screen.listen()
+screen.onkeypress(press_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeypress(press_forward, "Up")
+screen.onkeypress(press_fire, "space")
+screen.onkeyrelease(release_left, "Left")
+screen.onkeyrelease(release_right, "Right")
+screen.onkeyrelease(release_forward, "Up")
+screen.onkeyrelease(release_fire, "space")
+
+#
+#  BEHAVIOURS
+#
+
+def move_spaceship():
+    if keys_pressed["Left"]:
+        player.left(ROTATE_SPEED)
+    if keys_pressed["Right"]:
+        player.right(ROTATE_SPEED)
+    if keys_pressed["Up"]:
+        player.forward(PLAYER_SPEED)
+    
+
+#
+#  GAME LOOP
+#
+
+def update():
+    move_spaceship()
+
+    screen.update()
+    screen.ontimer(update, GAME_TICK) # this calls the game loop again for the next tick
+
+
+#
+#  START THE GAME
+#
+
+update() # call the game loop to start the game
+screen.mainloop() # don't close the window
+```
+
+</Solution>
